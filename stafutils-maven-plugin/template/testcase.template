@@ -1,0 +1,32 @@
+// PACKAGE_NAME, will be replaced with the "packageName" of the "generateAPIRequestFile" Goal
+package ${PACKAGE_NAME};
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import de.simpleworks.staf.commons.annotation.Step;
+import de.simpleworks.staf.commons.annotation.Testcase;
+import de.simpleworks.staf.framework.elements.api.APITestCase;
+import de.simpleworks.staf.framework.elements.api.RewriteUrlObject;
+import de.simpleworks.staf.module.junit4.STAFBlockJUnit4ClassRunner;
+
+@Testcase(id = "TESTCLASS_ID")
+@RunWith(STAFBlockJUnit4ClassRunner.class)
+// TESTCLASS_NAME, will be replaced with the "file name" (without extension) of the "respecting" request json file
+public class ${TESTCLASS_NAME} extends APITestCase  {
+
+	public  ${TESTCLASS_NAME}() throws Exception {
+		super("classpath:requests/.../${TESTCLASS_NAME}.json");
+	}
+
+// METHODS, will be replaced with the substituted methods
+	${METHODS}
+
+	@Override
+	public List<RewriteUrlObject> getRewriteUrls() {
+		return new ArrayList<>();
+	}
+}

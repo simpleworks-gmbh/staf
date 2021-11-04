@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Configuration>
+	<Properties>
+		<Property name="pattern" value="[%d{ISO8601}] [%t] [%-5p] (%F:%L) %m%n" />
+		<Property name="application" value="testflo-maven-plugin" />
+		<Property name="logLevelFile" value="DEBUG" />
+		<Property name="logLevelConsole" value="DEBUG" />
+	</Properties>
+	<Appenders>
+		<Console name="STDOUT" target="SYSTEM_OUT">
+			<PatternLayout pattern="${pattern}" />
+		</Console>
+		<File name="file" fileName="logs/${application}.log" append="true">
+			<PatternLayout>
+				<Pattern>${pattern}</Pattern>
+			</PatternLayout>
+		</File>
+	</Appenders>
+	<Loggers>
+		<Logger name="de" level="${sys:logLevelFile}">
+			<AppenderRef ref="file" />
+		</Logger>
+		<Root>
+			<AppenderRef ref="STDOUT" level="${sys:logLevelConsole}" />
+		</Root>
+	</Loggers>
+</Configuration>

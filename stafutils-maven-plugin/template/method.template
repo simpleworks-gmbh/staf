@@ -1,0 +1,7 @@
+@Test
+	// STEP_NAME will be replaced with the "name" in the respecting request json file
+	// STEP_ORDER will be replaced with the "order" in the respecting request json file
+	@Step(description = "${STEP_NAME}", order = ${STEP_ORDER})
+	public void step${STEP_ORDER}() {   
+		// do testing stuff :)   
+	}

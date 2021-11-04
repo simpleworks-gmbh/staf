@@ -1,0 +1,16 @@
+name: staf pull request workflow
+on:
+  pull_request:
+    types: [opened]
+       
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:  
+    - uses: actions/checkout@v2
+    - name: Build docker image
+      run: docker build -t ${{ github.repository }}:latest -f dockerfile .
+    - name: Run tests
+      run: docker run -t ${{ github.repository }}:latest mvn clean install
+
+

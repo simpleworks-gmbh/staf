@@ -1,0 +1,12 @@
+*.properties
+.git
+
+**/target/
+**/.settings/
+
+**/.classpath
+**/.factorypath
+**/.project
+**/logs
+
+**/dev

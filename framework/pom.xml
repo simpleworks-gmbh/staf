@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>de.simpleworks.staf</groupId>
+		<artifactId>staf-parent</artifactId>
+		<version>0.10</version>
+	</parent>
+ 
+	<artifactId>framework</artifactId>
+	<name>framework</name>
+  
+	<properties>
+		<project.version>0.10</project.version>
+		<version.gson>2.8.2</version.gson>
+		<version.com.squareup.okhttp3>3.3.1</version.com.squareup.okhttp3>
+		<version.net.sourceforge.htmlcleaner.htmlcleaner>2.24</version.net.sourceforge.htmlcleaner.htmlcleaner>
+		<version.net.lightbody.bmp.browsermob-core>2.1.5</version.net.lightbody.bmp.browsermob-core>
+		<version.org.skyscreamer.jsonassert>1.5.0</version.org.skyscreamer.jsonassert>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>${version.com.squareup.okhttp3}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp-urlconnection</artifactId>
+			<version>${version.com.squareup.okhttp3}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>logging-interceptor</artifactId>
+			<version>${version.com.squareup.okhttp3}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.htmlcleaner</groupId>
+			<artifactId>htmlcleaner</artifactId>
+			<version>${version.net.sourceforge.htmlcleaner.htmlcleaner}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.lightbody.bmp</groupId>
+			<artifactId>browsermob-core</artifactId>
+			<version>${version.net.lightbody.bmp.browsermob-core}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.skyscreamer</groupId>
+			<artifactId>jsonassert</artifactId>
+			<version>${version.org.skyscreamer.jsonassert}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>${version.gson}</version>
+		</dependency>
+		<!--START STAF Dependencies -->
+		<dependency>
+			<groupId>de.simpleworks.staf</groupId>
+			<artifactId>commons</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.simpleworks.staf</groupId>
+			<artifactId>data</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<!--END STAF Dependencies -->
+	</dependencies>
+</project>

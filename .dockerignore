@@ -1,0 +1,11 @@
+.dockerignore
+.git/
+.github/
+.project/
+
+
+**/.project/
+**/.classpath/
+**/.settings/
+**/logs
+**/target/

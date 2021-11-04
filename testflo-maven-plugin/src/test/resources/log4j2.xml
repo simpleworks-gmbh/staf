@@ -1,0 +1,17 @@
+<Configuration>
+  <Properties>
+    <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} %p %c{1} (%F:%L) - %m%n</Property>
+  </Properties>
+  <Appenders>
+    <Console name="Console">
+      <PatternLayout>
+        <Pattern>${LOG_PATTERN}</Pattern>
+      </PatternLayout>
+    </Console>
+  </Appenders>
+  <Loggers>
+    <Root level="DEBUG">
+      <AppenderRef ref="Console"/>
+    </Root>
+  </Loggers>
+</Configuration>

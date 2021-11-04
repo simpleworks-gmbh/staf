@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>de.simpleworks.staf</groupId>
+		<artifactId>staf-parent</artifactId> 
+		<version>0.10</version>
+	</parent>	
+ 
+	<artifactId>junit4-module</artifactId>
+	<name>junit4-module</name> 
+	 
+	<properties>
+		<project.version>0.10</project.version>
+		<version.junit4>4.12</version.junit4> 
+	</properties>
+ 
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${version.junit4}</version>
+		</dependency>
+		<!--START STAF Dependencies -->
+		<dependency>
+			<groupId>de.simpleworks.staf</groupId>
+			<artifactId>commons</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.simpleworks.staf</groupId>
+			<artifactId>framework</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<!--END STAF Dependencies -->
+	</dependencies>
+</project>
+ 

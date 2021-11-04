@@ -1,0 +1,91 @@
+name: staf publish to release repo workflow
+on:
+  push:
+    tags:
+      - 'v*'
+      
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:  
+    - uses: actions/checkout@v2
+    - name: Build docker image
+      run: docker build -t ${{ github.repository }}:latest -f dockerfile .
+    - name: Run tests
+      run: docker run -t ${{ github.repository }}:latest mvn clean install
+    - name: notify slack channel
+      uses: rtCamp/action-slack-notify@v2
+      if:  success() == false
+      env:
+        SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+        SLACK_COLOR: ${{ job.status }}
+        SLACK_ICON: https://github.com/simpleworks-gmbh.png?size=48
+        SLACK_MESSAGE:  | 
+           the `${{ github.job }}` job  <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|has failed unfortunately> :cry:
+        SLACK_TITLE:  ${{ github.repository }}
+        SLACK_USERNAME: incoming-webhook
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+ 
+  publish-image:
+    runs-on: ubuntu-latest 
+    needs: test
+    steps:
+      - uses: actions/checkout@v2  
+      - uses: olegtarasov/get-tag@v2.1
+        id: tagName
+      - uses: mr-smithers-excellent/docker-build-push@v5
+        name: Build & push Docker image
+        id: publish-image
+        with:
+          image: ${{ github.repository }}/image
+          tags: ${{ steps.tagName.outputs.tag }}
+          registry: registry.gitlab.com
+          dockerfile: dockerfile-publish-image
+          username: ${{ secrets.GITLAB_USERNAME }}
+          password: ${{ secrets.GITLAB_ACCCESS_TOKEN }}
+      - name: notify slack channel
+        uses: rtCamp/action-slack-notify@v2
+        if:  success() == false
+        env:
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_ICON: https://github.com/simpleworks-gmbh.png?size=48
+          SLACK_MESSAGE:  | 
+            the `${{ github.job }}` job  <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|has failed unfortunately> :cry:
+          SLACK_TITLE:  ${{ github.repository }}
+          SLACK_USERNAME: incoming-webhook
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
+  publish-to-release-repo:
+    runs-on: ubuntu-latest
+    needs: publish-image
+    steps:
+      - uses: actions/checkout@v2  
+      - uses: olegtarasov/get-tag@v2.1
+        id: tagName
+      - name: Publish artifact
+        run: docker build --build-arg GIT_USER=${{ secrets.CI_CD_USER }} --build-arg GIT_EMAIL=${{ secrets.CI_CD_EMAIL }} --build-arg GIT_PAT=${{ secrets.CI_CD_TOKEN }}  --build-arg TAG=${{ steps.tagName.outputs.tag }} -t ${{ github.repository }}:latest -f dockerfile-publish-to-release-repo .
+      - name: notify slack channel 
+        uses: rtCamp/action-slack-notify@v2
+        if: success()
+        env:
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_ICON: https://github.com/simpleworks-gmbh.png?size=48
+          SLACK_MESSAGE:  |
+             ${{ github.repository }} ${{ steps.tagName.outputs.tag }} is now available on https://github.com/${{ github.repository }}-release/tree/${{ steps.tagName.outputs.tag }} :rocket:
+          SLACK_TITLE:  ${{ github.repository }}
+          SLACK_USERNAME: incoming-webhook
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      - name: notify slack channel 
+        uses: rtCamp/action-slack-notify@v2
+        if:  success() != true
+        env:
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_ICON: https://github.com/simpleworks-gmbh.png?size=48
+          SLACK_MESSAGE:  |
+             the `${{ github.job }}` job  <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|has failed unfortunately> :cry:
+          SLACK_TITLE:  ${{ github.repository }}
+          SLACK_USERNAME: incoming-webhook
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

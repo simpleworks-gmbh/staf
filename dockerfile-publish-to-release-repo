@@ -1,0 +1,102 @@
+FROM ubuntu:18.04
+
+###
+## build arguments
+#
+
+ARG GIT_USER
+ARG GIT_EMAIL
+ARG GIT_PAT
+ARG TAG
+
+ENV RELEASE=staf-release
+
+###
+## Install needed software
+#
+
+# refresh package list
+RUN apt update -y
+
+# install java openjdk 8
+RUN apt install openjdk-8-jdk -y
+
+# install git
+RUN apt install git -y
+
+# install unzip
+RUN apt install unzip -y
+
+# install wget
+RUN apt install wget -y 
+
+# fetch maven-3.8.3
+RUN wget https://dlcdn.apache.org/maven/maven-3/3.8.3/binaries/apache-maven-3.8.3-bin.zip
+
+# unzip maven-3.8.3
+RUN unzip apache-maven-*-bin.zip
+
+RUN mv apache-maven-3.8.3 /opt/maven
+
+# Set mvn environment variables
+ENV M2_HOME=/opt/maven
+ENV MAVEN_HOME=/opt/maven
+ENV PATH=${M2_HOME}/bin:${PATH}
+
+###
+## configure software build
+#
+
+RUN git clone https://github.com/simpleworks-gmbh/${RELEASE}.git
+
+# move release
+RUN mv ${RELEASE} /mnt/${RELEASE}
+
+###
+## configure software delivery
+#
+
+###
+## build software
+
+# copy work directory to mount point
+COPY . /mnt
+# setting working directory
+WORKDIR /mnt
+
+# compile and install to local .m2 cache maven
+RUN mvn clean install
+
+# deploy artifacts
+RUN mvn -DaltDeploymentRepository=internal::default::file://\${project.build.directory}/mvn-repo javadoc:jar source:jar deploy
+
+# copy all artefacts to /mnt/staf-release
+RUN for i in $(find $(pwd) -name mvn-repo); do cp -r $i/* /mnt/${RELEASE};done
+
+###
+## deliver software
+WORKDIR /mnt/${RELEASE}
+
+# configure git user name
+RUN git config user.name ${GIT_USER}
+
+# configure git user email
+RUN git config user.email ${GIT_EMAIL}
+
+# configure git user password
+RUN git config user.password ${GIT_PAT}
+
+# add commit message
+RUN git checkout -b ${TAG}
+
+# add all artifacts
+RUN git add .
+
+# add commit message
+RUN git commit -m "add Release ${TAG}" 
+
+# set correct git url
+RUN git remote set-url origin https://${GIT_USER}:${GIT_PAT}@github.com/simpleworks-gmbh/${RELEASE}
+
+# push artefacts
+RUN git push --set-upstream origin ${TAG}

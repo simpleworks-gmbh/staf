@@ -1,0 +1,75 @@
+name: staf publish to maven central workflow
+on:
+  release:
+    types: [published]
+    branch: master
+    tags:
+        - 'v*'
+
+jobs:
+  check-publish-to-maven-central:
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/master'
+    steps:  
+    - uses: olegtarasov/get-tag@v2.1
+      id: tagName
+    - name: notify slack channel
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+        SLACK_COLOR: ${{ job.status }}
+        SLACK_ICON: https://github.com/simpleworks-gmbh.png?size=48
+        SLACK_MESSAGE:  | 
+           release ${{ steps.tagName.outputs.tag }} is configued incorrectly, the target branch is ${{ github.ref }} instead of `refs/heads/master` :cry:
+        SLACK_TITLE:  ${{ github.repository }}
+        SLACK_USERNAME: incoming-webhook
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
+  publish-to-maven-central:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    container:
+      image: registry.gitlab.com/simpleworks-gmbh/staf:${{ steps.tagName.outputs.tag }}
+      credentials:
+        username: ${{ secrets.GITLAB_USERNAME }}
+        password: ${{ secrets.GITLAB_ACCCESS_TOKEN }}
+    steps:
+      - name: Set up Maven Central Repository
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'adopt'
+          server-id: ossrh
+          server-username: OSSRH_USERNAME
+          server-password: OSSRH_TOKEN
+
+      - name: Publish package
+        run: mvn --batch-mode javadoc:jar source:jar deploy
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
+
+      - name: notify slack channel 
+        uses: rtCamp/action-slack-notify@v2
+        if: success()
+        env:
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_ICON: https://github.com/simpleworks-gmbh.png?size=48
+          SLACK_MESSAGE:  |
+             ${{ github.repository }} ${{ steps.tagName.outputs.tag }} has been published on <https://mvnrepository.com/|Maven Central Repository> :champagne:
+          SLACK_TITLE:  ${{ github.repository }}
+          SLACK_USERNAME: incoming-webhook
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }
+      - name: notify slack channel 
+        uses: rtCamp/action-slack-notify@v2
+        if:  success() != true
+        env:
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_ICON: https://github.com/simpleworks-gmbh.png?size=48
+          SLACK_MESSAGE:  |
+             the `${{ github.job }}` job  <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|has failed unfortunately> :cry:
+          SLACK_TITLE:  ${{ github.repository }}
+          SLACK_USERNAME: incoming-webhook
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
