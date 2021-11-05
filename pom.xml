@@ -6,9 +6,38 @@
 	<description>Simpleworks Test Automation Framework</description>
 	<groupId>de.simpleworks.staf</groupId>
 	<artifactId>staf-parent</artifactId>
-	<version>0.10</version>
+	<version>0.50</version>
 	<packaging>pom</packaging>
 	<name>staf-parent</name>
+	<url>https://github.com/simpleworks-gmbh/staf</url>
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+	<developers>
+		<developer>
+			<id>dustin.baer</id>
+			<name>Dustin Baer</name>
+			<email>dustin.baer@simpleworks.de</email>
+		</developer>
+		<developer>
+			<id>marcin.brzoza</id>
+			<name>Marcin Brzoza</name>
+			<email>marcin.brzoza@simpleworks.de</email>
+		</developer>
+		<developer>
+			<id>norman.hopfeld</id>
+			<name>Norman Hopfeld</name>
+			<email>norman.hopfeld@simpleworks.de</email>
+		</developer>
+	</developers>
+	<scm>
+		<connection>scm:git:git@github.com:simpleworks-gmbh/staf.git</connection>
+		<developerConnection>scm:git:ssh://github.com:simpleworks-gmbh/staf.git</developerConnection>
+		<url>https://github.com/simpleworks-gmbh/staf/tree/master</url>
+	</scm>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -16,12 +45,42 @@
 		<version.maven-compiler-plugin>3.8.0</version.maven-compiler-plugin>
 		<version.selenium>3.141.59</version.selenium>
 		<version.maven-jar-plugin>3.1.1</version.maven-jar-plugin>
+		<version.maven-gpg-plugin>1.6</version.maven-gpg-plugin>
 		<version.guice>4.0</version.guice>
 		<version.gson>2.8.2</version.gson>
 		<version.com.jayway.jsonpath.json-path>2.6.0</version.com.jayway.jsonpath.json-path>
 		<version.log4j>2.12.1</version.log4j>
 		<version.junit>5.4.0</version.junit>
 	</properties>
+	<profiles>
+		<profile>
+			<id>ci-cd</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>${version.maven-gpg-plugin}</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+								<configuration>
+									<gpgArguments>
+										<arg>--pinentry-mode</arg>
+										<arg>loopback</arg>
+									</gpgArguments>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>

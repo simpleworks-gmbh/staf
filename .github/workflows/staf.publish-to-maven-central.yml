@@ -7,48 +7,30 @@ on:
         - 'v*'
 
 jobs:
-  check-publish-to-maven-central:
+  fetch-tag:
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/master'
+    outputs:
+      tag: ${{ steps.tagName.outputs.tag }}
     steps:  
     - uses: olegtarasov/get-tag@v2.1
       id: tagName
-    - name: notify slack channel
-      uses: rtCamp/action-slack-notify@v2
-      env:
-        SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
-        SLACK_COLOR: ${{ job.status }}
-        SLACK_ICON: https://github.com/simpleworks-gmbh.png?size=48
-        SLACK_MESSAGE:  | 
-           release ${{ steps.tagName.outputs.tag }} is configued incorrectly, the target branch is ${{ github.ref }} instead of `refs/heads/master` :cry:
-        SLACK_TITLE:  ${{ github.repository }}
-        SLACK_USERNAME: incoming-webhook
-        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-
+ 
   publish-to-maven-central:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+    needs: fetch-tag 
     container:
-      image: registry.gitlab.com/simpleworks-gmbh/staf:${{ steps.tagName.outputs.tag }}
+      image: registry.gitlab.com/simpleworks-gmbh/staf/image:${{ needs.fetch-tag.outputs.tag }}
+      options: --user root
       credentials:
         username: ${{ secrets.GITLAB_USERNAME }}
         password: ${{ secrets.GITLAB_ACCCESS_TOKEN }}
-    steps:
-      - name: Set up Maven Central Repository
-        uses: actions/setup-java@v2
-        with:
-          java-version: '8'
-          distribution: 'adopt'
-          server-id: ossrh
-          server-username: OSSRH_USERNAME
-          server-password: OSSRH_TOKEN
-
-      - name: Publish package
-        run: mvn --batch-mode javadoc:jar source:jar deploy
+        
+    steps: 
+      - name: Publish package 
+        run:  mvn -Pci-cd -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} -Did.username=${{ secrets.OSSRH_USERNAME }} -Did.password=${{ secrets.OSSRH_TOKEN }} -DaltDeploymentRepository=${{ secrets.NEXUS_URL }} javadoc:jar source:jar deploy
+        working-directory: /mnt
         env:
-          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
-
+          HOME: /root
       - name: notify slack channel 
         uses: rtCamp/action-slack-notify@v2
         if: success()
@@ -57,10 +39,10 @@ jobs:
           SLACK_COLOR: ${{ job.status }}
           SLACK_ICON: https://github.com/simpleworks-gmbh.png?size=48
           SLACK_MESSAGE:  |
-             ${{ github.repository }} ${{ steps.tagName.outputs.tag }} has been published on <https://mvnrepository.com/|Maven Central Repository> :champagne:
+             ${{ github.repository }} ${{ steps.tagName.outputs.tag }} has been deployed to <https://s01.oss.sonatype.org/#stagingRepositories|Nexus> :champagne:
           SLACK_TITLE:  ${{ github.repository }}
           SLACK_USERNAME: incoming-webhook
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
       - name: notify slack channel 
         uses: rtCamp/action-slack-notify@v2
         if:  success() != true
