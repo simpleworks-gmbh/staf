@@ -4,11 +4,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.logging.log4j.LogManager;
@@ -247,7 +249,14 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 						value = Long.toString(rs.getLong(column));
 					} else if (String.class.equals(ob.getClass())) {
 						value = rs.getString(column);
-					} else {
+					} else if (UUID.class.equals(ob.getClass())) {
+						UUID uuid = rs.getObject(column, UUID.class);
+						value = uuid.toString();
+					} else if (Timestamp.class.equals(ob.getClass())) {
+						Timestamp timestamp = rs.getObject(column, Timestamp.class);
+						value = timestamp.toString();
+					}
+					else {
 						throw new IllegalArgumentException(
 								String.format("Cannot handle type: '%s', value '%s'.", ob.getClass(), value));
 					}
@@ -401,7 +410,7 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 					DbTestCase.class.toString()));
 		}
 
-		return new ArrayList<RewriteUrlObject>();
+		return new ArrayList<>();
 	}
 
 	@Override
