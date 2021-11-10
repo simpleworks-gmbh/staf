@@ -8,8 +8,7 @@ public class EmptyWebDriverManager extends WebDriverManagerImpl {
 
 	@Override
 	protected WebDriver createDriver() {
-		// TODO Auto-generated method stub
-		return null;
+		return new EmptyWebDriver();
 	}
 
 }
