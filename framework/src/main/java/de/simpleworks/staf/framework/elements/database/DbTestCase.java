@@ -236,6 +236,10 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 
 					Object ob = rs.getObject(column);
 					String value = Convert.EMPTY_STRING;
+					if (ob == null) {
+						row.put(column, value);
+						continue;
+					}
 
 					if (Integer.class.equals(ob.getClass())) {
 						value = Integer.toString(rs.getInt(column));
