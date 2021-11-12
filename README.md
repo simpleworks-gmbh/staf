@@ -102,7 +102,7 @@ that is represented by a class, that extends the `PageObject`
 public class AnyPage extends PageObject {
 
 	@FindBy(xpath = "//any//xpath")
-        // STAFButton - WebElement thatis provided by STAF
+        // STAFButton - WebElement that is provided by STAF
 	private STAFButton button;
 
 	@Inject
@@ -112,7 +112,7 @@ public class AnyPage extends PageObject {
 	}
 
 	/**
-	 * @brief actions on WebElemens
+	 * @brief actions on WebElements
 	 */
 	public void clicButton() {
 		button.click();
@@ -225,7 +225,7 @@ public class TC_APITestCase extends APITestCase  {
 	}
 
 	@Test
-	@Step(description = "execute api test ", order = 1)
+	@Step(description = "execute api test", order = 1)
 	public void step1() {   
 		// no implementation neccessary
 	}
