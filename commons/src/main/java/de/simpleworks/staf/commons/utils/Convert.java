@@ -104,6 +104,23 @@ public final class Convert {
 	}
 
 	@SuppressWarnings("unused")
+	public static boolean isBoolean(final Object ob) {
+		if (ob == null) {
+			throw new IllegalArgumentException("ob can't be null.");
+		}
+
+		try {
+			@SuppressWarnings("boxing")
+			final boolean i = (boolean) ob;
+			return true;
+		} catch (final Exception nfe) {
+			// nothing to do
+		}
+
+		return false;
+	}
+
+	@SuppressWarnings("unused")
 	public static boolean isNumeric(final Object ob) {
 		if (ob == null) {
 			throw new IllegalArgumentException("ob can't be null.");
