@@ -28,8 +28,7 @@ public abstract class XrayMojo extends AbstractMojo {
 			Guice.createInjector(UtilsCollection.add(Module.class, modules, new XrayModule(), new JiraModule()))
 					.injectMembers(this);
 		} catch (final Exception ex) {
-			final String message = String.format("Cannot initiate Mojo of Type \"%s\" , due to: \"%s\".",
-					this.getClass().getName());
+			final String message = String.format("Cannot initiate Mojo of Type \"%s\".", this.getClass().getName());
 			XrayMojo.logger.error(message, ex);
 			throw new RuntimeException(message);
 		}
