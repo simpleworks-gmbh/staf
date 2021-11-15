@@ -4,8 +4,15 @@
 
 ### Parameter
 
-- id: `Jira Key of any xray testplan` (f.e. ABC-123)
-- file: `File to store xray testplan` (f.e. testplan/ABC-123.json)
+- ids: `comma separated list Jira Keys of any xray testplans` (f.e. ABC-123,.,ABC-999)
+- file: `File to store xray testplan` (f.e. testplan/ABC-123.json) 
+    - if `ids` is a list, and `file` is a directory, then 
+    every `id` will be stored to a file like Testplan-`id`.json, that will be stored to the respecting directory.
+
+
+    - if `ids` is a list, and `file` is a file, then 
+    every `file` will be overwritten only the last `id` will be stored to  `file`.
+
 - environment `Defined environment in JIRA` (f.e. Integration)
 
 Property File
@@ -33,7 +40,7 @@ Xray Settings
 Execute
 ```bash
 mvn de.simpleworks.staf:xray-maven-plugin:fetchTestPlan \
--Did=`Jira Key of any xray testplan` \
+-Dids=`comma separated Jira Key of any xray testplan` \
 -Dproperty.file.root=`Root Folder where .property files were stored`  \
 -Dfile=`File to store xray testplan` \
 -Dxray.client_id=`Xray Client Id` \
