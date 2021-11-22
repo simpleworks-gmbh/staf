@@ -2,8 +2,10 @@ package de.simpleworks.staf.plugin.maven.xray.mojo;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,25 +29,24 @@ import de.simpleworks.staf.commons.elements.TestCase;
 import de.simpleworks.staf.commons.elements.TestPlan;
 import de.simpleworks.staf.commons.elements.TestStep;
 import de.simpleworks.staf.commons.mapper.elements.MapperTestplan;
+import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.plugin.maven.xray.commons.Xray;
 import de.simpleworks.staf.plugin.maven.xray.consts.XrayConsts;
 import de.simpleworks.staf.plugin.maven.xray.elements.Test;
 import de.simpleworks.staf.plugin.maven.xray.enums.StatusEnum;
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 @Mojo(name = "fetchTestPlan", defaultPhase = LifecyclePhase.INITIALIZE)
 public class FetchTestPlanMojo extends XrayMojo {
 
 	private static final Logger logger = LogManager.getLogger(FetchTestPlanMojo.class);
 
-	@Inject
-	@Parameter(property = "id", required = true)
-	private String id;
+	@Parameter(property = "ids", required = true)
+	private List<String> ids;
 
-	@Inject
 	@Parameter(property = "file", required = true)
 	private String file;
 
-	@Inject
 	@Parameter(property = "environment", required = true)
 	private String environment;
 
@@ -56,17 +57,49 @@ public class FetchTestPlanMojo extends XrayMojo {
 	@Inject
 	private IssueRestClient clientJira;
 
+	private final List<File> files;
+
 	public FetchTestPlanMojo() throws Exception {
 		super();
+		files = new ArrayList<>();
+	}
+
+	private void init() {
+		if (Convert.isEmpty(ids)) {
+			throw new IllegalArgumentException("ids can't be null or empty.");
+		}
+		final File directory = new File(file);
+
+		if (directory.isDirectory()) {
+			for (final String id : ids) {
+				files.add(Paths.get(file, String.format("Testplan-%s.json", id)).toFile());
+			}
+		}
 	}
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		final TestPlan result = new TestPlan();
-
-		result.setId(id);
 
 		try {
+			// init variables
+			init();
+
+			fetchTestplans();
+
+		} catch (final Exception ex) {
+			final String msg = "can't upload testresults.";
+			FetchTestPlanMojo.logger.error(msg, ex);
+			throw new MojoExecutionException(msg);
+		}
+	}
+
+	private void fetchTestplans() throws Exception {
+
+		for (final String id : ids) {
+			final TestPlan result = new TestPlan();
+
+			result.setId(id);
+
 			// Fetch test plan
 			final JsonObject testplan = getTestplan(id);
 
@@ -88,13 +121,19 @@ public class FetchTestPlanMojo extends XrayMojo {
 			final String testExecutionKey = startTestExecution(result, testplan);
 			result.setId(testExecutionKey);
 
-			// Write resulted test plan to file
-			writeTestplan(result);
+			File testplanFile = null;
 
-		} catch (final Exception ex) {
-			final String msg = "can't fetch testplan.";
-			FetchTestPlanMojo.logger.error("can't fetch testplan.", ex);
-			throw new MojoExecutionException(msg);
+			final Optional<File> opFile = files.stream().filter(f -> f.getName().contains(id)).findFirst();
+
+			// find the designated testplan file, that matches the testplane
+			if (opFile.isPresent()) {
+				testplanFile = opFile.get();
+			} else {
+				// set testplanfile from the parameter
+				testplanFile = new File(file);
+			}
+			// Write resulted test plan to file
+			FetchTestPlanMojo.writeTestplan(result, testplanFile);
 		}
 	}
 
@@ -106,8 +145,8 @@ public class FetchTestPlanMojo extends XrayMojo {
 	 *         their steps.
 	 */
 	private JsonObject getTestplan(final String key) {
-		final String jql = String.format("project = '%s' AND issuetype = 'Test Plan' AND key = '%s'", id.split("-")[0],
-				id);
+		final String jql = String.format("project = '%s' AND issuetype = 'Test Plan' AND key = '%s'", key.split("-")[0],
+				key);
 		final String graphQl = String.format(
 				"query{getTestPlans(jql: \"%s\", limit: 1) { total start limit results { issueId tests(limit: 100) { total start limit results { issueId testType { name } steps { id action data result attachments { id filename storedInJira downloadLink } } } } jira(fields: [\"issueNum\", \"assignee\", \"reporter\"]) } } }",
 				jql);
@@ -271,18 +310,19 @@ public class FetchTestPlanMojo extends XrayMojo {
 		}
 	}
 
-	private void writeTestplan(final TestPlan testplan) throws Exception {
-		final List<TestPlan> result = new ArrayList<>();
+	private static void writeTestplan(final TestPlan testplan, final File file) throws Exception {
 
 		if (testplan == null) {
 			throw new IllegalArgumentException("testplan can't be null.");
 		}
 
-		result.add(testplan);
+		if (file == null) {
+			throw new IllegalArgumentException("file can't be null.");
+		}
 
 		final MapperTestplan mapper = new MapperTestplan();
 		try {
-			mapper.write(new File(file), result);
+			mapper.write(file, Arrays.asList(new TestPlan[] { testplan }));
 		} catch (final Exception ex) {
 			FetchTestPlanMojo.logger.error(String.format("Can't write result to file \"%s\".", file));
 			throw ex;

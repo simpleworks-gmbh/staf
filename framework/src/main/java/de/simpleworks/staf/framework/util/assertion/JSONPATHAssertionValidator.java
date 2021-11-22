@@ -46,10 +46,11 @@ public class JSONPATHAssertionValidator extends AssertionUtils<HttpResponse> {
 			result = jsonArray.toJSONString();
 		} else if (Convert.isNumeric(response)) {
 			result = response.toString();
+		} else if (Convert.isBoolean(response)) {
+			result = response.toString();
 		} else if (response instanceof LinkedHashMap) {
 			result = JSONObject.toJSONString((Map<String, ? extends Object>) response);
 		}
-
 		else {
 			throw new RuntimeException(String.format("can't handle response of '%s'.", response.getClass().getName()));
 		}
