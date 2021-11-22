@@ -11,7 +11,7 @@ import de.simpleworks.staf.commons.utils.UtilsFormat;
 public class Statement implements IPojo {
 
 	private static final Logger logger = LogManager.getLogger(Statement.class);
-
+  
 	private StatementsEnum type;
 	private String expression;
 	private String connectionId;

@@ -9,7 +9,7 @@ import de.simpleworks.staf.commons.utils.UtilsCollection;
 import de.simpleworks.staf.commons.utils.UtilsFormat;
 
 public enum DbResultsEnum implements IEnum {
-	QUEUED("QUEUED", DbResultsValue.QUEUED);
+	QUEUED("QUEUED", DbResultsValue.QUEUED),;
 
 	final private String name;
 	final private String value;

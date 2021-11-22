@@ -9,6 +9,7 @@ import de.simpleworks.staf.commons.utils.UtilsCollection;
 import de.simpleworks.staf.commons.utils.UtilsFormat;
 
 public enum StatementsEnum implements IEnum {
+	SELECT("SELECT", StatementsValue.SELECT),
 	QUERY("QUERY", StatementsValue.QUERY);
 
 	final private String name;
