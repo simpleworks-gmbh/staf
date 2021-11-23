@@ -141,6 +141,8 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 		return result;
 	}
 
+	// Database connnections will be closed at the end of the test
+	@SuppressWarnings("resource")
 	private DbTestResult runStatement(final Statement statement, final List<Assertion> assertions)
 			throws SystemException {
 
@@ -170,11 +172,11 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 			switch (type) {
 
 			case SELECT:
-				currentResult = runSelectStatement(conn, statement);
+				currentResult = DbTestCase.runSelectStatement(conn, statement);
 				break;
 
 			case QUERY:
-				currentResult = runQueryStatement(conn, statement);
+				currentResult = DbTestCase.runQueryStatement(conn, statement);
 				break;
 			default:
 				throw new IllegalArgumentException(String.format("type '%s' is not implemented yet.", type.getValue()));
@@ -203,7 +205,7 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 		return result;
 	}
 
-	private static QueuedDbResult readData(ResultSet rs) throws SQLException {
+	private static QueuedDbResult readData(final ResultSet rs) throws SQLException {
 		final QueuedDbResult result = new QueuedDbResult();
 
 		final ResultSetMetaData rsMetaData = rs.getMetaData();
@@ -272,7 +274,7 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 
 		try (final PreparedStatement selectStatement = connection.prepareStatement(statement.getExpression());
 				final ResultSet rs = selectStatement.executeQuery();) {
-			return readData(rs);
+			return DbTestCase.readData(rs);
 		} catch (final Exception ex) {
 			final String msg = String.format("can't parse response from statement '%s'.", statement);
 			DbTestCase.logger.error(msg, ex);
@@ -463,6 +465,10 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 
 	@Override
 	public CsvFile createArtefact() {
+
+		if (currentResult == null) {
+			return new CsvFile(UtilsCollection.toArray(String.class, Arrays.asList()));
+		}
 
 		CsvFile result = null;
 
