@@ -335,7 +335,7 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 
 		switch (resultType) {
 
-		case QUEUED:
+		case SELECTED:
 
 			for (final Assertion assertion : assertions) {
 				if (DbTestCase.logger.isDebugEnabled()) {
@@ -389,9 +389,18 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 			throw new IllegalArgumentException("debresult is invalid.");
 		}
 
-		final DbResultRow rows = debresult.getResult();
 		final int expectedRowsAmount = statement.getExpectedRows();
 
+		if (expectedRowsAmount < 0) {
+			if (DbTestCase.logger.isDebugEnabled()) {
+				DbTestCase.logger.debug(
+						String.format("expectedRowsAmount \"%s\" is less than zero, no validation is neccessary.",
+								Integer.toString(expectedRowsAmount)));
+			}
+			return;
+		}
+
+		final DbResultRow rows = debresult.getResult();
 		if ((rows.size() != expectedRowsAmount)) {
 			throw new SystemException(String.format("debresult only has '%s' rows, but expected are '%s'.",
 					Integer.toString(rows.size()), Integer.toString(expectedRowsAmount)));
