@@ -233,16 +233,16 @@ public abstract class TestCase {
 		}
 	}
 
-	public void setExtractedValues(Map<String, Map<String, String>> map) {
+	public void setExtractedValues(final Map<String, Map<String, String>> map) {
 
-		for (String key : map.keySet()) {
+		for (final String key : map.keySet()) {
 			final Map<String, String> values = map.get(key);
 
 			if (extractedValues.containsKey(key)) {
 
 				final Map<String, String> tmpValues = extractedValues.get(key);
 
-				for (String tmpKey : tmpValues.keySet()) {
+				for (final String tmpKey : tmpValues.keySet()) {
 					// values, only adds keys from extractedValues that do not exist.
 					if (!values.containsKey(tmpKey)) {
 						values.put(tmpKey, tmpValues.get(tmpKey));
@@ -315,8 +315,12 @@ public abstract class TestCase {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public void setArtefact(Artefact artefact) {
+	public void setArtefact(final Artefact artefact) {
 		this.artefact = artefact;
+	}
+
+	public int getShutdownCounter() {
+		return shutdownCounter;
 	}
 
 	/**
@@ -325,7 +329,7 @@ public abstract class TestCase {
 	 * @return current variable storage (Map<String, Map<String, String>>) of any
 	 *         testcase
 	 */
-	protected Map<String, Map<String, String>> executeTestcase(TestCase testcase) throws Exception {
+	protected Map<String, Map<String, String>> executeTestcase(final TestCase testcase) throws Exception {
 
 		if (testcase == null) {
 			throw new IllegalArgumentException("testcase can't be null.");
@@ -334,10 +338,15 @@ public abstract class TestCase {
 		testcase.bootstrap();
 
 		try {
-			testcase.executeTestStep();
-		} catch (Throwable ex) {
+			for (int i = 0; i < testcase.getShutdownCounter(); i++) {
+				if (TestCase.logger.isDebugEnabled()) {
+					TestCase.logger.debug(String.format("Execute step %d.", Integer.valueOf(i)));
+				}
+				testcase.executeTestStep();
+			}
+		} catch (final Throwable ex) {
 			@SuppressWarnings("rawtypes")
-			Artefact artefact = testcase.createArtefact();
+			final Artefact artefact = testcase.createArtefact();
 
 			// transmit artefact
 			this.setArtefact(artefact);
