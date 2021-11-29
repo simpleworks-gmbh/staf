@@ -17,11 +17,18 @@ public class Statement implements IPojo {
 	private String connectionId;
 	private int expectedRows;
 
+	public Statement() {
+		type = StatementsEnum.QUERY;
+		expression = Convert.EMPTY_STRING;
+		connectionId = Convert.EMPTY_STRING;
+		expectedRows = -1;
+	}
+
 	public StatementsEnum getType() {
 		return type;
 	}
 
-	public void setType(StatementsEnum type) {
+	public void setType(final StatementsEnum type) {
 		this.type = type;
 	}
 
@@ -29,7 +36,7 @@ public class Statement implements IPojo {
 		return expression;
 	}
 
-	public void setExpression(String expression) {
+	public void setExpression(final String expression) {
 		this.expression = expression;
 	}
 
@@ -37,7 +44,7 @@ public class Statement implements IPojo {
 		return connectionId;
 	}
 
-	public void setConnectionId(String connectionId) {
+	public void setConnectionId(final String connectionId) {
 		this.connectionId = connectionId;
 	}
 
@@ -45,7 +52,7 @@ public class Statement implements IPojo {
 		return expectedRows;
 	}
 
-	public void setExpectedRows(int expectedRows) {
+	public void setExpectedRows(final int expectedRows) {
 		this.expectedRows = expectedRows;
 	}
 

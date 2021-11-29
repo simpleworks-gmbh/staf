@@ -327,6 +327,12 @@ public class TC_DbTestCase extends DbTestCase  {
 	}
 ]
 ```
+### Note:
+if you omit `expectedRows`, the number of result rows won't be checked.
+One can use it, if the number of rows is **unknown**.
+
+Keep in mind, that the assertions will checked on every row of the result set, but only the values "of the last row" will be stored.
+
 ### `dbconfig.json`
 ```bash
 [
@@ -342,6 +348,7 @@ public class TC_DbTestCase extends DbTestCase  {
 	}
 ]
 ```
+ 
 
 ## `properties`
 

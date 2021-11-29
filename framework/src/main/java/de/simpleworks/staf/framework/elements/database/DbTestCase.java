@@ -4,11 +4,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.logging.log4j.LogManager;
@@ -53,11 +56,11 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 	private QueuedDbResult currentResult;
 
 	protected DbTestCase(final String resource, final Module... modules) throws SystemException {
-		super(resource, ENVIRONMENT_VARIABLES_NAME, new MapperDbTeststep(), modules);
+		super(resource, DbTestCase.ENVIRONMENT_VARIABLES_NAME, new MapperDbTeststep(), modules);
 
 		try {
 			databaseconnectionimpl = new DbConnectionManagerImpl();
-		} catch (InstantiationException ex) {
+		} catch (final InstantiationException ex) {
 			DbTestCase.logger.error(ex);
 			throw new SystemException("can't set up database connection manager.");
 		}
@@ -73,11 +76,11 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 		// add error handling
 		getNextTeststep();
 
-		final Statement currentStatement = getCurrentStatement();
+		final Statement current = getCurrentStatement();
 		final Assertion[] assertions = getCurrentAssertions();
 		currentResult = new QueuedDbResult();
 
-		final DbTestResult result = runStatement(currentStatement, UtilsCollection.toList(assertions));
+		final DbTestResult result = runStatement(current, UtilsCollection.toList(assertions));
 		AssertionUtils.assertTrue(result.getErrormessage(), result.isSuccessfull());
 
 		addExtractedValues(currentstepname, result.getExtractedValues());
@@ -138,18 +141,17 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 		return result;
 	}
 
-	private DbTestResult runStatement(Statement statement, List<Assertion> assertions) throws SystemException {
+	// Database connnections will be closed at the end of the test
+	@SuppressWarnings("resource")
+	private DbTestResult runStatement(final Statement statement, final List<Assertion> assertions)
+			throws SystemException {
 
 		if (statement == null) {
 			throw new IllegalArgumentException("statement can't be null.");
 		}
 
 		if (!statement.validate()) {
-			throw new IllegalArgumentException(String.format("statement \"%s\" is invalid.", statement));
-		}
-
-		if (Convert.isEmpty(assertions)) {
-			throw new IllegalArgumentException("assertions can't be null or empty.");
+			throw new IllegalArgumentException(String.format("statement '%s' is invalid.", statement));
 		}
 
 		final DbTestResult result = new DbTestResult();
@@ -160,22 +162,27 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 			throw new SystemException("connectionPool can't be null.");
 		}
 
+		final String connectionId = statement.getConnectionId();
+		final Connection conn = connectionPool.getConnection(connectionId);
+
 		try {
 
 			final StatementsEnum type = statement.getType();
 
 			switch (type) {
 
-			case QUERY:
-
-				currentResult = runQuery(connectionPool, statement);
-				validateExpectedRows(currentResult, statement);
+			case SELECT:
+				currentResult = DbTestCase.runSelectStatement(conn, statement);
 				break;
 
+			case QUERY:
+				currentResult = DbTestCase.runQueryStatement(conn, statement);
+				break;
 			default:
-				throw new IllegalArgumentException(
-						String.format("type \"%s\" is not implemented yet.", type.getValue()));
+				throw new IllegalArgumentException(String.format("type '%s' is not implemented yet.", type.getValue()));
 			}
+
+			DbTestCase.validateExpectedRows(currentResult, statement);
 
 			if (!Convert.isEmpty(assertions)) {
 				final Map<String, String> values = validateAssertions(currentResult,
@@ -198,90 +205,121 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 		return result;
 	}
 
-	private QueuedDbResult runQuery(DbConnectionPool connectionPool, Statement statement) throws SystemException {
-
+	private static QueuedDbResult readData(final ResultSet rs) throws SQLException {
 		final QueuedDbResult result = new QueuedDbResult();
+
+		final ResultSetMetaData rsMetaData = rs.getMetaData();
+
 		final Map<String, String> columns = new HashedMap<>();
-
-		final String connectionId = statement.getConnectionId();
-
-		Connection conn = connectionPool.getConnection(connectionId);
-
-		if (conn == null) {
-			throw new SystemException(String.format("can't get connection \"%s\".", connectionId));
+		for (int itr = 1; itr <= rsMetaData.getColumnCount(); itr++) {
+			columns.put(rsMetaData.getColumnName(itr), Convert.EMPTY_STRING);
 		}
 
-		try {
+		while (rs.next()) { // will traverse through all rows
 
-			if (conn.isClosed()) {
-				throw new SystemException(String.format("connection to database \"%s\" is closed.", connectionId));
-			}
+			final Map<String, String> row = new HashedMap<>();
 
-			PreparedStatement selectStatement = conn.prepareStatement(statement.getExpression());
-			ResultSet rs = selectStatement.executeQuery();
+			for (final String column : columns.keySet()) {
 
-			ResultSetMetaData rsMetaData = rs.getMetaData();
-
-			for (int itr = 1; itr <= rsMetaData.getColumnCount(); itr++) {
-				columns.put(rsMetaData.getColumnName(itr), Convert.EMPTY_STRING);
-			}
-
-			while (rs.next()) { // will traverse through all rows
-
-				Map<String, String> row = new HashedMap<>();
-
-				for (final String column : columns.keySet()) {
-
-					Object ob = rs.getObject(column);
-					String value = Convert.EMPTY_STRING;
-
-					if (Integer.class.equals(ob.getClass())) {
-						value = Integer.toString(rs.getInt(column));
-					} else if (Double.class.equals(ob.getClass())) {
-						value = Double.toString(rs.getDouble(column));
-					} else if (Boolean.class.equals(ob.getClass())) {
-						value = Boolean.toString(rs.getBoolean(column));
-					} else if (Float.class.equals(ob.getClass())) {
-						value = Float.toString(rs.getFloat(column));
-					} else if (Long.class.equals(ob.getClass())) {
-						value = Long.toString(rs.getLong(column));
-					} else if (String.class.equals(ob.getClass())) {
-						value = rs.getString(column);
-					} else {
-						throw new IllegalArgumentException(
-								String.format("Cannot handle type: '%s', value '%s'.", ob.getClass(), value));
-					}
-
+				final Object ob = rs.getObject(column);
+				String value = Convert.EMPTY_STRING;
+				if (ob == null) {
 					row.put(column, value);
-
+					continue;
 				}
 
-				result.add(row);
+				if (Integer.class.equals(ob.getClass())) {
+					value = Integer.toString(rs.getInt(column));
+				} else if (Double.class.equals(ob.getClass())) {
+					value = Double.toString(rs.getDouble(column));
+				} else if (Boolean.class.equals(ob.getClass())) {
+					value = Boolean.toString(rs.getBoolean(column));
+				} else if (Float.class.equals(ob.getClass())) {
+					value = Float.toString(rs.getFloat(column));
+				} else if (Long.class.equals(ob.getClass())) {
+					value = Long.toString(rs.getLong(column));
+				} else if (String.class.equals(ob.getClass())) {
+					value = rs.getString(column);
+				} else if (UUID.class.equals(ob.getClass())) {
+					final UUID uuid = rs.getObject(column, UUID.class);
+					value = uuid.toString();
+				} else if (Timestamp.class.equals(ob.getClass())) {
+					final Timestamp timestamp = rs.getObject(column, Timestamp.class);
+					value = timestamp.toString();
+				} else {
+					throw new IllegalArgumentException(
+							String.format("Cannot handle type: '%s', value '%s'.", ob.getClass(), value));
+				}
+
+				row.put(column, value);
+
 			}
-		} catch (Exception ex) {
-			final String msg = String.format("can't parse response from statement \"%s\".", statement);
-			DbTestCase.logger.error(msg, ex);
-			throw new SystemException(msg);
+
+			result.add(row);
 		}
 
 		return result;
 	}
 
+	private static QueuedDbResult runSelectStatement(final Connection connection, final Statement statement)
+			throws Exception {
+
+		if (connection == null) {
+			throw new SystemException(String.format("connection can't be null."));
+		}
+
+		if (connection.isClosed()) {
+			throw new SystemException(String.format("connection to database is closed."));
+		}
+
+		try (final PreparedStatement selectStatement = connection.prepareStatement(statement.getExpression());
+				final ResultSet rs = selectStatement.executeQuery();) {
+			return DbTestCase.readData(rs);
+		} catch (final Exception ex) {
+			final String msg = String.format("can't parse response from statement '%s'.", statement);
+			DbTestCase.logger.error(msg, ex);
+			throw new SystemException(msg);
+		}
+	}
+
+	private static QueuedDbResult runQueryStatement(final Connection connection, final Statement statement)
+			throws Exception {
+
+		if (connection == null) {
+			throw new SystemException(String.format("connection can't be null."));
+		}
+
+		if (connection.isClosed()) {
+			throw new SystemException(String.format("connection to database is closed."));
+		}
+
+		final QueuedDbResult result = new QueuedDbResult();
+
+		try (final PreparedStatement queryStatement = connection.prepareStatement(statement.getExpression())) {
+
+			final int limit = queryStatement.executeUpdate();
+
+			for (int itr = 0; itr < limit; itr += 1) {
+				result.add(new HashedMap<>());
+			}
+			return result;
+		} catch (final Exception ex) {
+			final String msg = String.format("can't parse response from statement '%s'.", statement);
+			DbTestCase.logger.error(msg, ex);
+			throw new SystemException(msg);
+		}
+	}
+
 	@Override
-	protected Map<String, String> validateAssertions(QueuedDbResult dbresult, List<Assertion> assertions)
+	protected Map<String, String> validateAssertions(final QueuedDbResult dbresult, final List<Assertion> assertions)
 			throws SystemException {
 
 		if (dbresult == null) {
 			throw new IllegalArgumentException("dbresult can't be null.");
 		}
 
-		if (!(dbresult instanceof IDbResult)) {
-			throw new IllegalArgumentException(
-					String.format("dbresult is not an instance of the class \"%s\".", IDbResult.class));
-		}
-
 		@SuppressWarnings("rawtypes")
-		IDbResult dbResult = dbresult;
+		final IDbResult dbResult = dbresult;
 
 		if (Convert.isEmpty(assertions)) {
 			throw new IllegalArgumentException("assertions can't be null or empty.");
@@ -293,11 +331,11 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 			DbTestCase.logger.debug("run assertions");
 		}
 
-		DbResultsEnum resultType = dbResult.getDbResultsEnum();
+		final DbResultsEnum resultType = dbResult.getDbResultsEnum();
 
 		switch (resultType) {
 
-		case QUEUED:
+		case SELECTED:
 
 			for (final Assertion assertion : assertions) {
 				if (DbTestCase.logger.isDebugEnabled()) {
@@ -308,12 +346,11 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 				final ValidateMethodEnum method = assertion.getValidateMethod();
 
 				if (!(dbResult instanceof QueuedDbResult)) {
-					throw new SystemException(
-							String.format("dbResult needs to be an instance of \"%s\", but is \"%s\".",
-									QueuedDbResult.class, dbResult.getClass()));
+					throw new SystemException(String.format("dbResult needs to be an instance of '%s', but is '%s'.",
+							QueuedDbResult.class, dbResult.getClass()));
 				}
 
-				QueuedDbResult queriedDbResult = (QueuedDbResult) dbResult;
+				final QueuedDbResult queriedDbResult = (QueuedDbResult) dbResult;
 
 				final Map<String, String> results;
 				switch (method) {
@@ -341,7 +378,8 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 		return result;
 	}
 
-	private static void validateExpectedRows(QueuedDbResult debresult, Statement statement) throws SystemException {
+	private static void validateExpectedRows(final QueuedDbResult debresult, final Statement statement)
+			throws SystemException {
 
 		if (debresult == null) {
 			throw new IllegalArgumentException("debresult can't be null.");
@@ -351,11 +389,20 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 			throw new IllegalArgumentException("debresult is invalid.");
 		}
 
-		final DbResultRow rows = debresult.getResult();
 		final int expectedRowsAmount = statement.getExpectedRows();
 
-		if (!(rows.size() == expectedRowsAmount)) {
-			throw new SystemException(String.format("debresult only has \"%s\" rows, but expected are \"%s\".",
+		if (expectedRowsAmount < 0) {
+			if (DbTestCase.logger.isDebugEnabled()) {
+				DbTestCase.logger.debug(
+						String.format("expectedRowsAmount \"%s\" is less than zero, no validation is neccessary.",
+								Integer.toString(expectedRowsAmount)));
+			}
+			return;
+		}
+
+		final DbResultRow rows = debresult.getResult();
+		if ((rows.size() != expectedRowsAmount)) {
+			throw new SystemException(String.format("debresult only has '%s' rows, but expected are '%s'.",
 					Integer.toString(rows.size()), Integer.toString(expectedRowsAmount)));
 		}
 	}
@@ -363,7 +410,7 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 	@Override
 	protected void getNextTeststep() throws SystemException {
 
-		TeststepProvider<DbTeststep> provider = getProvider();
+		final TeststepProvider<DbTeststep> provider = getProvider();
 
 		if (provider == null) {
 			throw new IllegalArgumentException("provider can't be null.");
@@ -396,19 +443,19 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 	@Override
 	public List<RewriteUrlObject> getRewriteUrls() {
 
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("url rewriting is not supported on \"%s\", will return empty list.",
+		if (DbTestCase.logger.isDebugEnabled()) {
+			DbTestCase.logger.debug(String.format("url rewriting is not supported on '%s', will return empty list.",
 					DbTestCase.class.toString()));
 		}
 
-		return new ArrayList<RewriteUrlObject>();
+		return new ArrayList<>();
 	}
 
 	@Override
 	public BrowserMobProxyServer getProxy() {
 
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("proxying connections is not supported on \"%s\", will return null.",
+		if (DbTestCase.logger.isDebugEnabled()) {
+			DbTestCase.logger.debug(String.format("proxying connections is not supported on '%s', will return null.",
 					DbTestCase.class.toString()));
 		}
 
@@ -428,9 +475,17 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 	@Override
 	public CsvFile createArtefact() {
 
+		if (currentResult == null) {
+			return new CsvFile(UtilsCollection.toArray(String.class, Arrays.asList()));
+		}
+
 		CsvFile result = null;
 
-		for (Map<String, String> row : currentResult.getResult()) {
+		for (final Map<String, String> row : currentResult.getResult()) {
+
+			if (Convert.isEmpty(row)) {
+				continue;
+			}
 
 			if (result == null) {
 				result = new CsvFile(UtilsCollection.toArray(String.class, row.keySet()));

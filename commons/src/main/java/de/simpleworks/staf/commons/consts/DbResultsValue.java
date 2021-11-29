@@ -1,5 +1,5 @@
 package de.simpleworks.staf.commons.consts;
 
 public class DbResultsValue {
-	public final static String QUEUED = "QUEUED";
+	public final static String SELECTED = "SELECTED";
 }

@@ -23,14 +23,14 @@ public class QueuedDbResult implements IDbResult<DbResultRow> {
 	@Override
 	public boolean validate() {
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("validate UpdateDbResult...");
+		if (QueuedDbResult.logger.isDebugEnabled()) {
+			QueuedDbResult.logger.debug("validate UpdateDbResult...");
 		}
 
 		return true;
 	}
 
-	public boolean add(Map<String, String> row) {
+	public boolean add(final Map<String, String> row) {
 
 		if (row == null) {
 			throw new IllegalArgumentException("row can't be null.");
@@ -46,6 +46,6 @@ public class QueuedDbResult implements IDbResult<DbResultRow> {
 
 	@Override
 	public DbResultsEnum getDbResultsEnum() {
-		return DbResultsEnum.QUEUED;
+		return DbResultsEnum.SELECTED;
 	}
 }
