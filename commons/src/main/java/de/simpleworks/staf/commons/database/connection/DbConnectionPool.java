@@ -18,12 +18,12 @@ public class DbConnectionPool {
 
 	private final Map<String, Connection> pool;
 
-	public DbConnectionPool(List<DbConnection> dbconnections) throws InstantiationException {
+	public DbConnectionPool(final List<DbConnection> dbconnections) throws InstantiationException {
 		pool = new HashedMap<>();
 
 		try {
 			setUpConnectionPool(dbconnections);
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			final String msg = "can't instantiate DbConnectionPool.";
 			DbConnectionPool.logger.error(msg, ex);
 			throw new InstantiationException(msg);
@@ -36,12 +36,12 @@ public class DbConnectionPool {
 			throw new IllegalArgumentException("connectionId can't be null or empty String.");
 		}
 
-		Connection result = pool.get(connectionId);
+		final Connection result = pool.get(connectionId);
 		return result;
 	}
 
 	public boolean drainPool() {
-		for (String dbanme : pool.keySet()) {
+		for (final String dbanme : pool.keySet()) {
 			if (!closeConnection(dbanme)) {
 				return false;
 			}
@@ -49,30 +49,34 @@ public class DbConnectionPool {
 		return true;
 	}
 
+	// Database connnections will be closed at the end of the test
+	@SuppressWarnings("resource")
 	private boolean closeConnection(final String dbanme) {
 
 		if (Convert.isEmpty(dbanme)) {
 			throw new IllegalArgumentException("dbname can't be null or empty String.");
 		}
 
-		Connection result = pool.remove(dbanme);
+		final Connection result = pool.remove(dbanme);
 		try {
 			result.close();
-		} catch (SQLException ex) {
+		} catch (final SQLException ex) {
 			final String msg = String.format("can't close connection to database \"%s\".", dbanme);
-			logger.error(msg, ex);
+			DbConnectionPool.logger.error(msg, ex);
 			return false;
 		}
 
 		return true;
 	}
 
-	public void setUpConnectionPool(List<DbConnection> dbconnections) throws Exception {
+	// Database connnections will be closed at the end of the test
+	@SuppressWarnings("resource")
+	public void setUpConnectionPool(final List<DbConnection> dbconnections) throws Exception {
 
-		for (DbConnection dbconnection : dbconnections) {
+		for (final DbConnection dbconnection : dbconnections) {
 
 			final String id = dbconnection.getId();
-			final Connection connection = setUpConnection(dbconnection);
+			final Connection connection = DbConnectionPool.setUpConnection(dbconnection);
 
 			if (pool.containsKey(id)) {
 				throw new Exception(String.format("database connection \"%s\" is already configured.", id));
@@ -82,7 +86,7 @@ public class DbConnectionPool {
 		}
 	}
 
-	private static Connection setUpConnection(DbConnection dbconnection) throws Exception {
+	private static Connection setUpConnection(final DbConnection dbconnection) throws Exception {
 
 		if (dbconnection == null) {
 			throw new IllegalArgumentException("dbconnection can't be null.");
@@ -92,14 +96,14 @@ public class DbConnectionPool {
 			throw new IllegalArgumentException(String.format("dbconnection \"%s\" is invalid.", dbconnection));
 		}
 
-		Connection result = createConnection(dbconnection.getConnectionString(), dbconnection.getUsername(),
-				dbconnection.getDriver(), dbconnection.getPassword());
+		final Connection result = DbConnectionPool.createConnection(dbconnection.getConnectionString(),
+				dbconnection.getUsername(), dbconnection.getDriver(), dbconnection.getPassword());
 
 		return result;
 	}
 
-	private static Connection createConnection(String url, String user, String driver, String password)
-			throws Exception {
+	private static Connection createConnection(final String url, final String user, final String driver,
+			final String password) throws Exception {
 
 		Class.forName(driver);
 
@@ -107,7 +111,7 @@ public class DbConnectionPool {
 
 		try {
 			result = DriverManager.getConnection(url, user, password);
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			final String msg = String.format("can't create connection to \"%s\".", url);
 			DbConnectionPool.logger.error(msg, ex);
 			throw new Exception(msg);

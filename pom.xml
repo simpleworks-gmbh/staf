@@ -6,7 +6,7 @@
 	<description>Simpleworks Test Automation Framework</description>
 	<groupId>de.simpleworks.staf</groupId>
 	<artifactId>staf-parent</artifactId>
-	<version>0.50</version>
+	<version>0.51.5</version>
 	<packaging>pom</packaging>
 	<name>staf-parent</name>
 	<url>https://github.com/simpleworks-gmbh/staf</url>
@@ -49,7 +49,7 @@
 		<version.guice>4.0</version.guice>
 		<version.gson>2.8.2</version.gson>
 		<version.com.jayway.jsonpath.json-path>2.6.0</version.com.jayway.jsonpath.json-path>
-		<version.log4j>2.12.1</version.log4j>
+		<version.log4j>2.16.0</version.log4j>
 		<version.junit>5.4.0</version.junit>
 	</properties>
 	<profiles>
