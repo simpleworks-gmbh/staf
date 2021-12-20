@@ -307,7 +307,7 @@ public class TC_DbTestCase extends DbTestCase  {
 			"statement": {
 				"type": "QUERY",
 				"expression": "SELECT name, population FROM <&DbTestCase#Table&> WHERE id = 6;",
-				"database": "world-db",
+				"connectionId": "world-db",
 				"expectedRows": 1
 			},
 			"assertions": [{
