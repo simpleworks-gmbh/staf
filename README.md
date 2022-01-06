@@ -328,7 +328,7 @@ public class TC_DbTestCase extends DbTestCase  {
 ]
 ```
 ### Note:
-`type` has two values to choose from depending on the type of SQL statement:
+`type` in `statement` has two values to choose from depending on the type of SQL statement:
 
 - "SELECT" is for only SELECT sql statements like in the `select.json` above.
 
