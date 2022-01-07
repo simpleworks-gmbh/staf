@@ -87,12 +87,6 @@ public class Assertion implements IPojo {
 		this.value = value;
 	}
 
-	/**
-	 *
-	 *
-	 * private String xpath; private ValidateMethodEnum validateMethod;
-	 */
-
 	@Override
 	public boolean validate() {
 		if (Assertion.logger.isDebugEnabled()) {
@@ -154,6 +148,52 @@ public class Assertion implements IPojo {
 
 		}
 		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+
+		if (!(obj instanceof Assertion)) {
+			return false;
+		}
+
+		Assertion assertion = (Assertion) obj;
+
+		try {
+
+			if (!id.equals(assertion.getId())) {
+				return false;
+			}
+
+			if (!xpath.equals(assertion.getXpath())) {
+				return false;
+			}
+
+			if (!jsonpath.equals(assertion.getJsonpath())) {
+				return false;
+			}
+
+			if (!attribute.equals(assertion.getAttribute())) {
+				return false;
+			}
+
+			if (!allowedValue.equals(assertion.getAllowedValue())) {
+				return false;
+			}
+
+			if (!validateMethod.equals(assertion.getValidateMethod())) {
+				return false;
+			}
+
+			if (!value.equals(assertion.getValue())) {
+				return false;
+			}
+		} catch (Exception ex) {
+			Assertion.logger.error("can't compare assertions.", ex);
+			return false;
+		}
+
+		return true;
 	}
 
 	@Override
