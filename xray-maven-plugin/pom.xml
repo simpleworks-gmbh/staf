@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>de.simpleworks.staf</groupId>
 		<artifactId>staf-parent</artifactId>
-		<version>0.60</version>
+		<version>0.65</version>
 	</parent>
 
 	<artifactId>xray-maven-plugin</artifactId>
@@ -17,7 +17,7 @@
 	<packaging>maven-plugin</packaging>
 	
 	<properties>
-		<project.version>0.60</project.version>
+		<project.version>0.65</project.version>
 		<version.maven-plugin-api>3.6.3</version.maven-plugin-api>
 		<version.maven-plugin-annotations>3.6.0</version.maven-plugin-annotations>
 		<version.maven-project>2.2.1</version.maven-project>
