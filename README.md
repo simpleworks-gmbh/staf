@@ -305,7 +305,7 @@ public class TC_DbTestCase extends DbTestCase  {
 			"order": 1,
 			"name": "Step 1", 
 			"statement": {
-				"type": "QUERY",
+				"type": "SELECT",
 				"expression": "SELECT name, population FROM <&DbTestCase#Table&> WHERE id = 6;",
 				"connectionId": "world-db",
 				"expectedRows": 1
@@ -328,6 +328,12 @@ public class TC_DbTestCase extends DbTestCase  {
 ]
 ```
 ### Note:
+`type` in `statement` has two values to choose from depending on the type of SQL statement:
+
+- "SELECT" is for only SELECT sql statements like in the `select.json` above.
+
+- "QUERY" is for all other types of sql statements (e.g. INSERT, UPDATE, DELETE etc.).
+
 if you omit `expectedRows`, the number of result rows won't be checked.
 One can use it, if the number of rows is **unknown**.
 
