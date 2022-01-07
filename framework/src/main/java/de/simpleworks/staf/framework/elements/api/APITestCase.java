@@ -16,6 +16,7 @@ import de.simpleworks.staf.commons.api.APITeststep;
 import de.simpleworks.staf.commons.api.Assertion;
 import de.simpleworks.staf.commons.api.HttpRequest;
 import de.simpleworks.staf.commons.api.HttpResponse;
+import de.simpleworks.staf.commons.consts.CommonsConsts;
 import de.simpleworks.staf.commons.enums.ContentTypeEnum;
 import de.simpleworks.staf.commons.enums.ValidateMethodEnum;
 import de.simpleworks.staf.commons.exceptions.SystemException;
@@ -167,6 +168,31 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 	protected HttpResponse doRequest(final HttpRequest request) throws SystemException {
 		if (request == null) {
 			throw new IllegalArgumentException("request can't be null.");
+		}
+
+		// apply pacing if it's defined.
+		String timeout = Convert.EMPTY_STRING;
+		try {
+
+			timeout = System.getProperty(CommonsConsts.API_TIMEOUT, null);
+
+			if (!Convert.isEmpty(timeout)) {
+				Thread.sleep(Integer.parseInt(timeout) * 1000);
+			}
+
+		} catch (Exception ex) {
+
+			if (ex instanceof NumberFormatException) {
+				APITestCase.logger.error(String.format("pacing \"%s\" can't be parsed to an integer.", timeout), ex);
+			}
+
+			else if (ex instanceof InterruptedException) {
+				APITestCase.logger.error(String.format("can't wait whole pacing \"%s\".", timeout), ex);
+			}
+
+			else {
+				APITestCase.logger.error("pacing can't be applied.", ex);
+			}
 		}
 
 		final BrowserMobProxyServer proxy = client.getBrowserMobProxyServer();
