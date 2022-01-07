@@ -34,7 +34,7 @@ public class XPATHAssertionValidator extends AssertionUtils<HttpResponse> {
 		final HtmlCleaner cleaner = new HtmlCleaner();
 		final TagNode node = cleaner.clean(response.getBody());
 
-		Object[] tagnode = new Object[]{};
+		Object[] tagnode = new Object[] {};
 
 		try {
 			tagnode = node.evaluateXPath(xpath);
@@ -45,8 +45,9 @@ public class XPATHAssertionValidator extends AssertionUtils<HttpResponse> {
 		}
 
 		if ((tagnode.length == 0) && AllowedValueEnum.NON_EMPTY.equals(allowedValue)) {
-			throw new RuntimeException(
-					"The assertion was not met. Value can't be fetched, but a 'non empty vaue' was expected.");
+			throw new RuntimeException(String.format(
+					"The assertion '%s' was not met. Value can't be fetched, but a 'non empty vaue' was expected.",
+					assertion.getId()));
 		}
 
 		final TagNode temp = (TagNode) tagnode[0];
@@ -64,13 +65,14 @@ public class XPATHAssertionValidator extends AssertionUtils<HttpResponse> {
 
 			if (!assertion.getValue().equals(value) && AllowedValueEnum.EXACT_VALUE.equals(allowedValue)) {
 				throw new RuntimeException(
-						String.format("The assertion was not met. Expected value '%s', but it was '%s'.",
-								assertion.getValue(), value));
+						String.format("The assertion '%s' was not met. Expected value '%s', but it was '%s'.",
+								assertion.getId(), assertion.getValue(), value));
 			}
 
 			if (!value.contains(assertion.getValue()) && AllowedValueEnum.CONTAINS_VALUE.equals(allowedValue)) {
-				throw new RuntimeException(String.format("The assertion was not met. Value '%s' must contain '%s'.",
-						value, assertion.getValue()));
+				throw new RuntimeException(
+						String.format("The assertion '%s' was not met. Value '%s' must contain '%s'.",
+								assertion.getId(), value, assertion.getValue()));
 			}
 
 		} else {
@@ -80,8 +82,9 @@ public class XPATHAssertionValidator extends AssertionUtils<HttpResponse> {
 			}
 
 			if (Convert.isEmpty(value) && AllowedValueEnum.NON_EMPTY.equals(allowedValue)) {
-				throw new RuntimeException(
-						"The assertion was not met. Value is empty, but a 'non empty one' was expected.");
+				throw new RuntimeException(String.format(
+						"The assertion '%s' was not met. Value is empty, but a 'non empty one' was expected.",
+						assertion.getId()));
 			}
 		}
 
