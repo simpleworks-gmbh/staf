@@ -29,6 +29,9 @@ ENV M2_HOME=/opt/maven
 ENV MAVEN_HOME=/opt/maven
 ENV PATH=${M2_HOME}/bin:${PATH}
 
+# remove maven repository
+RUN rm -rf ~/.m2
+
 ###
 ## configure software build
 #
