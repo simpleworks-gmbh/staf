@@ -51,16 +51,17 @@ public class DbResultAssertionValidator extends AssertionUtils<QueuedDbResult> {
 
 				if (content.equals(assertionValue)) {
 					throw new RuntimeException(String.format(
-							"The assertion was not met. Fetched value '%s' does match the expected one '%s'.", content,
-							assertionValue));
+							"The assertion '%s' was not met. Fetched value '%s' does match the expected one '%s'.",
+							assertion.getId(), content, assertionValue));
 				}
 			}
 			break;
 
 		case NON_EMPTY:
 			if (Convert.isEmpty(response.getResult())) {
-				throw new RuntimeException(
-						"The assertion was not met. Value can't be fetched, but a \"non empty vaue\" was expected.");
+				throw new RuntimeException(String.format(
+						"The assertion '%s' was not met. Value can't be fetched, but a \"non empty vaue\" was expected.",
+						assertion.getId()));
 			}
 			break;
 
@@ -75,8 +76,8 @@ public class DbResultAssertionValidator extends AssertionUtils<QueuedDbResult> {
 
 				if (!content.contains(assertionValue)) {
 					throw new RuntimeException(
-							String.format("The assertion was not met. Fetched value '%s' does not contain '%s'.",
-									content, assertionValue));
+							String.format("The assertion '%s' was not met. Fetched value '%s' does not contain '%s'.",
+									assertion.getId(), content, assertionValue));
 				}
 			}
 
@@ -93,8 +94,8 @@ public class DbResultAssertionValidator extends AssertionUtils<QueuedDbResult> {
 
 				if (!content.equals(assertionValue)) {
 					throw new RuntimeException(String.format(
-							"The assertion was not met. Fetched value '%s' does not match the expected one '%s'.",
-							content, assertionValue));
+							"The assertion '%s' was not met. Fetched value '%s' does not match the expected one '%s'.",
+							assertion.getId(), content, assertionValue));
 				}
 			}
 			break;

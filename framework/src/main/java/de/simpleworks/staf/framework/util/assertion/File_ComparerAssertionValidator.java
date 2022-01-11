@@ -40,12 +40,15 @@ public class File_ComparerAssertionValidator extends AssertionUtils<HttpResponse
 			final File tmpFile = UtilsIO.createTempFile();
 			final boolean conversionSucceeded = UtilsIO.convertBase64StringtoFile(base64String, tmpFile);
 			if (!conversionSucceeded) {
-				throw new RuntimeException(
-						"The assertion was not met. The file to be comapred, can't be transformed, from base64 back to a file.");
+				throw new RuntimeException(String.format(
+						"The assertion '%s' was not met. The file to be comapred, can't be transformed, from base64 back to a file.",
+						assertion.getId()));
 			}
 
 			if (!UtilsIO.checkIfFilesAreEqual(tmpFile, new File(filePath))) {
-				throw new RuntimeException("The assertion was not met. The files do not match as it was expected.");
+				throw new RuntimeException(
+						String.format("The assertion '%s' was not met. The files do not match as it was expected.",
+								assertion.getId()));
 			}
 
 			result.put(assertion.getId(), base64String);
