@@ -35,7 +35,9 @@ public enum ContentTypeEnum implements IEnum {
 	JPEG("image/jpeg", ContentTypeValue.JPEG),
 	FORM_URLENCODED("x-www-form-urlencoded", ContentTypeValue.FORM_URLENCODED),
 	MULTIPART_FORM_DATA("multipart/form-data", ContentTypeValue.MULTIPART_FORM_DATA),
-	TEXT("text/plain", ContentTypeValue.TEXT), HTML("text/html", ContentTypeValue.HTML);
+	TEXT("text/plain", ContentTypeValue.TEXT),
+	CSV("text/csv", ContentTypeValue.CSV),
+	HTML("text/html", ContentTypeValue.HTML);
 
 	final private String name;
 	final private String value;
