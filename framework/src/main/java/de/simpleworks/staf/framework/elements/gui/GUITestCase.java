@@ -1,5 +1,10 @@
 package de.simpleworks.staf.framework.elements.gui;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.TakesScreenshot;
@@ -8,15 +13,19 @@ import org.openqa.selenium.WebDriver;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 
+import de.simpleworks.staf.commons.annotation.Step;
 import de.simpleworks.staf.commons.exceptions.SystemException;
 import de.simpleworks.staf.commons.manager.WebDriverManager;
 import de.simpleworks.staf.commons.report.artefact.Screenshot;
+import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.UtilsCollection;
 import de.simpleworks.staf.framework.api.proxy.ProxyUtils;
 import de.simpleworks.staf.framework.elements.api.RewriteUrlObject;
 import de.simpleworks.staf.framework.elements.commons.TestCase;
 import de.simpleworks.staf.framework.gui.webdriver.module.DriverModule;
 import de.simpleworks.staf.framework.gui.webdriver.module.WebDriverManagerImpl;
+import de.simpleworks.staf.framework.util.AssertionUtils;
+import de.simpleworks.staf.framework.util.TestCaseUtils;
 import net.lightbody.bmp.BrowserMobProxyServer;
 
 public abstract class GUITestCase extends TestCase {
@@ -114,9 +123,90 @@ public abstract class GUITestCase extends TestCase {
 		return result;
 	}
 
+	private Method getNextTeststep() throws Exception {
+
+		List<Method> methods = TestCaseUtils.fetchStepMethods(this.getClass());
+
+		if (Convert.isEmpty(methods)) {
+			throw new Exception("methods can't be null or empty.");
+		}
+
+		final int size = methods.size();
+		final int indexCurrentTestStep = size - getShutdownCounter();
+
+		final Method result = methods.get(indexCurrentTestStep);
+		return result;
+	}
+
 	@Override
 	public void executeTestStep() throws Exception {
-		throw new SystemException(
-				String.format("executeTestStep not supported on \"%s\".", this.getClass().toString()));
+		// add error handling
+		final Method testStep = getNextTeststep();
+		;
+
+		final GUITestResult result = runTeststep(testStep);
+		AssertionUtils.assertTrue(result.getErrormessage(), result.isSuccessfull());
+	}
+
+	private GUITestResult runTeststep(Method method) throws Exception {
+
+		if (method == null) {
+			throw new IllegalArgumentException("method can't be null.");
+		}
+
+		final Step step = method.getAnnotation(Step.class);
+
+		if (step == null) {
+			throw new IllegalArgumentException(String.format("method \"%s\" is not annotated with \"%s\".",
+					method.getName(), Step.class.getName()));
+		}
+
+		final GUITestResult result = new GUITestResult();
+		result.setSuccessfull(false);
+
+		try {
+			method.invoke(this);
+			result.setSuccessfull(true);
+		} catch (Throwable th) {
+
+			if (th instanceof IllegalAccessException) {
+				GUITestCase.logger
+						.error(String.format("method \"%s\" is not accessible via reflection.", method.getName()));
+				throw th;
+			}
+
+			else if (th instanceof IllegalArgumentException) {
+
+				GUITestCase.logger.error(
+						String.format(
+								"method \"%s\" was called without parameters, although parameter \"[]\" were expected.",
+								method.getName(), String
+										.join(",",
+												UtilsCollection.toList(method.getParameters()).stream()
+														.map(param -> param.getName()).collect(Collectors.toList()))),
+						th);
+				throw th;
+			}
+
+			else if (th instanceof InvocationTargetException) {
+				GUITestCase.logger
+						.error(String.format("method \"%s\" caused an exception, while it was called via reflection.",
+								method.getName()), th);
+				throw th;
+			}
+
+			// for every failing assertion and runtime error
+			else {
+
+				final String msg = String.format("Test Step '%s' has failed.", step.description());
+				GUITestCase.logger.error(msg, th);
+				result.setErrormessage(th.getMessage());
+
+				result.setSuccessfull(false);
+			}
+
+		}
+
+		return result;
 	}
 }
