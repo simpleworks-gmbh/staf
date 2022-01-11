@@ -51,7 +51,7 @@ public class STAFCheckbox extends STAFElement {
 
 		if (STAFCheckbox.logger.isDebugEnabled()) {
 			STAFCheckbox.logger.debug(
-					String.format("The Checkbox at '%s' is checked: '%s'.", getBy(), Boolean.valueOf(isChecked())));
+					String.format("The Checkbox at '%s' is checked: '%s'.", getBy(), Boolean.valueOf(isChecked)));
 		}
 
 		return isChecked;
