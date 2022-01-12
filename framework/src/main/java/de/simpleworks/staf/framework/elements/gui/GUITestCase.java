@@ -36,6 +36,8 @@ public abstract class GUITestCase extends TestCase {
 
 	@Inject
 	private WebDriverManagerImpl drivermanagerimpl;
+	
+	private int currentStep;
 
 	public GUITestCase(final Module... modules) {
 		super(UtilsCollection.add(Module.class, modules, new DriverModule()));
@@ -83,6 +85,8 @@ public abstract class GUITestCase extends TestCase {
 		configureProxy();
 
 		drivermanagerimpl.startProxy();
+		
+		currentStep = 0;
 	}
 
 	@Override
@@ -131,10 +135,8 @@ public abstract class GUITestCase extends TestCase {
 			throw new Exception("methods can't be null or empty.");
 		}
 
-		final int size = methods.size();
-		final int indexCurrentTestStep = size - getShutdownCounter();
-
-		final Method result = methods.get(indexCurrentTestStep);
+		final Method result = methods.get(currentStep++);
+		
 		return result;
 	}
 
@@ -142,7 +144,6 @@ public abstract class GUITestCase extends TestCase {
 	public void executeTestStep() throws Exception {
 		// add error handling
 		final Method testStep = getNextTeststep();
-		;
 
 		final GUITestResult result = runTeststep(testStep);
 		AssertionUtils.assertTrue(result.getErrormessage(), result.isSuccessfull());
