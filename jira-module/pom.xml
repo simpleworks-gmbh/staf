@@ -26,21 +26,7 @@
 			</releases>
 		</repository>
 	</repositories>
-
-	<pluginRepositories>
-		<pluginRepository>
-			<id>atlassian-public</id>
-			<url>https://m2proxy.atlassian.com/repository/public</url>
-			<releases>
-				<enabled>true</enabled>
-				<checksumPolicy>warn</checksumPolicy>
-			</releases>
-			<snapshots>
-				<checksumPolicy>warn</checksumPolicy>
-			</snapshots>
-		</pluginRepository>
-	</pluginRepositories>
-
+	
 	<properties>
 		<project.version>0.70</project.version>
 		<version.jersey-json>1.5</version.jersey-json>
