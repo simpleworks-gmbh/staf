@@ -35,5 +35,14 @@ ENV PATH=${M2_HOME}/bin:${PATH}
 
 # copy work directory to mount point
 COPY . /mnt
+
 # setting working directory
 WORKDIR /mnt
+
+# create directory for test artefacts
+RUN mkdir artefactory
+
+# remove maven repository
+RUN rm -rf ~/.m2
+
+RUN mvn clean install -DskipTests=true dependency:resolve dependency:resolve-plugins
