@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>de.simpleworks.staf</groupId>
 		<artifactId>staf-parent</artifactId> 
-		<version>0.70</version>
+		<version>0.60.14</version>
 	</parent> 
 
 	<artifactId>surefire-maven-plugin</artifactId>
@@ -16,13 +16,12 @@
 	<packaging>maven-plugin</packaging>
  
 	<properties>
-		<project.version>0.70</project.version>
+		<project.version>0.60.14</project.version>
 		<version.maven-plugin-api>3.6.3</version.maven-plugin-api>
 		<version.maven-plugin-annotations>3.6.0</version.maven-plugin-annotations>
 		<version.maven-project>2.2.1</version.maven-project>
 		<version.maven-jar-plugin>3.1.1</version.maven-jar-plugin>
 		<version.maven-plugin-plugin>3.5</version.maven-plugin-plugin>
-		<version.junit4>4.12</version.junit4>
 		<version.maven-surefire-plugin>2.22.2</version.maven-surefire-plugin>
 	</properties>
 
@@ -71,18 +70,13 @@
 			<artifactId>framework</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
+		<dependency> 
 			<groupId>de.simpleworks.staf</groupId>
 			<artifactId>jira-module</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<!--END STAF Dependencies -->
 		<!-- Plugins Dependencies -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${version.junit4}</version>
-		</dependency>
 		<dependency>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-surefire-plugin</artifactId>
