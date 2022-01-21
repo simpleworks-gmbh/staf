@@ -120,7 +120,7 @@ public class APITeststep implements ITeststep {
 						Arrays.asList(assertions).stream().map(a -> a.toString()).collect(Collectors.toList()))));
 				result = false;
 			}
-			
+
 			for (Assertion assertion : currentAssertions) {
 				if (currentAssertions.indexOf(assertion) != currentAssertions.lastIndexOf(assertion)) {
 					APITeststep.logger.error(String

@@ -80,7 +80,7 @@ public abstract class TestCase {
 			throw new InstantiationError(message);
 		}
 	}
-	
+
 	public int getStepsSize() {
 		return TestCaseUtils.fetchStepMethods(this.getClass()).size();
 	}
@@ -326,7 +326,7 @@ public abstract class TestCase {
 	public int getShutdownCounter() {
 		return shutdownCounter;
 	}
-	
+
 	/**
 	 * @return
 	 * @brief method to start other testcases

@@ -202,7 +202,7 @@ public class NotifyTestResultMojo extends MsTeamsMojo {
 					final List<JSONObject> tmp = new ArrayList<>();
 
 					for (int itr = 0; itr < convertedSections.size(); itr += 1) {
-						
+
 						JSONObject convertedSection = convertedSections.get(itr);
 						tmp.add(convertedSection);
 						jsonObject.put("sections", UtilsCollection.toArray(JSONObject.class, tmp));
@@ -210,13 +210,13 @@ public class NotifyTestResultMojo extends MsTeamsMojo {
 
 						final RequestBody body = RequestBody.create(MediaType.parse("application/json"),
 								new JSONObject(jsonarray).toString());
- 						
+
 						/**
-						 * We need to ensure that the payload is less than 28KB 
-						 * We will send 10KB, to be sure to handle further limitations. 
+						 * We need to ensure that the payload is less than 28KB We will send 10KB, to be
+						 * sure to handle further limitations.
 						 * 
 						 * Furthermore we will ensure, that we send data, if we are at the "last index"
-						 * */
+						 */
 						if ((body.contentLength() / 1024) > 10 || (itr == convertedSections.size() - 1)) {
 
 							final Request request = new Request.Builder().url(webhook).post(body).build();
@@ -224,8 +224,7 @@ public class NotifyTestResultMojo extends MsTeamsMojo {
 							final Call call = client.newCall(request);
 
 							try (Response response = call.execute()) {
-								
-								
+
 								Assert.assertTrue(
 										String.format("The response code %s, does not match the expected one %s.",
 												Integer.toString(response.code()), "200"),

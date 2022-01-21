@@ -36,7 +36,7 @@ public abstract class GUITestCase extends TestCase {
 
 	@Inject
 	private WebDriverManagerImpl drivermanagerimpl;
-	
+
 	private int currentStep;
 
 	public GUITestCase(final Module... modules) {
@@ -85,7 +85,7 @@ public abstract class GUITestCase extends TestCase {
 		configureProxy();
 
 		drivermanagerimpl.startProxy();
-		
+
 		currentStep = 0;
 	}
 
@@ -136,7 +136,7 @@ public abstract class GUITestCase extends TestCase {
 		}
 
 		final Method result = methods.get(currentStep++);
-		
+
 		return result;
 	}
 

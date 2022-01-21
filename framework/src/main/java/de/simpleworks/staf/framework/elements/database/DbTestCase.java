@@ -69,7 +69,7 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 	private static final Map<String, String> checkDbResult(final QueuedDbResult result, final Assertion assertion) {
 		return new DbResultAssertionValidator().validateAssertion(result, assertion);
 	}
- 
+
 	@Override
 	public void executeTestStep() throws Exception {
 
