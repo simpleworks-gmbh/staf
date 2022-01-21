@@ -49,10 +49,6 @@ public class UtilsMsTeams {
 
 			for (final StepReport stepreport : report.getSteps()) {
 				final Fact fact = new Fact();
-				fact.setName(stepreport.getDescription());
-				fact.setValue(stepreport.getResult().getValue());
-
-				facts.add(fact);
 
 				if (!Result.SUCCESSFULL.equals(stepreport.getResult())) {
 
@@ -84,6 +80,12 @@ public class UtilsMsTeams {
 						}
 					}
 				}
+
+				fact.setName(stepreport.getDescription());
+				fact.setValue(stepreport.getResult().getValue());
+
+				facts.add(fact);
+
 			}
 
 			result.setFacts(UtilsCollection.toArray(Fact.class, facts));

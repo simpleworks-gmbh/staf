@@ -8,14 +8,13 @@ import de.simpleworks.staf.commons.api.HttpRequest;
 import de.simpleworks.staf.commons.api.HttpResponse;
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.UtilsFormat;
+import de.simpleworks.staf.framework.elements.commons.ATestResult;
 
-public class APITestResult {
+public class APITestResult extends ATestResult {
 	private final HttpRequest request;
 	private final HttpResponse expectedResponse;
 
 	private HttpResponse response;
-	private boolean successfull;
-	private String errormessage;
 	private Map<String, String> extractedValues;
 
 	public APITestResult(final HttpRequest request, final HttpResponse expectedResponse) {
@@ -29,10 +28,6 @@ public class APITestResult {
 
 		this.request = request;
 		this.expectedResponse = expectedResponse;
-	}
-
-	public boolean isSuccessfull() {
-		return successfull;
 	}
 
 	public HttpRequest getRequest() {
@@ -51,24 +46,12 @@ public class APITestResult {
 		return expectedResponse;
 	}
 
-	public void setSuccessfull(final boolean successfull) {
-		this.successfull = successfull;
-	}
-
 	public void setResponse(final HttpResponse response) {
 		this.response = response;
 	}
 
 	public void setExtractedValues(final Map<String, String> extractedValues) {
 		this.extractedValues = extractedValues;
-	}
-
-	public String getErrormessage() {
-		return errormessage;
-	}
-
-	public void setErrormessage(final String errormessage) {
-		this.errormessage = errormessage;
 	}
 
 	@Override
@@ -86,7 +69,7 @@ public class APITestResult {
 
 		return String.format("[%s: %s, %s, %s, %s, %s, %s]", Convert.getClassName(APITestResult.class),
 				UtilsFormat.format("request", request), UtilsFormat.format("expectedResponse", expectedResponse),
-				UtilsFormat.format("response", response), UtilsFormat.format("successfull", successfull),
-				UtilsFormat.format("errormessage", errormessage), UtilsFormat.format("extractedValues", vals));
+				UtilsFormat.format("response", response), UtilsFormat.format("successfull", isSuccessfull()),
+				UtilsFormat.format("errormessage", getErrormessage()), UtilsFormat.format("extractedValues", vals));
 	}
 }
