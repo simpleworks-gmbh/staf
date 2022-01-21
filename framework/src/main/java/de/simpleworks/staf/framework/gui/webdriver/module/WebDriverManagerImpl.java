@@ -84,7 +84,7 @@ public abstract class WebDriverManagerImpl implements WebDriverManager {
 		if (isRunning()) {
 			if (driver != null) {
 				try {
-					driver.close();
+					driver.quit();
 
 					running = false;
 				} catch (final Throwable th) {

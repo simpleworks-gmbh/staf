@@ -4,29 +4,11 @@ import java.util.Map;
 
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.UtilsFormat;
+import de.simpleworks.staf.framework.elements.commons.ATestResult;
 
-public class DbTestResult {
-
-	private boolean successfull;
-	private String errormessage;
+public class DbTestResult extends ATestResult {
 
 	private Map<String, String> extractedValues;
-
-	public boolean isSuccessfull() {
-		return successfull;
-	}
-
-	public void setSuccessfull(final boolean successfull) {
-		this.successfull = successfull;
-	}
-
-	public String getErrormessage() {
-		return errormessage;
-	}
-
-	public void setErrormessage(final String errormessage) {
-		this.errormessage = errormessage;
-	}
 
 	public Map<String, String> getExtractedValues() {
 		return extractedValues;
@@ -38,9 +20,9 @@ public class DbTestResult {
 
 	@Override
 	public String toString() {
-
 		return String.format("[%s: %s, %s]", Convert.getClassName(DbTestResult.class),
-				UtilsFormat.format("successfull", successfull), UtilsFormat.format("errormessage", errormessage),
+				UtilsFormat.format("successfull", isSuccessfull()),
+				UtilsFormat.format("errormessage", getErrormessage()),
 				UtilsFormat.format("extractedValues", extractedValues));
 	}
 }

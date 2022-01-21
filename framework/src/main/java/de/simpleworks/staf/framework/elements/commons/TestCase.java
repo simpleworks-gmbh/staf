@@ -69,7 +69,7 @@ public abstract class TestCase {
 			Guice.createInjector(modules).injectMembers(this);
 
 			// initialize lists of step methods
-			shutdownCounter = TestCaseUtils.fetchStepMethods(this.getClass()).size();
+			shutdownCounter = getStepsSize();
 
 			testcaseReport = new TestcaseReport(getTestCaseName());
 
@@ -79,6 +79,10 @@ public abstract class TestCase {
 			TestCase.logger.error(message, ex);
 			throw new InstantiationError(message);
 		}
+	}
+
+	public int getStepsSize() {
+		return TestCaseUtils.fetchStepMethods(this.getClass()).size();
 	}
 
 	/**
@@ -338,7 +342,7 @@ public abstract class TestCase {
 		testcase.bootstrap();
 
 		try {
-			for (int i = 0; i < testcase.getShutdownCounter(); i++) {
+			for (int i = 0; i < testcase.getStepsSize(); i++) {
 				if (TestCase.logger.isDebugEnabled()) {
 					TestCase.logger.debug(String.format("Execute step %d.", Integer.valueOf(i)));
 				}
@@ -346,10 +350,10 @@ public abstract class TestCase {
 			}
 		} catch (final Throwable ex) {
 			@SuppressWarnings("rawtypes")
-			final Artefact artefact = testcase.createArtefact();
+			final Artefact current = testcase.createArtefact();
 
 			// transmit artefact
-			this.setArtefact(artefact);
+			this.setArtefact(current);
 
 			throw ex;
 		} finally {

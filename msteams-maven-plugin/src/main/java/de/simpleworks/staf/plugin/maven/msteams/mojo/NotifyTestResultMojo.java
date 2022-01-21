@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -79,6 +80,7 @@ public class NotifyTestResultMojo extends MsTeamsMojo {
 		super();
 	}
 
+	@SuppressWarnings("unchecked")
 	private void init() throws Exception {
 
 		resultFile = new File(result);
@@ -167,45 +169,70 @@ public class NotifyTestResultMojo extends MsTeamsMojo {
 						}
 					}
 
-					final List<Section> sections = testresults.stream().map(UtilsMsTeams::convert)
-							.collect(Collectors.toList()).stream().map(section -> {
+					final List<Section> sections = testresults.stream().map(section -> {
+						try {
+							return UtilsMsTeams.convert(section);
+						} catch (Exception ex) {
+							return null;
+						}
+					}).filter(Objects::nonNull).collect(Collectors.toList()).stream().map(section -> {
 
-								try {
-									section.setActivityText(String.format("[Current Test-Execution](%s)", String.format(
-											"%s/plugins/servlet/ac/com.xpandit.plugins.xray/execution-page?ac.testExecIssueKey=%s&ac.testIssueKey=%s",
-											properties.getUrl().toString(), testplans.get(0).getId(),
-											section.getActivityTitle())));
-								} catch (final InvalidConfiguration ex) {
-									NotifyTestResultMojo.logger.error("can't setup link to current test execution.",
-											ex);
-								}
+						try {
+							section.setActivityText(String.format("[Current Test-Execution](%s)", String.format(
+									"%s/plugins/servlet/ac/com.xpandit.plugins.xray/execution-page?ac.testExecIssueKey=%s&ac.testIssueKey=%s",
+									properties.getUrl().toString(), testplans.get(0).getId(),
+									section.getActivityTitle())));
+						} catch (final InvalidConfiguration ex) {
+							NotifyTestResultMojo.logger.error("can't setup link to current test execution.", ex);
+						}
 
-								return section;
-							}).collect(Collectors.toList());
+						return section;
+					}).collect(Collectors.toList());
 
 					final List<JSONObject> convertedSections = sections.stream().map(UtilsMsTeams::convert)
 							.collect(Collectors.toList());
-
-					final JSONObject jsonObject = new JSONObject();
-
-					jsonObject.put("sections", UtilsCollection.toArray(JSONObject.class, convertedSections));
 
 					final String jsonString = UtilsIO.getAllContentFromFile(templateFile);
 
 					@SuppressWarnings("rawtypes")
 					final LinkedHashMap jsonarray = JsonPath.read(jsonString, "$");
-					jsonarray.put("sections", jsonObject.get("sections"));
 
-					final RequestBody body = RequestBody.create(MediaType.parse("application/json"),
-							new JSONObject(jsonarray).toString());
+					final JSONObject jsonObject = new JSONObject();
 
-					final Request request = new Request.Builder().url(webhook).post(body).build();
+					final List<JSONObject> tmp = new ArrayList<>();
 
-					final Call call = client.newCall(request);
+					for (int itr = 0; itr < convertedSections.size(); itr += 1) {
 
-					try (Response response = call.execute()) {
-						Assert.assertTrue(String.format("The response code %s, does not match the expected one %s.",
-								Integer.toString(response.code()), "200"), response.code() == 200);
+						JSONObject convertedSection = convertedSections.get(itr);
+						tmp.add(convertedSection);
+						jsonObject.put("sections", UtilsCollection.toArray(JSONObject.class, tmp));
+						jsonarray.put("sections", jsonObject.get("sections"));
+
+						final RequestBody body = RequestBody.create(MediaType.parse("application/json"),
+								new JSONObject(jsonarray).toString());
+
+						/**
+						 * We need to ensure that the payload is less than 28KB We will send 10KB, to be
+						 * sure to handle further limitations.
+						 * 
+						 * Furthermore we will ensure, that we send data, if we are at the "last index"
+						 */
+						if ((body.contentLength() / 1024) > 10 || (itr == convertedSections.size() - 1)) {
+
+							final Request request = new Request.Builder().url(webhook).post(body).build();
+
+							final Call call = client.newCall(request);
+
+							try (Response response = call.execute()) {
+
+								Assert.assertTrue(
+										String.format("The response code %s, does not match the expected one %s.",
+												Integer.toString(response.code()), "200"),
+										response.code() == 200);
+							}
+
+							tmp.clear();
+						}
 					}
 				}
 			}

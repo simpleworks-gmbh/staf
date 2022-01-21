@@ -1,6 +1,7 @@
 package de.simpleworks.staf.commons.database;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -93,10 +94,23 @@ public class DbTeststep implements ITeststep {
 		}
 
 		if (!Convert.isEmpty(assertions)) {
-			if (Arrays.asList(assertions).stream().filter(a -> a.validate()).collect(Collectors.toList()).isEmpty()) {
+
+			List<Assertion> currentAssertions = Arrays.asList(assertions);
+
+			if (currentAssertions.stream().filter(a -> a.validate()).collect(Collectors.toList()).isEmpty()) {
 				DbTeststep.logger.error(String.format("assertions are invalid [%s].", String.join(",",
 						Arrays.asList(assertions).stream().map(a -> a.toString()).collect(Collectors.toList()))));
 				result = false;
+			}
+
+			for (Assertion assertion : currentAssertions) {
+
+				if (currentAssertions.indexOf(assertion) != currentAssertions.lastIndexOf(assertion)) {
+					DbTeststep.logger.error(String
+							.format("assertion \"%s\" is used at last two times, which is not supported.", assertion));
+					result = false;
+					break;
+				}
 			}
 
 		}

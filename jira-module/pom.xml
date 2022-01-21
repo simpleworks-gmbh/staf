@@ -5,9 +5,9 @@
 	<parent>
 		<groupId>de.simpleworks.staf</groupId>
 		<artifactId>staf-parent</artifactId>
-		<version>0.60.17</version>
+		<version>0.70</version>
 	</parent>
- 
+  
 	<artifactId>jira-module</artifactId>
 	<name>jira-module</name>
  
@@ -26,23 +26,9 @@
 			</releases>
 		</repository>
 	</repositories>
-
-	<pluginRepositories>
-		<pluginRepository>
-			<id>atlassian-public</id>
-			<url>https://m2proxy.atlassian.com/repository/public</url>
-			<releases>
-				<enabled>true</enabled>
-				<checksumPolicy>warn</checksumPolicy>
-			</releases>
-			<snapshots>
-				<checksumPolicy>warn</checksumPolicy>
-			</snapshots>
-		</pluginRepository>
-	</pluginRepositories>
-
+	
 	<properties>
-		<project.version>0.60.17</project.version>
+		<project.version>0.70</project.version>
 		<version.jersey-json>1.5</version.jersey-json>
 		<version.jersey-client>1.5</version.jersey-client>
 		<version.guava>25.0-jre</version.guava>
@@ -50,7 +36,7 @@
 		<version.fugue>2.6.1</version.fugue>
 		<version.jettison>1.0.1</version.jettison>
 		<version.slf4j-simple>1.6.4</version.slf4j-simple>
-		<version.commons-io>2.4</version.commons-io>
+		<version.commons-io>2.7</version.commons-io>
 		<version.junit>5.1.0</version.junit>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -58,7 +44,7 @@
 		<version.maven-compiler-plugin>3.8.0</version.maven-compiler-plugin>
 		<version.maven-jar-plugin>3.1.1</version.maven-jar-plugin>
 	</properties>
-
+ 
 	<dependencies>
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
@@ -117,12 +103,6 @@
 			<artifactId>commons</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<!--END STAF Dependencies -->
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<version>${version.junit}</version>
-			<scope>test</scope>
-		</dependency>
+		<!--END STAF Dependencies --> 
 	</dependencies>
 </project>
