@@ -2,23 +2,21 @@ package de.simpleworks.staf.plugin.maven.testflo.commons;
 
 import java.net.URL;
 import java.util.List;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
-
 import com.atlassian.jira.rest.client.api.IssueRestClient;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.Subtask;
 import com.atlassian.jira.rest.client.api.domain.Transition;
 import com.atlassian.jira.rest.client.api.domain.input.TransitionInput;
-
 import de.simpleworks.staf.commons.elements.TestCase;
 import de.simpleworks.staf.commons.elements.TestPlan;
 import de.simpleworks.staf.commons.enums.Result;
 import de.simpleworks.staf.commons.exceptions.SystemException;
 import de.simpleworks.staf.commons.report.TestcaseReport;
 import de.simpleworks.staf.commons.utils.Convert;
+import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestCaseGeneral;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestCaseStatus;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestCaseTransition;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestPlanStatus;
@@ -26,11 +24,7 @@ import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestPlanTransition
 import okhttp3.OkHttpClient;
 
 public class TestFlo {
-
 	private static final Logger logger = LogManager.getLogger(TestFlo.class);
-
-	private static final String TEMPLATE = "TC Template";
-
 	private final IssueRestClient jira;
 	private final TestFloTms tms;
 
@@ -38,7 +32,6 @@ public class TestFlo {
 		if (jira == null) {
 			throw new IllegalArgumentException("jira can't be null.");
 		}
-
 		this.jira = jira;
 		tms = new TestFloTms(client, urlTms);
 	}
@@ -60,13 +53,10 @@ public class TestFlo {
 	private void transition(final Issue issue, final String expectedStatus, final int transtionId)
 			throws SystemException {
 		Assert.assertNotNull("issue can't be null.", issue);
-
 		if (Convert.isEmpty(expectedStatus)) {
 			throw new IllegalArgumentException("expectedStatus can't be null or empty string.");
 		}
-
 		TestFloUtils.checkStatus(issue, expectedStatus);
-
 		if (TestFlo.logger.isDebugEnabled()) {
 			TestFlo.logger.debug(String.format("issue '%s': process transition: '%d'.", issue.getKey(),
 					Integer.valueOf(transtionId)));
@@ -86,7 +76,6 @@ public class TestFlo {
 			throws SystemException {
 		Assert.assertNotNull("expectedStatus can't be null.", expectedStatus);
 		Assert.assertNotNull("transition can't be null.", transition);
-
 		transition(issue, expectedStatus.getTestFloName(), transition.getTestFloId());
 	}
 
@@ -95,7 +84,6 @@ public class TestFlo {
 		Assert.assertNotNull("testPlan can't be null.", testPlan);
 		Assert.assertNotNull("expectedStatus can't be null.", expectedStatus);
 		Assert.assertNotNull("transition can't be null.", transition);
-
 		final Issue issue = jira.getIssue(testPlan.getId()).claim();
 		Assert.assertNotNull(String.format("can't get issue for: '%s'.", testPlan.getId()), issue);
 		transition(issue, expectedStatus, transition);
@@ -105,7 +93,6 @@ public class TestFlo {
 			throws SystemException {
 		Assert.assertNotNull("expectedStatus can't be null.", expectedStatus);
 		Assert.assertNotNull("transition can't be null.", transition);
-
 		transition(issue, expectedStatus.getTestFloName(), transition.getTestFloId());
 	}
 
@@ -114,10 +101,8 @@ public class TestFlo {
 		Assert.assertNotNull("subtask can't be null.", subtask);
 		Assert.assertNotNull("expectedStatus can't be null.", expectedStatus);
 		Assert.assertNotNull("transition can't be null.", transition);
-
 		final Issue issue = jira.getIssue(subtask.getIssueKey()).claim();
 		Assert.assertNotNull(String.format("can't get issue for: '%s'.", subtask.getIssueKey()), issue);
-
 		transition(issue, expectedStatus.getTestFloName(), transition.getTestFloId());
 	}
 
@@ -125,30 +110,23 @@ public class TestFlo {
 		if (TestFlo.logger.isDebugEnabled()) {
 			TestFlo.logger.debug(String.format("read test case data for key: '%s'.", subtask.getIssueKey()));
 		}
-
 		final Issue result = jira.getIssue(subtask.getIssueKey()).claim();
 		Assert.assertNotNull(String.format("can't get issue for: '%s'.", subtask.getIssueKey()), result);
-
 		final TestCase testCase = new TestCase();
-
 		testCase.setId(result.getKey());
-		final String templateId = TestFloUtils.getField(result, TestFlo.TEMPLATE);
+		final String templateId = TestFloUtils.getField(result, TestCaseGeneral.TEMPLATE.getTestFloName());
 		Assert.assertFalse(String.format("test case '%s': can't get templateId (field '%s' has empty value).",
-				result.getKey(), TestFlo.TEMPLATE), Convert.isEmpty(templateId));
+				result.getKey(), TestCaseGeneral.TEMPLATE), Convert.isEmpty(templateId));
 		testCase.setTemplateId(templateId);
-
 		if (TestFlo.logger.isDebugEnabled()) {
 			TestFlo.logger.debug(String.format("test case '%s' based on template: '%s'.", result.getKey(), templateId));
 		}
-
 		TestFloUtils.readSteps(result, testCase);
-
 		if (TestFlo.logger.isDebugEnabled()) {
 			TestFlo.logger.debug(String.format("add test case id: '%s', templateId: '%s' to test plan '%s'.",
 					testCase.getId(), testCase.getTemplateId(), testPlan.getId()));
 		}
 		testPlan.add(testCase);
-
 		return result;
 	}
 
@@ -156,16 +134,12 @@ public class TestFlo {
 		if (Convert.isEmpty(testPlanId)) {
 			throw new IllegalArgumentException("testPlanId can't be null or empty string.");
 		}
-
 		if (TestFlo.logger.isInfoEnabled()) {
 			TestFlo.logger.info(String.format("create next iteration for test plan '%s'.", testPlanId));
 		}
-
 		final Issue issue = jira.getIssue(testPlanId).claim();
 		Assert.assertNotNull(String.format("can't get issue for: '%s'.", testPlanId), issue);
-
 		TestFloUtils.checkTestPlanStatus(issue, TestPlanStatus.Open, null);
-
 		tms.moveTestPlanToNextIteration(issue);
 	}
 
@@ -173,23 +147,17 @@ public class TestFlo {
 		if (Convert.isEmpty(testCaseId)) {
 			throw new IllegalArgumentException("testCaseId can't be null or empty string.");
 		}
-
 		if (TestFlo.logger.isInfoEnabled()) {
 			TestFlo.logger.info(String.format("read test case '%s'.", testCaseId));
 		}
-
 		final TestCase testcase = new TestCase();
 		testcase.setId(testCaseId);
-
 		if (TestFlo.logger.isDebugEnabled()) {
 			TestFlo.logger.debug(String.format("get issue for testCaseId: '%s'.", testCaseId));
 		}
-
 		final Issue issue = jira.getIssue(testCaseId).claim();
 		Assert.assertNotNull(String.format("can't get issue for: '%s'.", testCaseId), issue);
-
 		TestFloUtils.readSteps(issue, testcase);
-
 		return testcase;
 	}
 
@@ -197,28 +165,21 @@ public class TestFlo {
 		if (Convert.isEmpty(testPlanId)) {
 			throw new IllegalArgumentException("testPlanId can't be null or empty string.");
 		}
-
 		if (TestFlo.logger.isInfoEnabled()) {
 			TestFlo.logger.info(String.format("read test plan '%s'.", testPlanId));
 		}
-
 		final TestPlan result = new TestPlan();
 		result.setId(testPlanId);
-
 		if (TestFlo.logger.isDebugEnabled()) {
 			TestFlo.logger.debug(String.format("get issue for testPlanId: '%s'.", testPlanId));
 		}
-
 		final Issue issue = jira.getIssue(testPlanId).claim();
 		Assert.assertNotNull(String.format("can't get issue for: '%s'.", testPlanId), issue);
-
 		TestFloUtils.checkTestPlanStatus(issue, TestPlanStatus.Open, TestCaseStatus.Open);
-
 		for (final Subtask subtask : issue.getSubtasks()) {
 			Assert.assertNotNull("subtask can't be null.", subtask);
 			readTestCase(subtask, result);
 		}
-
 		return result;
 	}
 
@@ -226,25 +187,19 @@ public class TestFlo {
 		if (testPlan == null) {
 			throw new IllegalArgumentException("testPlan can't be null or empty string.");
 		}
-
 		if (TestFlo.logger.isInfoEnabled()) {
 			TestFlo.logger.info(String.format("start test plan '%s'.", testPlan.getId()));
 		}
-
 		final Issue issue = jira.getIssue(testPlan.getId()).claim();
 		Assert.assertNotNull(String.format("can't get issue for: '%s'.", testPlan.getId()), issue);
-
 		TestFloUtils.checkTestPlanStatus(issue, TestPlanStatus.Open, TestCaseStatus.Open);
-
 		final StringBuilder builder = new StringBuilder();
-
 		try {
 			transition(issue, TestPlanStatus.Open, TestPlanTransition.Start);
 		} catch (final SystemException ex) {
 			TestFlo.logger.error("error on transition for test plan.", ex);
 			builder.append(", '").append(ex.getMessage()).append("'");
 		}
-
 		for (final Subtask subtask : issue.getSubtasks()) {
 			try {
 				transition(subtask, TestCaseStatus.Open, TestCaseTransition.Test);
@@ -253,7 +208,6 @@ public class TestFlo {
 				builder.append(", '").append(ex.getMessage()).append("'");
 			}
 		}
-
 		final String errors = builder.toString();
 		if (!Convert.isEmpty(errors)) {
 			throw new SystemException(
@@ -265,16 +219,13 @@ public class TestFlo {
 		if (Convert.isEmpty(testPlanId)) {
 			throw new IllegalArgumentException("testPlanId can't be null or empty string.");
 		}
-
 		final Issue issue = jira.getIssue(testPlanId).claim();
 		Assert.assertNotNull(String.format("can't get issue for: '%s'.", testPlanId), issue);
-
 		try {
 			transition(issue, TestPlanStatus.InProgress, TestPlanTransition.Stop);
 		} catch (final SystemException ex) {
 			TestFlo.logger.info(String.format("ignore error '%s'.", ex.getMessage()));
 		}
-
 		for (final Subtask subtask : issue.getSubtasks()) {
 			try {
 				transition(subtask, TestCaseStatus.InProgress, TestCaseTransition.Open);
@@ -288,17 +239,14 @@ public class TestFlo {
 			throws SystemException {
 		final Issue issue = jira.getIssue(testCase.getId()).claim();
 		Assert.assertNotNull(String.format("can't get issue for: '%s'.", testCase.getId()), issue);
-
 		for (final StepResult stepResult : stepResults) {
 			tms.updateTestStep(issue, stepResult);
 		}
-
 		return issue;
 	}
 
 	private void updateTestCaseStatus(final Issue issue, final Result result) throws SystemException {
 		TestCaseTransition transition;
-
 		switch (result) {
 		case SUCCESSFULL:
 			transition = TestCaseTransition.Pass;
@@ -309,7 +257,6 @@ public class TestFlo {
 		default:
 			throw new SystemException(String.format("unsuported result: '%s'", result));
 		}
-
 		transition(issue, TestCaseStatus.InProgress, transition);
 	}
 
@@ -317,19 +264,14 @@ public class TestFlo {
 		if (testCase == null) {
 			throw new IllegalArgumentException("testCase can't be null.");
 		}
-
 		if (report == null) {
 			throw new IllegalArgumentException("report can't be null.");
 		}
-
 		if (TestFlo.logger.isDebugEnabled()) {
 			TestFlo.logger.debug(String.format("update test case: '%s' by report: '%s'.", testCase, report.getId()));
 		}
-
 		final List<StepResult> stepResults = TestFloUtils.prepareStepResult(testCase, report);
-
 		final Issue issue = updateStepResults(testCase, stepResults);
-
 		updateTestCaseStatus(issue, report.getResult());
 	}
 }
