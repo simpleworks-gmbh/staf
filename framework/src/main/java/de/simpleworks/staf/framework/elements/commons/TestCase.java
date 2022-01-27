@@ -1,5 +1,6 @@
 package de.simpleworks.staf.framework.elements.commons;
 
+import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Guice;
 import com.google.inject.Module;
 
+import de.simpleworks.staf.commons.annotation.Step;
 import de.simpleworks.staf.commons.annotation.Testcase;
 import de.simpleworks.staf.commons.enums.Result;
 import de.simpleworks.staf.commons.exceptions.SystemException;
@@ -342,12 +344,21 @@ public abstract class TestCase {
 		testcase.bootstrap();
 
 		try {
-			for (int i = 0; i < testcase.getStepsSize(); i++) {
+
+			for (final Method stepMethod : TestCaseUtils.fetchStepMethods(this.getClass())) {
+
+				final Step step = stepMethod.getAnnotation(Step.class);
+
+				if (step == null) {
+					continue;
+				}
+
 				if (TestCase.logger.isDebugEnabled()) {
-					TestCase.logger.debug(String.format("Execute step %d.", Integer.valueOf(i)));
+					TestCase.logger.debug(String.format("Execute step \"%s\".", step.description()));
 				}
 				testcase.executeTestStep();
 			}
+
 		} catch (final Throwable ex) {
 			@SuppressWarnings("rawtypes")
 			final Artefact current = testcase.createArtefact();
