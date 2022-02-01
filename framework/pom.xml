@@ -7,14 +7,14 @@
 	<parent>
 		<groupId>de.simpleworks.staf</groupId>
 		<artifactId>staf-parent</artifactId>
-		<version>0.70</version>
+		<version>0.70.3</version>
 	</parent>
  
 	<artifactId>framework</artifactId>
 	<name>framework</name>
   
 	<properties>
-		<project.version>0.70</project.version>
+		<project.version>0.70.3</project.version>
 		<version.gson>2.8.2</version.gson>
 		<version.com.squareup.okhttp3>3.3.1</version.com.squareup.okhttp3>
 		<version.net.sourceforge.htmlcleaner.htmlcleaner>2.24</version.net.sourceforge.htmlcleaner.htmlcleaner>
