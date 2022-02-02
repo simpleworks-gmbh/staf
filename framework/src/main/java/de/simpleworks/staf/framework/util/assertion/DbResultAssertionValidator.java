@@ -46,7 +46,8 @@ public class DbResultAssertionValidator extends AssertionUtils<QueuedDbResult> {
 				content = map.get(assertionAtribute);
 
 				if (content == null) {
-					throw new RuntimeException("Can't validate assertion. The fetched value was null.");
+					throw new RuntimeException(String
+							.format("Can't validate assertion '%s'. The fetched value was null.", assertion.getId()));
 				}
 
 				if (content.equals(assertionValue)) {
