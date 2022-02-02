@@ -325,8 +325,10 @@ public class TestFloUtils {
 		}
 
 		if (!map.isEmpty()) {
-			throw new SystemException(String.format("test case '%s', report '%s' have different steps.",
-					testCase.getId(), report.getId()));
+			if (TestFloUtils.logger.isDebugEnabled()) {
+				TestFloUtils.logger.debug(String.format("test case '%s', report '%s' have different steps.",
+						testCase.getId(), report.getId()));
+			}
 		}
 
 		return result;
