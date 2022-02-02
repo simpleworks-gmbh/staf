@@ -363,7 +363,10 @@ All files, ending with `.properties` will be read as properties.
 The argument `property.file.root` describes the root directory, where all files 
 ending with `.properties` will be searched in all (sub-) directories, and loaded.
 
+One can also put several directories in a "comma separated list"
 
+### `available properties`
+#
 - `testcase.header_name`: (String) value needed to identify Testcase Exections, *Default value* is  `TestcaseExecution`
 
 - `testcase.create_artefact`: (String) value of any CreateArtefactEnum *Default value* is `ON_FAILURE`
