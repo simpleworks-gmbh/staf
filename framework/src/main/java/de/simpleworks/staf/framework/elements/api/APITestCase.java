@@ -45,6 +45,10 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 		super(resource, ENVIRONMENT_VARIABLES_NAME, new MapperAPITeststep(), modules);
 	}
 
+	private static final Map<String, String> checkHeader(final HttpResponse response, final Assertion assertion) {
+		return new XPATHAssertionValidator().validateAssertion(response, assertion);
+	}
+
 	private static final Map<String, String> checkXpath(final HttpResponse response, final Assertion assertion) {
 		return new XPATHAssertionValidator().validateAssertion(response, assertion);
 	}
@@ -79,6 +83,10 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 			final ValidateMethodEnum method = assertion.getValidateMethod();
 			final Map<String, String> results;
 			switch (method) {
+
+			case HEADER:
+				results = APITestCase.checkHeader(httpResponse, assertion);
+				break;
 			case XPATH:
 				results = APITestCase.checkXpath(httpResponse, assertion);
 				break;
