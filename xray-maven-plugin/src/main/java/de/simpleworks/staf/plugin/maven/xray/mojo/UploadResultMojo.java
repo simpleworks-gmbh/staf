@@ -176,8 +176,9 @@ public class UploadResultMojo extends XrayMojo {
 				final String stepId = stepObject.get("id").getAsString();
 
 				if (stepReport.getError() != null) {
-					final String error = stepReport.getError().getMessage().toString().replaceAll("\\\"",
+					String error = stepReport.getError().getMessage().toString().replaceAll("\\\"",
 							Convert.EMPTY_STRING);
+					error = error.replace("\\", "\\\\");
 					errorMessage = error.substring(0, Math.min(500, error.length() - 1));
 					errorMessage = errorMessage.replaceAll("\n", Convert.EMPTY_STRING);
 				}
