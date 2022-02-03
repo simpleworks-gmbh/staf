@@ -27,6 +27,7 @@ import de.simpleworks.staf.framework.elements.commons.TemplateTestCase;
 import de.simpleworks.staf.framework.util.AssertionUtils;
 import de.simpleworks.staf.framework.util.HttpResponseUtils;
 import de.simpleworks.staf.framework.util.assertion.File_ComparerAssertionValidator;
+import de.simpleworks.staf.framework.util.assertion.HeaderAssertionValidator;
 import de.simpleworks.staf.framework.util.assertion.JSONPATHAssertionValidator;
 import de.simpleworks.staf.framework.util.assertion.XPATHAssertionValidator;
 import net.lightbody.bmp.BrowserMobProxyServer;
@@ -43,6 +44,10 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 
 	protected APITestCase(final String resource, final Module... modules) throws SystemException {
 		super(resource, ENVIRONMENT_VARIABLES_NAME, new MapperAPITeststep(), modules);
+	}
+
+	private static final Map<String, String> checkHeader(final HttpResponse response, final Assertion assertion) {
+		return new HeaderAssertionValidator().validateAssertion(response, assertion);
 	}
 
 	private static final Map<String, String> checkXpath(final HttpResponse response, final Assertion assertion) {
@@ -79,6 +84,9 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 			final ValidateMethodEnum method = assertion.getValidateMethod();
 			final Map<String, String> results;
 			switch (method) {
+			case HEADER:
+				results = APITestCase.checkHeader(httpResponse, assertion);
+				break;
 			case XPATH:
 				results = APITestCase.checkXpath(httpResponse, assertion);
 				break;
