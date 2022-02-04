@@ -50,21 +50,24 @@ public abstract class PropertiesReader {
 	 * @throws SystemException
 	 */
 	private List<File> loadFiles() throws SystemException {
-		final List<File> files = new ArrayList<>();
+		final List<File> result = new ArrayList<>();
 
 		final String fileName = getName();
 		final String root = System.getProperty(PropertiesConsts.PROPERTY_FILE_ROOT, "src/main/resources");
-		if (PropertiesReader.logger.isDebugEnabled()) {
-			PropertiesReader.logger.debug(String.format("search for files in: '%s'.", root));
+
+		for (String filePath : Arrays.asList(root.split(","))) {
+			if (PropertiesReader.logger.isDebugEnabled()) {
+				PropertiesReader.logger.debug(String.format("search for files in: '%s'.", filePath));
+			}
+
+			UtilsIO.listFiles(new File(filePath), fileName).forEach(file -> result.add(file));
+			if (Convert.isEmpty(result)) {
+				throw new SystemException(
+						String.format("Cannot configure properties files, identified by '%s'.", getName()));
+			}
 		}
 
-		UtilsIO.listFiles(new File(root), fileName).forEach(file -> files.add(file));
-		if (Convert.isEmpty(files)) {
-			throw new SystemException(
-					String.format("Cannot configure properties files, identified by '%s'.", getName()));
-		}
-
-		return files;
+		return result;
 	}
 
 	private static Properties loadProperties(final File file) throws SystemException {
