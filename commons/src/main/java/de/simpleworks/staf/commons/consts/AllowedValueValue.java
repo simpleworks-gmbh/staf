@@ -3,6 +3,7 @@ package de.simpleworks.staf.commons.consts;
 public class AllowedValueValue {
 	public final static String UNKNOWN = "UNKNOWN";
 	public static final String NOT = "NOT";
+	public static final String EVERYTHING = "EVERYTHING";
 	public final static String NON_EMPTY = "NON_EMPTY";
 	public static final String CONTAINS_VALUE = "CONTAINS_VALUE";
 	public static final String ANY_ORDER = "ANY_ORDER";
