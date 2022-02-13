@@ -142,10 +142,18 @@ public class Xray {
 				}
 			}
 
-			Assert.assertEquals(200, response.code());
-
 			try (ResponseBody bodyAsStream = response.body()) {
 				final String bodyAsString = bodyAsStream.string();
+
+				if (logger.isTraceEnabled()) {
+					Assert.assertEquals(
+							String.format("Expected 200, but was %d, message: '%s', payload: '%s'.",
+									Integer.valueOf(response.code()), bodyAsString, payload.toString()),
+							200, response.code());
+				} else {
+					Assert.assertEquals(String.format("Expected 200, but was %d, message: '%s'.",
+							Integer.valueOf(response.code()), bodyAsString), 200, response.code());
+				}
 				Assert.assertFalse(Convert.isEmpty(bodyAsString));
 				responseAsJson = new JsonParser().parse(bodyAsString).getAsJsonObject();
 			}

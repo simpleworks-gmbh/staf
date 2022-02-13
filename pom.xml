@@ -6,7 +6,7 @@
 	<description>Simpleworks Test Automation Framework</description>
 	<groupId>de.simpleworks.staf</groupId>
 	<artifactId>staf-parent</artifactId>
-	<version>0.70.6</version>
+	<version>0.70.7</version>
 	<packaging>pom</packaging>
 	<name>staf-parent</name>
 	<url>https://github.com/simpleworks-gmbh/staf</url>
@@ -48,10 +48,9 @@
 		<version.maven-gpg-plugin>1.6</version.maven-gpg-plugin>
 		<version.guice>4.0</version.guice>
 		<version.gson>2.8.2</version.gson>
-		<version.junit4>4.13.1</version.junit4>
 		<version.com.jayway.jsonpath.json-path>2.6.0</version.com.jayway.jsonpath.json-path>
-		<version.log4j>2.17.1</version.log4j>
-		<version.junit-jupiter-engine>5.4.0</version.junit-jupiter-engine> 
+		<version.log4j>2.17.0</version.log4j>
+		<version.junit>5.4.0</version.junit>
 	</properties>
 	<profiles>
 		<profile>
@@ -126,14 +125,8 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<version>${version.junit-jupiter-engine}</version>
+			<version>${version.junit}</version>
 			<scope>test</scope>
-		</dependency>
-		
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${version.junit4}</version>
 		</dependency>
 	</dependencies>
 	<build>

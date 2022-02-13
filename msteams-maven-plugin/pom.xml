@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>de.simpleworks.staf</groupId>
 		<artifactId>staf-parent</artifactId>
-		<version>0.70.6</version>
+		<version>0.70.7</version>
 	</parent>
  
 	<artifactId>msteams-maven-plugin</artifactId>
@@ -16,7 +16,7 @@
 	<packaging>maven-plugin</packaging>
 
 	<properties> 
-		<project.version>0.70.6</project.version>
+		<project.version>0.70.7</project.version>
 		<version.maven-plugin-api>3.6.3</version.maven-plugin-api>
 		<version.maven-plugin-annotations>3.6.0</version.maven-plugin-annotations>
 		<version.maven-project>2.2.1</version.maven-project>
@@ -26,7 +26,8 @@
 		<version.maven-compiler-plugin>3.8.0</version.maven-compiler-plugin>
 		<version.maven-jar-plugin>3.1.1</version.maven-jar-plugin>
 		<version.maven-plugin-plugin>3.5</version.maven-plugin-plugin>
-		<version.com.jayway.jsonpath>2.4.0</version.com.jayway.jsonpath> 
+		<version.com.jayway.jsonpath>2.4.0</version.com.jayway.jsonpath>
+		<version.junit4>4.12</version.junit4>
 	</properties>
 	<build>
 		<pluginManagement>
@@ -71,7 +72,12 @@
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>
 			<version>${version.com.jayway.jsonpath}</version>
-		</dependency> 
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${version.junit4}</version>
+		</dependency>
 		<!--START STAF Dependencies -->
 		<dependency>
 			<groupId>de.simpleworks.staf</groupId>
