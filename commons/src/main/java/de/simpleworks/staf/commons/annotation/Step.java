@@ -10,5 +10,7 @@ import java.lang.annotation.Target;
 public @interface Step {
 	int order() default 0;
 
+	boolean manual() default false;
+
 	String description();
 }

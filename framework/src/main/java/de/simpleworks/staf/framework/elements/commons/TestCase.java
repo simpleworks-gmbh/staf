@@ -1,18 +1,17 @@
 package de.simpleworks.staf.framework.elements.commons;
 
+import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.google.inject.Guice;
 import com.google.inject.Module;
-
+import de.simpleworks.staf.commons.annotation.Step;
 import de.simpleworks.staf.commons.annotation.Testcase;
 import de.simpleworks.staf.commons.enums.Result;
 import de.simpleworks.staf.commons.exceptions.SystemException;
@@ -30,23 +29,17 @@ import de.simpleworks.staf.framework.util.TestCaseUtils;
 import net.lightbody.bmp.BrowserMobProxyServer;
 
 public abstract class TestCase {
-
 	private static final Logger logger = LoggerFactory.getLogger(TestCase.class);
 	private static final TestCaseProperties testcaseProperties = TestCaseProperties.getInstance();
-
 	private final Semaphore startLock = new Semaphore(1);
 	private final JsonReporter reporter = new JsonReporter();
-
 	private boolean isRunning = false;
 	private boolean isFailed = false;
 	private String nuance = Convert.EMPTY_STRING;
-
 	private final TestcaseReport testcaseReport;
 	private int shutdownCounter;
-
 	@SuppressWarnings("rawtypes")
 	private Artefact artefact;
-
 	private final Map<String, Map<String, String>> extractedValues;
 
 	public TestCase(final Module... modules) {
@@ -55,24 +48,18 @@ public abstract class TestCase {
 				TestCase.logger.debug(String.format("No Custom-Modules will be injected."));
 			}
 		}
-
 		if (this.getClass().getAnnotation(Testcase.class) == null) {
 			final String msg = String.format("'%s' does not have the annotation '%s'.", this.getClass().getName(),
 					Testcase.class.getName());
 			TestCase.logger.error(msg);
 			throw new InstantiationError(msg);
 		}
-
 		try {
-
 			// load guice models
 			Guice.createInjector(modules).injectMembers(this);
-
 			// initialize lists of step methods
 			shutdownCounter = getStepsSize();
-
 			testcaseReport = new TestcaseReport(getTestCaseName());
-
 			extractedValues = new HashMap<>();
 		} catch (final Exception ex) {
 			final String message = String.format("Cannot initiate TestCase of Type '%s'.", this.getClass().getName());
@@ -105,7 +92,6 @@ public abstract class TestCase {
 		} finally {
 			startLock.release();
 		}
-
 		return isRunning;
 	}
 
@@ -113,34 +99,27 @@ public abstract class TestCase {
 		if (stepResult == null) {
 			throw new IllegalArgumentException("stepResult can't be null.");
 		}
-
 		final CreateArtefactEnum createartefact = TestCase.testcaseProperties.getCreateArtefactOn();
 		if (TestCase.logger.isDebugEnabled()) {
 			TestCase.logger.debug(String.format("Create Artefact on '%s'.", createartefact.getValue()));
 		}
-
 		if (CreateArtefactEnum.EVERYTIME.equals(createartefact)) {
 			return true;
 		}
-
 		boolean result = false;
-
 		switch (stepResult) {
 		case FAILURE:
 			result = CreateArtefactEnum.ON_FAILURE.equals(createartefact);
 			break;
-
 		case SUCCESSFULL:
 			result = CreateArtefactEnum.ON_SUCCESS.equals(createartefact);
 			break;
-
 		default:
 			if (TestCase.logger.isDebugEnabled()) {
 				TestCase.logger.debug(String.format("No action defined for '%s' will return '%s'.",
 						stepResult.getValue(), Boolean.valueOf(result)));
 			}
 		}
-
 		return result;
 	}
 
@@ -158,7 +137,6 @@ public abstract class TestCase {
 				if (!TestCase.shouldArtefactBeCreated(stepReport.getResult())) {
 					stepReport.setArtefact(null);
 				}
-
 				testcaseReport.setStopTime(stepReport.getStopTime());
 				testcaseReport.addStep(stepReport);
 			} catch (final SystemException ex) {
@@ -166,21 +144,17 @@ public abstract class TestCase {
 						.error(String.format("Cannot add step '%s' to test report.", stepReport.getDescription()), ex);
 			}
 		}
-
 		shutdownCounter -= 1;
 		if (shutdownCounter <= 0) {
 			isRunning = false;
 		}
-
 		return isRunning;
 	}
 
 	protected String createXRequestId(final String description) {
-
 		if (Convert.isEmpty(description)) {
 			throw new IllegalArgumentException("description can't be null or empty string.");
 		}
-
 		final Date date = UtilsDate.getCurrentDateTime();
 		final String result = String.format("Testcase_%s-Step_%s-Date_%s-Timestamp_%s", getTestCaseName(), description,
 				UtilsDate.getCurrentTimeFormatted(date), Long.valueOf(UtilsDate.getCurrentTimeInMilliSeonds(date)));
@@ -193,24 +167,19 @@ public abstract class TestCase {
 					APITestCase.class.getName()));
 			return;
 		}
-
 		final BrowserMobProxyServer proxy = getProxy();
 		if (proxy == null) {
 			if (TestCase.logger.isDebugEnabled()) {
 				TestCase.logger.debug("steps will not be marked, because the proxy is null.");
 			}
-
 			return;
 		}
-
 		// check if random nuance was already created
 		if (Convert.isEmpty(nuance)) {
 			nuance = UUID.randomUUID().toString();
 		}
-
 		proxy.removeHeader(TestCase.testcaseProperties.getTestStepHeaderName());
 		proxy.addHeader(TestCase.testcaseProperties.getTestStepHeaderName(), createXRequestId(mark));
-
 		proxy.addHeader("Cookie", String.format("%s_%s=%s", TestCase.testcaseProperties.getTestCaseHeaderName(),
 				getTestCaseName(), nuance));
 	}
@@ -227,7 +196,6 @@ public abstract class TestCase {
 
 	public void writeDownResults() {
 		final TestcaseReport report = getTestcaseReport();
-
 		if (report == null) {
 			if (TestCase.logger.isDebugEnabled()) {
 				TestCase.logger.debug("report can't be null, no report will be written.");
@@ -238,14 +206,10 @@ public abstract class TestCase {
 	}
 
 	public void setExtractedValues(final Map<String, Map<String, String>> map) {
-
 		for (final String key : map.keySet()) {
 			final Map<String, String> values = map.get(key);
-
 			if (extractedValues.containsKey(key)) {
-
 				final Map<String, String> tmpValues = extractedValues.get(key);
-
 				for (final String tmpKey : tmpValues.keySet()) {
 					// values, only adds keys from extractedValues that do not exist.
 					if (!values.containsKey(tmpKey)) {
@@ -273,32 +237,26 @@ public abstract class TestCase {
 	/**
 	 * @brief getters
 	 */
-
 	public TestcaseReport getTestcaseReport() {
 		return testcaseReport;
 	}
 
 	public final String getTestCaseName() {
 		final Testcase testcase = this.getClass().getAnnotation(Testcase.class);
-
 		if (testcase == null) {
 			if (TestCase.logger.isWarnEnabled()) {
 				TestCase.logger
 						.warn(String.format("testcase annotation was not set, name is set to '%s'.", Convert.UNKNOWN));
 			}
-
 			return Convert.UNKNOWN;
 		}
-
 		final String id = testcase.id();
 		if (Convert.isEmpty(id)) {
 			if (TestCase.logger.isWarnEnabled()) {
 				TestCase.logger.warn(String.format("testcase id was not set, name is set to '%s'.", Convert.UNKNOWN));
 			}
-
 			return Convert.UNKNOWN;
 		}
-
 		return id;
 	}
 
@@ -334,32 +292,36 @@ public abstract class TestCase {
 	 *         testcase
 	 */
 	protected Map<String, Map<String, String>> executeTestcase(final TestCase testcase) throws Exception {
-
 		if (testcase == null) {
 			throw new IllegalArgumentException("testcase can't be null.");
 		}
-
 		testcase.bootstrap();
-
 		try {
-			for (int i = 0; i < testcase.getStepsSize(); i++) {
+			for (Method stepmethod : TestCaseUtils.fetchStepMethods(this.getClass())) {
+				if (stepmethod == null) {
+					TestCase.logger.error("Method '%s' can't be null.");
+					break;
+				}
+				final Step step = stepmethod.getAnnotation(Step.class);
+				if (step == null) {
+					TestCase.logger.error(String.format("Method '%s' is not annotated by a 'Step' annotation.",
+							stepmethod.getName()));
+					break;
+				}
 				if (TestCase.logger.isDebugEnabled()) {
-					TestCase.logger.debug(String.format("Execute step %d.", Integer.valueOf(i)));
+					TestCase.logger.debug(String.format("Execute step '%s'.", step.description()));
 				}
 				testcase.executeTestStep();
 			}
 		} catch (final Throwable ex) {
 			@SuppressWarnings("rawtypes")
 			final Artefact current = testcase.createArtefact();
-
 			// transmit artefact
 			this.setArtefact(current);
-
 			throw ex;
 		} finally {
 			testcase.shutdown();
 		}
-
 		return testcase.getExtractedValues();
 	}
 }
