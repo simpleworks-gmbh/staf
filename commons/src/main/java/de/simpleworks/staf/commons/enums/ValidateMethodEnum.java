@@ -9,8 +9,9 @@ import de.simpleworks.staf.commons.utils.UtilsCollection;
 import de.simpleworks.staf.commons.utils.UtilsFormat;
 
 public enum ValidateMethodEnum implements IEnum {
-	UNKNOWN("unkown", ValidateMethodValue.UNKNOWN), XPATH("XPATH", ValidateMethodValue.XPATH),
-	JSONPATH("JSONPATH", ValidateMethodValue.JSONPATH), DB_RESULT("DB_RESULT", ValidateMethodValue.DB_RESULT),
+	UNKNOWN("unkown", ValidateMethodValue.UNKNOWN), HEADER("HEADER", ValidateMethodValue.HEADER),
+	XPATH("XPATH", ValidateMethodValue.XPATH), JSONPATH("JSONPATH", ValidateMethodValue.JSONPATH),
+	DB_RESULT("DB_RESULT", ValidateMethodValue.DB_RESULT),
 	FILE_COMPARER("FILE_COMPARER", ValidateMethodValue.FILE_COMPARER);
 
 	final private String name;
