@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.logging.log4j.LogManager;
@@ -57,7 +58,19 @@ public class DbConnectionPool {
 			throw new IllegalArgumentException("dbname can't be null or empty String.");
 		}
 
-		final Connection result = pool.remove(dbanme);
+		if (pool.getOrDefault(dbanme, null) == null) {
+
+			final String connectionPoolContents = pool.keySet().stream().map(key -> key + "=" + pool.get(key))
+					.collect(Collectors.joining(", ", "{", "}"));
+
+			final String msg = String.format(
+					"can't close connection to database \"%s\", because it does not exist in connection pool \"%s\".",
+					dbanme, connectionPoolContents);
+			DbConnectionPool.logger.error(msg);
+			return false;
+		}
+
+		final Connection result = pool.get(dbanme);
 		try {
 			result.close();
 		} catch (final SQLException ex) {

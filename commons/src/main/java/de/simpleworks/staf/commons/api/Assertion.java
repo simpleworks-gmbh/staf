@@ -16,6 +16,7 @@ public class Assertion implements IPojo {
 	private String id;
 	private String xpath;
 	private String jsonpath;
+	private String headername;
 	private String attribute;
 	private AllowedValueEnum allowedValue;
 	private ValidateMethodEnum validateMethod;
@@ -25,6 +26,7 @@ public class Assertion implements IPojo {
 		id = Convert.EMPTY_STRING;
 		xpath = Convert.EMPTY_STRING;
 		jsonpath = Convert.EMPTY_STRING;
+		headername = Convert.EMPTY_STRING;
 		attribute = Convert.EMPTY_STRING;
 		allowedValue = AllowedValueEnum.NON_EMPTY;
 		validateMethod = ValidateMethodEnum.UNKNOWN;
@@ -41,6 +43,10 @@ public class Assertion implements IPojo {
 
 	public String getJsonpath() {
 		return jsonpath;
+	}
+
+	public String getHeadername() {
+		return headername;
 	}
 
 	public String getAttribute() {
@@ -69,6 +75,10 @@ public class Assertion implements IPojo {
 
 	public void setJsonpath(final String jsonpath) {
 		this.jsonpath = jsonpath;
+	}
+
+	public void setHeadername(String headername) {
+		this.headername = headername;
 	}
 
 	public void setAttribute(final String attribute) {
@@ -125,6 +135,12 @@ public class Assertion implements IPojo {
 					result = false;
 				}
 				break;
+			case HEADER:
+				if (Convert.isEmpty(headername)) {
+					Assertion.logger.error("headername can't be null or empty string.");
+					result = false;
+				}
+				break;
 			case FILE_COMPARER:
 				if (Convert.isEmpty(value)) {
 					Assertion.logger.error("value can't be null or empty string.");
@@ -132,7 +148,7 @@ public class Assertion implements IPojo {
 				}
 				break;
 			case DB_RESULT:
-				if (!allowedValue.equals(AllowedValueEnum.NON_EMPTY)) {
+				if (allowedValue.equals(AllowedValueEnum.NON_EMPTY)) {
 					if (Convert.isEmpty(value)) {
 						Assertion.logger.error("value can't be null or empty string.");
 						result = false;
@@ -173,6 +189,10 @@ public class Assertion implements IPojo {
 				return false;
 			}
 
+			if (!headername.equals(assertion.getHeadername())) {
+				return false;
+			}
+
 			if (!attribute.equals(assertion.getAttribute())) {
 				return false;
 			}
@@ -198,9 +218,10 @@ public class Assertion implements IPojo {
 
 	@Override
 	public String toString() {
-		return String.format("[%s: %s, %s, %s, %s, %s, %s, %s]", Convert.getClassName(Assertion.class),
+		return String.format("[%s: %s, %s, %s, %s, %s, %s, %s, %s]", Convert.getClassName(Assertion.class),
 				UtilsFormat.format("id", id), UtilsFormat.format("xpath", xpath),
 				UtilsFormat.format("jsonpath", jsonpath), UtilsFormat.format("attribute", attribute),
+				UtilsFormat.format("headername", headername),
 				UtilsFormat.format("allowedValue", allowedValue == null ? null : allowedValue.getValue()),
 				UtilsFormat.format("validateMethod", validateMethod == null ? null : validateMethod.getValue()),
 				UtilsFormat.format("value", value));
