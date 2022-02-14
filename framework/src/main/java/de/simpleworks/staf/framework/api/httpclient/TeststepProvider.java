@@ -78,13 +78,16 @@ public class TeststepProvider<Teststep extends ITeststep> {
 		}
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Teststep get() {
+		if (Convert.isEmpty(teststeps)) {
+			return null;
+		}
+
 		if (TeststepProvider.logger.isDebugEnabled()) {
 			TeststepProvider.logger.debug("sorting steps.");
 		}
-		teststeps.sort(new TeststepComparator());
+		teststeps.sort(new TeststepComparator<>());
 
-		return Convert.isEmpty(steps) ? null : teststeps.remove(0);
+		return teststeps.remove(0);
 	}
 }
