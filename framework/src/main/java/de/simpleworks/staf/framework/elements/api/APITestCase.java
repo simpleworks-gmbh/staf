@@ -212,6 +212,9 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 			throw new IllegalArgumentException("provider can't be null.");
 		}
 		APITeststep apiteststep = provider.get();
+		if (apiteststep == null) {
+			return;
+		}
 		if (!apiteststep.validate()) {
 			throw new IllegalArgumentException(String.format("Step '%s' is invalid.", apiteststep));
 		}
