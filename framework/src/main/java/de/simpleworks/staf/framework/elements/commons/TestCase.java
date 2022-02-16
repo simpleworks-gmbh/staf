@@ -297,7 +297,7 @@ public abstract class TestCase {
 		}
 		testcase.bootstrap();
 		try {
-			for (Method stepmethod : TestCaseUtils.fetchStepMethods(this.getClass())) {
+			for (Method stepmethod : TestCaseUtils.fetchStepMethods(testcase.getClass())) {
 				if (stepmethod == null) {
 					TestCase.logger.error("Method '%s' can't be null.");
 					break;
