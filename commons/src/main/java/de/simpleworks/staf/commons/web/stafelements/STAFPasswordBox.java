@@ -9,17 +9,17 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import de.simpleworks.staf.commons.exceptions.SystemException;
 
-public class STAFPasswordBox extends STAFElement {
+public class STAFPasswordBox extends STAFInputBox {
 	private static final Logger logger = LogManager.getLogger(STAFPasswordBox.class);
 
 	public STAFPasswordBox(final WebDriver webDriver, final By by) {
 		super(webDriver, by);
 	}
 
+	@Override
 	public void enterText(final String text) {
 		if (STAFPasswordBox.logger.isDebugEnabled()) {
-			STAFPasswordBox.logger
-					.debug(String.format("enter '%s' into the Input at '%s'.", text.replaceAll(".", "*"), getBy()));
+			STAFPasswordBox.logger.debug(String.format("enter confidential input at '%s'.", getBy()));
 		}
 
 		final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
@@ -48,8 +48,7 @@ public class STAFPasswordBox extends STAFElement {
 		final String value = getAttribute("value");
 
 		if (STAFPasswordBox.logger.isDebugEnabled()) {
-			STAFPasswordBox.logger
-					.debug(String.format("text is '%s' of Input at '%s'", value.replaceAll(".", "*"), getBy()));
+			STAFPasswordBox.logger.debug(String.format("text is confidential will not be logged from '%s'.", getBy()));
 		}
 
 		return value;
