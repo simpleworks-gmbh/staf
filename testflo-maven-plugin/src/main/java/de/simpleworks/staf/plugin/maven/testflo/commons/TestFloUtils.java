@@ -161,6 +161,7 @@ public class TestFloUtils {
 		Assert.assertFalse("name can't be null.", Convert.isEmpty(name));
 
 		final IssueField field = issue.getFieldByName(name);
+		Assert.assertNotNull(String.format("test case '%s': can't get field '%s'.", issue.getKey(), name), field);		
 		Assert.assertNotNull(String.format("test case '%s': field '%s' without value.", issue.getKey(), name),
 				field.getValue());
 
