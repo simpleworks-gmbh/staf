@@ -1,7 +1,9 @@
 package de.simpleworks.staf.plugin.maven.testflo.commons;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
@@ -16,17 +18,20 @@ import de.simpleworks.staf.commons.enums.Result;
 import de.simpleworks.staf.commons.exceptions.SystemException;
 import de.simpleworks.staf.commons.report.TestcaseReport;
 import de.simpleworks.staf.commons.utils.Convert;
+import de.simpleworks.staf.module.jira.util.JiraProperties;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestCaseGeneral;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestCaseStatus;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestCaseTransition;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestPlanStatus;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestPlanTransition;
+import de.simpleworks.staf.plugin.maven.testflo.commons.pojo.FixVersion;
 import okhttp3.OkHttpClient;
 
 public class TestFlo {
 	private static final Logger logger = LogManager.getLogger(TestFlo.class);
 	private final IssueRestClient jira;
 	private final TestFloTms tms;
+	private final TestFloFixVersion testFloFixVersion;
 
 	public TestFlo(final IssueRestClient jira, final OkHttpClient client, final URL urlTms) {
 		if (jira == null) {
@@ -34,6 +39,7 @@ public class TestFlo {
 		}
 		this.jira = jira;
 		tms = new TestFloTms(client, urlTms);
+		testFloFixVersion = new TestFloFixVersion(client, jira, JiraProperties.getInstance());
 	}
 
 	private void logTransitions(final Issue issue) {
@@ -273,5 +279,47 @@ public class TestFlo {
 		final List<StepResult> stepResults = TestFloUtils.prepareStepResult(testCase, report);
 		final Issue issue = updateStepResults(testCase, stepResults);
 		updateTestCaseStatus(issue, report.getResult());
+	}
+
+	public void addFixVersions(final List<String> fixVersions, TestPlan testPlan) {
+		if (Convert.isEmpty(fixVersions)) {
+			throw new IllegalArgumentException("fixVersions can't be null or empty.");
+		}
+		if (testPlan == null) {
+			throw new IllegalArgumentException("testPlan can't be null.");
+		}
+		final String testplanId = testPlan.getId();
+		if (Convert.isEmpty(testplanId)) {
+			throw new IllegalArgumentException("testplanId can't be nur or empty string.");
+		}
+		List<FixVersion> versions = new ArrayList<FixVersion>();
+		for (final String fixVersion : fixVersions) {
+			if (TestFlo.logger.isDebugEnabled()) {
+				TestFlo.logger.debug(String.format("fetch fix Version '%s'.", fixVersion));
+			}
+			try {
+				final FixVersion version = testFloFixVersion.fetchFixVersion(fixVersion, testplanId);
+				if (!versions.add(version)) {
+					TestFlo.logger.error(String.format("can't  add fix Version '%s'.", fixVersion));
+				}
+			} catch (Exception ex) {
+				final String msg = String.format("can't fetch Fix Version '%s'.", fixVersion);
+				TestFlo.logger.error(msg, ex);
+			}
+		}
+		for (TestCase testcase : testPlan.getTestCases()) {
+			if (TestFlo.logger.isDebugEnabled()) {
+				TestFlo.logger.debug(String.format("add fix versions '%s' to issue '%s'.",
+						String.join(", ",
+								versions.stream().map(version -> version.toString()).collect(Collectors.toList())),
+						testcase.getId()));
+			}
+			try {
+				testFloFixVersion.addFixVersions(versions, testcase.getId());
+			} catch (Exception ex) {
+				final String msg = String.format("can't add Fix Version, for testcase '%s'.", testcase.getId());
+				TestFlo.logger.error(msg, ex);
+			}
+		}
 	}
 }
