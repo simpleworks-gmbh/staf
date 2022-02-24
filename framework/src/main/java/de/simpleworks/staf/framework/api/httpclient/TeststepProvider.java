@@ -15,7 +15,7 @@ public class TeststepProvider<Teststep extends ITeststep> {
 	private static final Logger logger = LogManager.getLogger(TeststepProvider.class);
 
 	private final List<Teststep> teststeps;
-	private final List<Step> steps;
+	//private final List<Step> steps;
 
 	public TeststepProvider(final List<Teststep> teststeps, final List<Step> steps) throws InstantiationException {
 		if (Convert.isEmpty(teststeps)) {
@@ -27,7 +27,7 @@ public class TeststepProvider<Teststep extends ITeststep> {
 		}
 
 		this.teststeps = teststeps;
-		this.steps = steps;
+		//this.steps = steps;
 		TeststepProvider.init(teststeps, steps);
 	}
 
