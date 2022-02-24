@@ -7,11 +7,11 @@
 	<parent>
 		<groupId>de.simpleworks.staf</groupId>
 		<artifactId>staf-parent</artifactId> 
-		<version>0.80</version>
+		<version>0.80.8</version>
 	</parent>	
  
 	<properties>
-		<project.version>0.80</project.version>
+		<project.version>0.80.8</project.version>
 	</properties>
  
 	<artifactId>data</artifactId>

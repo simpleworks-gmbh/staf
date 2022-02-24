@@ -180,7 +180,8 @@ public class HttpRequest implements IPojo {
 		if (HttpRequest.logger.isDebugEnabled()) {
 			HttpRequest.logger.debug(String.format("result: '%s'.", result));
 		}
-		if (HttpMethodEnum.GET.equals(method)) {
+
+		if (queryParameters.length > 0) {
 			result = substituteQueryParameter(result);
 		}
 		return result;
