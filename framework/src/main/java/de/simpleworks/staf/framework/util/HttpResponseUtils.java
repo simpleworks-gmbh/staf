@@ -18,12 +18,12 @@ public class HttpResponseUtils {
 
 		if (current.getStatus() != compareTo.getStatus()) {
 			throw new SystemException(String.format("The status '%s', does not match the expected one '%s'.",
-					Integer.toString(compareTo.getStatus()), Integer.toString(current.getStatus())));
+					Integer.toString(current.getStatus()), Integer.toString(compareTo.getStatus()) ));
 		}
 
 		if (!current.getContentType().equals(compareTo.getContentType())) {
 			throw new SystemException(String.format("The content type '%s', does not match the expected one '%s'.",
-					current.getContentType().getValue(), compareTo.getContentType().getValue()));
+					current.getContentType().getValue(), compareTo.getContentType().getValue() ) );
 		}
 
 		if (!current.getBody().equals(compareTo.getBody()) && !(Convert.isEmpty(compareTo.getBody()))) {
