@@ -259,6 +259,15 @@ public abstract class TemplateTestCase<Teststep extends ITeststep, Response> ext
 							final Object fieldValue = currentField.get(ob);
 
 							final Object obj = theClass.cast(fieldValue);
+
+							if (obj == null) {
+								if (TemplateTestCase.logger.isDebugEnabled()) {
+									TemplateTestCase.logger.debug(String.format(
+											"field '%s' has value null, will skip update.", currentField.getName()));
+								}
+								continue;
+							}
+
 							final Object updatedField = updateFields(currentField.getType(), obj, storage);
 							final Object castedupdatedField = theClass.cast(updatedField);
 

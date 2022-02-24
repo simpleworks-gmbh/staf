@@ -23,16 +23,20 @@ public class HttpResponse implements IPojo {
 	private String jsonBody;
 	private String base64Body;
 	private String bodyFileName;
+
+	private ResponseEntity entity;
+
 	private long duration;
 
 	public HttpResponse() {
 		this.headers = new Header[0];
-
 		this.body = Convert.EMPTY_STRING;
 		this.contentType = ContentTypeEnum.UNKNOWN;
 		this.jsonBody = Convert.EMPTY_STRING;
 		this.base64Body = Convert.EMPTY_STRING;
 		this.bodyFileName = Convert.EMPTY_STRING;
+
+		this.entity = null;
 	}
 
 	public int getStatus() {
@@ -61,6 +65,10 @@ public class HttpResponse implements IPojo {
 
 	public String getBodyFileName() {
 		return bodyFileName;
+	}
+
+	public ResponseEntity getEntity() {
+		return entity;
 	}
 
 	public long getDuration() {
@@ -95,6 +103,10 @@ public class HttpResponse implements IPojo {
 		this.bodyFileName = bodyFileName;
 	}
 
+	public void setEntity(ResponseEntity entity) {
+		this.entity = entity;
+	}
+
 	public void setDuration(final long duration) {
 		this.duration = duration;
 	}
@@ -106,6 +118,7 @@ public class HttpResponse implements IPojo {
 		result = (prime * result) + ((base64Body == null) ? 0 : base64Body.hashCode());
 		result = (prime * result) + ((body == null) ? 0 : body.hashCode());
 		result = (prime * result) + ((bodyFileName == null) ? 0 : bodyFileName.hashCode());
+		result = (prime * result) + ((entity == null) ? 0 : entity.hashCode());
 		result = (prime * result) + ((contentType == null) ? 0 : contentType.hashCode());
 		result = (prime * result) + (int) (duration ^ (duration >>> 32));
 		result = (prime * result) + Arrays.hashCode(headers);
@@ -140,19 +153,26 @@ public class HttpResponse implements IPojo {
 			result = false;
 		}
 
+		if (entity != null) {
+			if (!(entity.validate())) {
+				HttpResponse.logger.error(String.format("entity '%s' is invalid.", entity));
+				result = false;
+			}
+		}
+
 		return result;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("[%s: %s, %s, %s, %s, %s, %s, %s, %s]", Convert.getClassName(HttpResponse.class.getName()),
-				UtilsFormat.format("status", status),
+		return String.format("[%s: %s, %s, %s, %s, %s, %s, %s, %s, %s]",
+				Convert.getClassName(HttpResponse.class.getName()), UtilsFormat.format("status", status),
 				UtilsFormat.format("headers",
 						String.join(",",
 								Arrays.asList(headers).stream().map(h -> h.toString()).collect(Collectors.toList()))),
 				UtilsFormat.format("body", body), UtilsFormat.format("contentType", contentType),
 				UtilsFormat.format("jsonBody", jsonBody), UtilsFormat.format("base64Body", base64Body),
-				UtilsFormat.format("bodyFileName", bodyFileName),
+				UtilsFormat.format("bodyFileName", bodyFileName), UtilsFormat.format("entity", entity),
 				UtilsFormat.format("duration", Long.valueOf(duration)));
 	}
 }

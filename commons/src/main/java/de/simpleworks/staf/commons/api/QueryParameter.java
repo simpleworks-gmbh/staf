@@ -13,6 +13,16 @@ public class QueryParameter implements IPojo {
 	private String name;
 	private String value;
 
+	// zero args constructor
+	public QueryParameter() {
+
+	}
+
+	public QueryParameter(String name, String value) {
+		this.name = name;
+		this.value = value;
+	}
+
 	public String getName() {
 		return name;
 	}
