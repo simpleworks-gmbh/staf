@@ -20,7 +20,7 @@ public class STAFList extends STAFElement {
 
 	}
 
-	public List<WebElement> getAllElements() throw SystemException {
+	public List<WebElement> getAllElements() throws SystemException {
 		if (!exists()) {
 			throw new SystemException(String.format("No webElement can be found at '%s'.", getBy()));
 		}
