@@ -1,5 +1,7 @@
 package de.simpleworks.staf.commons.api;
 
+import java.io.File;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -16,6 +18,7 @@ public class Assertion implements IPojo {
 	private String id;
 	private String xpath;
 	private String jsonpath;
+	private String responsebodyfile;
 	private String headername;
 	private String attribute;
 	private AllowedValueEnum allowedValue;
@@ -26,6 +29,7 @@ public class Assertion implements IPojo {
 		id = Convert.EMPTY_STRING;
 		xpath = Convert.EMPTY_STRING;
 		jsonpath = Convert.EMPTY_STRING;
+		responsebodyfile = Convert.EMPTY_STRING;
 		headername = Convert.EMPTY_STRING;
 		attribute = Convert.EMPTY_STRING;
 		allowedValue = AllowedValueEnum.NON_EMPTY;
@@ -43,6 +47,14 @@ public class Assertion implements IPojo {
 
 	public String getJsonpath() {
 		return jsonpath;
+	}
+
+	public String getResponsebodyfile() {
+		return responsebodyfile;
+	}
+
+	public File getResponsebodyAsFile() {
+		return new File(responsebodyfile);
 	}
 
 	public String getHeadername() {
@@ -75,6 +87,10 @@ public class Assertion implements IPojo {
 
 	public void setJsonpath(final String jsonpath) {
 		this.jsonpath = jsonpath;
+	}
+
+	public void setResponsebodyfile(String responsebodyfile) {
+		this.responsebodyfile = responsebodyfile;
 	}
 
 	public void setHeadername(String headername) {
@@ -155,6 +171,23 @@ public class Assertion implements IPojo {
 					}
 				}
 				break;
+			case RESPONSEBODY:
+
+				if (!Convert.isEmpty(responsebodyfile)) {
+					File file = new File(responsebodyfile);
+
+					if (!file.exists()) {
+						Assertion.logger.error(String.format("the file at '%s does not exist.", responsebodyfile));
+						result = false;
+					}
+				} else {
+					if (Convert.isEmpty(value)) {
+						Assertion.logger.error("value can't be null or empty string, if responsebodyfile is not set.");
+						result = false;
+					}
+				}
+
+				break;
 			default:
 				Assertion.logger
 						.error(String.format("validateMethod '%s' not implemented yet.", validateMethod.getValue()));
@@ -218,10 +251,10 @@ public class Assertion implements IPojo {
 
 	@Override
 	public String toString() {
-		return String.format("[%s: %s, %s, %s, %s, %s, %s, %s, %s]", Convert.getClassName(Assertion.class),
+		return String.format("[%s: %s, %s, %s, %s, %s, %s, %s, %s, %s]", Convert.getClassName(Assertion.class),
 				UtilsFormat.format("id", id), UtilsFormat.format("xpath", xpath),
-				UtilsFormat.format("jsonpath", jsonpath), UtilsFormat.format("attribute", attribute),
-				UtilsFormat.format("headername", headername),
+				UtilsFormat.format("jsonpath", jsonpath), UtilsFormat.format("responsebodyfile", responsebodyfile),
+				UtilsFormat.format("attribute", attribute), UtilsFormat.format("headername", headername),
 				UtilsFormat.format("allowedValue", allowedValue == null ? null : allowedValue.getValue()),
 				UtilsFormat.format("validateMethod", validateMethod == null ? null : validateMethod.getValue()),
 				UtilsFormat.format("value", value));

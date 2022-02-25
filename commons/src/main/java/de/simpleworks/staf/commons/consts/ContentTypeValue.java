@@ -5,6 +5,7 @@ import de.simpleworks.staf.commons.utils.Convert;
 public class ContentTypeValue {
 	public final static String UNKNOWN = Convert.EMPTY_STRING;
 	public static final String NONE = "NONE";
+	public final static String OCTET_STREAM = "application/octet-stream";
 	public final static String JSON = "application/json";
 	public final static String ZIP = "application/zip";
 	public final static String PDF = "application/pdf";

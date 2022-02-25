@@ -417,6 +417,9 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 		}
 
 		DbTeststep dbteststep = provider.get();
+		if (dbteststep == null) {
+			return;
+		}
 
 		if (!dbteststep.validate()) {
 			throw new IllegalArgumentException(String.format("Step '%s' is invalid.", dbteststep));
