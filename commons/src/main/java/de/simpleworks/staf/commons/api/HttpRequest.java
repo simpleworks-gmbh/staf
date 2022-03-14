@@ -7,12 +7,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import com.google.common.net.UrlEscapers;
-
 import de.simpleworks.staf.commons.enums.ContentTypeEnum;
 import de.simpleworks.staf.commons.enums.HttpMethodEnum;
 import de.simpleworks.staf.commons.interfaces.IPojo;
@@ -184,7 +181,6 @@ public class HttpRequest implements IPojo {
 		if (HttpRequest.logger.isDebugEnabled()) {
 			HttpRequest.logger.debug(String.format("result: '%s'.", result));
 		}
-
 		if (queryParameters.length > 0) {
 			result = substituteQueryParameter(result);
 		}
@@ -201,20 +197,17 @@ public class HttpRequest implements IPojo {
 		final List<String> substitutedQueryParams = new ArrayList<>();
 		try {
 			for (final QueryParameter q : Arrays.asList(queryParameters)) {
-
 				if (ContentTypeEnum.FORM_URLENCODED.equals(contentType)) {
 					substitutedQueryParams.add(
 							String.format("%s=%s", URLEncoder.encode(q.getName(), StandardCharsets.UTF_8.toString()),
 									URLEncoder.encode(q.getValue(), StandardCharsets.UTF_8.toString())));
 				} else {
-
 					substitutedQueryParams.add(String
 							.format("%s=%s", UrlEscapers.urlFragmentEscaper().escape(q.getName()),
 									UrlEscapers.urlFragmentEscaper().escape(q.getValue()))
 							// workaround to convert to the ascii variant
-							.replace(  "%2B", "%20"));
+							.replace("%2B", "%20"));
 				}
-
 			}
 		} catch (final UnsupportedEncodingException ex) {
 			HttpRequest.logger.error("can't determine encoding for query parameter.", ex);
@@ -254,8 +247,10 @@ public class HttpRequest implements IPojo {
 			result = false;
 		}
 		if (Convert.isEmpty(urlPath)) {
-			HttpRequest.logger.error("urlPath can't be null or empty string.");
-			result = false;
+			if (HttpRequest.logger.isDebugEnabled()) {
+				HttpRequest.logger.debug("urlPath is be null or empty string, will set to empty string.");
+			}
+			urlPath = Convert.EMPTY_STRING;
 		}
 		if (!Convert.isEmpty(cookies)) {
 			if (Arrays.asList(cookies).stream().filter(c -> c.validate()).collect(Collectors.toList()).isEmpty()) {
