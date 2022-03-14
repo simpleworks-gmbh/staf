@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -22,7 +21,6 @@ import com.google.inject.Module;
 import de.simpleworks.staf.commons.api.Assertion;
 import de.simpleworks.staf.commons.database.DbResultRow;
 import de.simpleworks.staf.commons.database.DbTeststep;
-import de.simpleworks.staf.commons.database.IDbResult;
 import de.simpleworks.staf.commons.database.QueuedDbResult;
 import de.simpleworks.staf.commons.database.Statement;
 import de.simpleworks.staf.commons.database.connection.DbConnectionPool;
@@ -311,61 +309,27 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 	}
 
 	@Override
-	protected Map<String, String> validateAssertions(final QueuedDbResult dbresult, final List<Assertion> assertions)
+	protected Map<String, String> runAssertion(final QueuedDbResult dbresult, final Assertion assertion)
 			throws SystemException {
 
-		if (dbresult == null) {
-			throw new IllegalArgumentException("dbresult can't be null.");
-		}
+		final Map<String, String> results;
 
-		@SuppressWarnings("rawtypes")
-		final IDbResult dbResult = dbresult;
-
-		if (Convert.isEmpty(assertions)) {
-			throw new IllegalArgumentException("assertions can't be null or empty.");
-		}
-
-		final Map<String, String> result = new HashMap<>();
-
-		if (DbTestCase.logger.isDebugEnabled()) {
-			DbTestCase.logger.debug("run assertions");
-		}
-
-		final DbResultsEnum resultType = dbResult.getDbResultsEnum();
+		final DbResultsEnum resultType = dbresult.getDbResultsEnum();
 
 		switch (resultType) {
 
 		case SELECTED:
 
-			for (final Assertion assertion : assertions) {
-				if (DbTestCase.logger.isDebugEnabled()) {
-					DbTestCase.logger.debug(String.format("work with assertion: '%s'.", assertion));
-				}
-				assertion.validate();
+			final ValidateMethodEnum method = assertion.getValidateMethod();
 
-				final ValidateMethodEnum method = assertion.getValidateMethod();
+			switch (method) {
+			case DB_RESULT:
+				results = DbTestCase.checkDbResult(dbresult, assertion);
+				break;
 
-				if (!(dbResult instanceof QueuedDbResult)) {
-					throw new SystemException(String.format("dbResult needs to be an instance of '%s', but is '%s'.",
-							QueuedDbResult.class, dbResult.getClass()));
-				}
-
-				final QueuedDbResult queriedDbResult = (QueuedDbResult) dbResult;
-
-				final Map<String, String> results;
-				switch (method) {
-				case DB_RESULT:
-					results = DbTestCase.checkDbResult(queriedDbResult, assertion);
-					break;
-
-				default:
-					throw new IllegalArgumentException(
-							String.format("The validateMethod '%s' is not implemented yet.", method.getValue()));
-				}
-
-				results.keySet().stream().forEach(key -> {
-					result.put(key, results.get(key));
-				});
+			default:
+				throw new IllegalArgumentException(
+						String.format("The validateMethod '%s' is not implemented yet.", method.getValue()));
 			}
 
 			break;
@@ -375,7 +339,7 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 					String.format("The validateMethod '%s' is not implemented yet.", resultType.getValue()));
 		}
 
-		return result;
+		return results;
 	}
 
 	private static void validateExpectedRows(final QueuedDbResult debresult, final Statement statement)

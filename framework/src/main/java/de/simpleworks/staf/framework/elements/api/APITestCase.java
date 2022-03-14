@@ -19,6 +19,7 @@ import de.simpleworks.staf.commons.api.HttpRequest;
 import de.simpleworks.staf.commons.api.HttpResponse;
 import de.simpleworks.staf.commons.api.ResponseEntity;
 import de.simpleworks.staf.commons.enums.ContentTypeEnum;
+import de.simpleworks.staf.commons.enums.ValidateMethodEnum;
 import de.simpleworks.staf.commons.exceptions.SystemException;
 import de.simpleworks.staf.commons.mapper.Mapper;
 import de.simpleworks.staf.commons.mapper.api.MapperAPITeststep;
@@ -77,6 +78,38 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 
 	private static final Map<String, String> checkFile(final HttpResponse response, final Assertion assertion) {
 		return new File_ComparerAssertionValidator().validateAssertion(response, assertion);
+	}
+
+	@Override
+	protected Map<String, String> runAssertion(final HttpResponse response, final Assertion assertion)
+			throws SystemException {
+
+		final Map<String, String> results;
+
+		final ValidateMethodEnum method = assertion.getValidateMethod();
+
+		switch (method) {
+		case HEADER:
+			results = APITestCase.checkHeader(response, assertion);
+			break;
+		case XPATH:
+			results = APITestCase.checkXpath(response, assertion);
+			break;
+		case JSONPATH:
+			results = APITestCase.checkJSonPath(response, assertion);
+			break;
+		case RESPONSEBODY:
+			results = APITestCase.checkResponseBody(response, assertion);
+			break;
+		case FILE_COMPARER:
+			results = APITestCase.checkFile(response, assertion);
+			break;
+		default:
+			throw new SystemException(
+					String.format("The validateMethod '%s' is not implemented yet.", method.getValue()));
+		}
+
+		return results;
 	}
 
 	/**

@@ -11,6 +11,30 @@ public class JSONUtils {
 
 	private static final Logger logger = LogManager.getLogger(JSONUtils.class);
 
+	public static JSONArray transformToJSONArray(String jsonString) {
+
+		if (Convert.isEmpty(jsonString)) {
+			throw new IllegalArgumentException("jsonString cant't be null or empty string.");
+		}
+
+		if (!isJSONArray(jsonString)) {
+			throw new IllegalArgumentException(String.format("jsonString is no array [\"%s\"].", jsonString));
+		}
+
+		JSONArray result = null;
+
+		try {
+			Object obj = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(jsonString);
+			result = (JSONArray) obj;
+		} catch (Exception ex) {
+			logger.error(
+					String.format("can't check if jsonString is arrays or not, will return null '%s'.", jsonString),
+					ex);
+		}
+
+		return result;
+	}
+
 	public static boolean isJSONArray(String jsonString) {
 
 		if (Convert.isEmpty(jsonString)) {
