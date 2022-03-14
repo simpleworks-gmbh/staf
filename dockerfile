@@ -16,13 +16,13 @@ RUN apt install unzip -y
 # install wget
 RUN apt install wget -y 
 
-# fetch maven-3.8.4
-RUN wget https://dlcdn.apache.org/maven/maven-3/3.8.4/binaries/apache-maven-3.8.4-bin.zip
+# fetch maven-3.8.5
+RUN wget https://dlcdn.apache.org/maven/maven-3/3.8.5/binaries/apache-maven-3.8.5-bin.zip
 
-# unzip maven-3.8.4
-RUN unzip apache-maven-*-bin.zip
+# unzip maven-3.8.5
+RUN unzip apache-maven-3.8.5-bin.zip
 
-RUN mv apache-maven-3.8.4 /opt/maven
+RUN mv apache-maven-3.8.5 /opt/maven
 
 # Set mvn environment variables
 ENV M2_HOME=/opt/maven
