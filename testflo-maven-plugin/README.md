@@ -25,6 +25,9 @@ Jira Settings
 Fix Versions
 - fixVersions: `Comma separated list of existing Fix Versions`
 
+Fix Versions
+- labels: `Comma separated list of Jira Labels`
+
 
 TestFLO Settings
 

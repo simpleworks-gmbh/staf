@@ -4,14 +4,17 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
+
 import com.atlassian.jira.rest.client.api.IssueRestClient;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.Subtask;
 import com.atlassian.jira.rest.client.api.domain.Transition;
 import com.atlassian.jira.rest.client.api.domain.input.TransitionInput;
+
 import de.simpleworks.staf.commons.elements.TestCase;
 import de.simpleworks.staf.commons.elements.TestPlan;
 import de.simpleworks.staf.commons.enums.Result;
@@ -30,8 +33,10 @@ import okhttp3.OkHttpClient;
 public class TestFlo {
 	private static final Logger logger = LogManager.getLogger(TestFlo.class);
 	private final IssueRestClient jira;
+
 	private final TestFloTms tms;
 	private final TestFloFixVersion testFloFixVersion;
+	private final TestFloLabel testFloLabel;
 
 	public TestFlo(final IssueRestClient jira, final OkHttpClient client, final URL urlTms) {
 		if (jira == null) {
@@ -40,6 +45,7 @@ public class TestFlo {
 		this.jira = jira;
 		tms = new TestFloTms(client, urlTms);
 		testFloFixVersion = new TestFloFixVersion(client, jira, JiraProperties.getInstance());
+		testFloLabel = new TestFloLabel(jira);
 	}
 
 	private void logTransitions(final Issue issue) {
@@ -316,6 +322,29 @@ public class TestFlo {
 			}
 			try {
 				testFloFixVersion.addFixVersions(versions, testcase.getId());
+			} catch (Exception ex) {
+				final String msg = String.format("can't add Fix Version, for testcase '%s'.", testcase.getId());
+				TestFlo.logger.error(msg, ex);
+			}
+		}
+	}
+
+	public void addLabel(List<String> labels, TestPlan testPlan) {
+		if (Convert.isEmpty(labels)) {
+			throw new IllegalArgumentException("labels can't be null or empty.");
+		}
+		if (testPlan == null) {
+			throw new IllegalArgumentException("testPlan can't be null.");
+		}
+
+		for (TestCase testcase : testPlan.getTestCases()) {
+
+			if (TestFlo.logger.isDebugEnabled()) {
+				TestFlo.logger.debug(
+						String.format("add labels '%s' to issue '%s'.", String.join(", ", labels), testcase.getId()));
+			}
+			try {
+				testFloLabel.addLabels(testcase.getId(), labels);
 			} catch (Exception ex) {
 				final String msg = String.format("can't add Fix Version, for testcase '%s'.", testcase.getId());
 				TestFlo.logger.error(msg, ex);
