@@ -24,9 +24,17 @@ public class HttpClientProperties extends PropertiesReader {
 	@Property(FrameworkConsts.IGNORE_CERTIFICATE)
 	private boolean ignoreCertificate;
 
+	@Default("60")
+	@Property(FrameworkConsts.API_TIMEOUT)
+	private int timeout;
+
 	@Default("ACCEPT_ALL")
 	@Property(FrameworkConsts.COOKIE_POLICY)
 	private String cookiePolicy;
+
+	@Default("true")
+	@Property(FrameworkConsts.RETRY_CONNECTION)
+	private boolean retryConnection;
 
 	public Level getLoggingLevel() {
 		return loggingLevel;
@@ -34,6 +42,10 @@ public class HttpClientProperties extends PropertiesReader {
 
 	public boolean isIgnoreCertificate() {
 		return ignoreCertificate;
+	}
+
+	public int getTimeout() {
+		return timeout;
 	}
 
 	public CookiePolicy getCookiePolicy() {
@@ -45,6 +57,10 @@ public class HttpClientProperties extends PropertiesReader {
 					String.format("the cookie policy '%s' was not implemented yet.", cookiePolicy));
 
 		}
+	}
+
+	public boolean isRetryConnection() {
+		return retryConnection;
 	}
 
 	@Override
