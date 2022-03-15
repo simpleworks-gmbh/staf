@@ -21,6 +21,14 @@ Basic Information
 Jira Settings
 - jira.url: `Url of the used Jira Instance`
 
+
+Fix Versions
+- fixVersions: `Comma separated list of existing Fix Versions`
+
+Fix Versions
+- labels: `Comma separated list of Jira Labels`
+
+
 TestFLO Settings
 
 (Value of first two properties below has to be replaced with a valid url. The rest maintain their values given)

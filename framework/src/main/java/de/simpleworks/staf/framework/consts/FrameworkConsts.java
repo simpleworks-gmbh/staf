@@ -2,6 +2,9 @@ package de.simpleworks.staf.framework.consts;
 
 public class FrameworkConsts {
 
+	public static final String RETRY_CONNECTION = "retry.connection";
+	public static final String API_TIMEOUT = "api.timeout";
+
 	public static final String TESTCASE_HEADER_NAME = "testcase.header_name";
 	public static final String TESTSTEP_HEADER_NAME = "teststep.header_name";
 	public static final String TESTCASE_CREATE_ARTEFACT = "testcase.create_artefact";

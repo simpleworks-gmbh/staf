@@ -21,6 +21,7 @@ import com.jayway.jsonpath.JsonPath;
 
 import de.simpleworks.staf.commons.exceptions.SystemException;
 import de.simpleworks.staf.commons.utils.Convert;
+import de.simpleworks.staf.commons.utils.JSONUtils;
 import de.simpleworks.staf.commons.utils.UtilsIO;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -87,9 +88,13 @@ public abstract class Mapper<T> {
 		}
 	}
 
-	public final List<T> readAll(final String jsonstring) throws SystemException {
+	public final List<T> readAll(String jsonstring) throws SystemException {
 		if (Convert.isEmpty(jsonstring)) {
 			throw new IllegalArgumentException("jsonstring can't be null or empty string.");
+		}
+
+		if (!JSONUtils.isJSONArray(jsonstring)) {
+			jsonstring = String.format("[%s]", jsonstring);
 		}
 
 		List<T> result = new ArrayList<>();

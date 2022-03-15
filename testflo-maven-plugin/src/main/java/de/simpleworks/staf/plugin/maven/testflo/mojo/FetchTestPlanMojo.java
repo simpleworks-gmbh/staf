@@ -3,6 +3,7 @@ package de.simpleworks.staf.plugin.maven.testflo.mojo;
 import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,26 +29,30 @@ import okhttp3.OkHttpClient;
 
 @Mojo(name = "fetchTestPlan", defaultPhase = LifecyclePhase.INITIALIZE)
 public class FetchTestPlanMojo extends TestfloMojo {
-
 	private static final Logger logger = LogManager.getLogger(FetchTestPlanMojo.class);
-
 	@Inject
 	private IssueRestClient clientJira;
-
+	
 	@Inject
 	@Named(Consts.BASIC_AUTHENTICATED_CLIENT)
 	private OkHttpClient clientHttp;
-
+	
 	@Parameter(property = "id", required = true)
 	private String testPlanId;
-
+	
 	@Parameter(property = "file", required = true)
 	private String fileName;
-
+	
+	@Parameter(property = "fixVersions")
+	private List<String> fixVersions;
+	
+	@Parameter(property = "labels")
+	private List<String> labels;
+	
 	@Inject
 	@Named(Consts.JIRA_REST_TMS)
 	private URL urlTms;
-
+	
 	private TestFlo testFlo;
 
 	protected FetchTestPlanMojo() {
@@ -56,15 +61,12 @@ public class FetchTestPlanMojo extends TestfloMojo {
 
 	protected FetchTestPlanMojo(final String testPlanId, final String fileName, final URL urlTms) {
 		this();
-
 		if (Convert.isEmpty(testPlanId)) {
 			throw new IllegalArgumentException("testPlanId can't be null or empty string.");
 		}
-
 		if (Convert.isEmpty(fileName)) {
 			throw new IllegalArgumentException("fileName can't be null or empty string.");
 		}
-
 		this.testPlanId = testPlanId;
 		this.fileName = fileName;
 		this.urlTms = urlTms;
@@ -74,18 +76,17 @@ public class FetchTestPlanMojo extends TestfloMojo {
 		if (FetchTestPlanMojo.logger.isDebugEnabled()) {
 			FetchTestPlanMojo.logger.debug(String.format("testPlanId: '%s'.", testPlanId));
 			FetchTestPlanMojo.logger.debug(String.format("fileName: '%s'.", fileName));
+			FetchTestPlanMojo.logger.debug(String.format("fixVersions: '%s'.", String.join(",", fixVersions)));
 			FetchTestPlanMojo.logger.debug("clients:");
 			FetchTestPlanMojo.logger.debug(String.format("urlTms: '%s'.", urlTms));
 			FetchTestPlanMojo.logger.debug(String.format("client: '%s'.", clientJira));
 			FetchTestPlanMojo.logger.debug(String.format("clientHttp: '%s'.", clientHttp));
 		}
-
 		Assert.assertFalse("testPlanId can't be null or empty string.", Convert.isEmpty(testPlanId));
 		Assert.assertFalse("fileName can't be null or empty string.", Convert.isEmpty(fileName));
 		Assert.assertNotNull("urlTms can't be null.", urlTms);
 		Assert.assertNotNull("client can't be null.", clientJira);
 		Assert.assertNotNull("clientHttp can't be null.", clientHttp);
-
 		testFlo = new TestFlo(clientJira, clientHttp, urlTms);
 	}
 
@@ -94,21 +95,24 @@ public class FetchTestPlanMojo extends TestfloMojo {
 		if (FetchTestPlanMojo.logger.isInfoEnabled()) {
 			FetchTestPlanMojo.logger.info(String.format("fetch test plan: '%s'.", testPlanId));
 		}
-
 		init();
-
 		try {
 			testFlo.moveTestPlanToNextIteration(testPlanId);
-
 			final TestPlan testPlan = testFlo.readTestPlan(testPlanId);
-
 			testFlo.startTestPlan(testPlan);
-
+			
+			if (!Convert.isEmpty(fixVersions)) {
+				testFlo.addFixVersions(fixVersions, testPlan);
+			}
+			
+			if (!Convert.isEmpty(labels)) {
+				testFlo.addLabel(labels, testPlan);
+			}
+			
 			final File file = new File(fileName);
 			if (FetchTestPlanMojo.logger.isInfoEnabled()) {
 				FetchTestPlanMojo.logger.info(String.format("write test plan into file: '%s'.", file));
 			}
-
 			UtilsIO.deleteFile(file);
 			new MapperTestplan().write(file, Arrays.asList(testPlan));
 		} catch (final SystemException ex) {

@@ -161,6 +161,7 @@ public class TestFloUtils {
 		Assert.assertFalse("name can't be null.", Convert.isEmpty(name));
 
 		final IssueField field = issue.getFieldByName(name);
+		Assert.assertNotNull(String.format("test case '%s': can't get field '%s'.", issue.getKey(), name), field);
 		Assert.assertNotNull(String.format("test case '%s': field '%s' without value.", issue.getKey(), name),
 				field.getValue());
 
@@ -305,13 +306,19 @@ public class TestFloUtils {
 			}
 
 			if (testStep.getOrder() != (row + 1)) {
-				throw new SystemException(
-						String.format("test case '%s', report '%s' have different order (test case: %d, report: %d).",
-								testCase.getId(), report.getId(), Integer.valueOf(testStep.getOrder()),
-								Integer.valueOf(row + 1)));
+
+				System.out.println("");
+				
+//				throw new SystemException(
+//						String.format("test case '%s', report '%s' have different order (test case: %d, report: %d).",
+//								testCase.getId(), report.getId(), Integer.valueOf(testStep.getOrder()),
+//								Integer.valueOf(row + 1)));
 			}
 
-			map.remove(key);
+			else {
+				map.remove(key);
+			}
+			
 
 			final String comment = TestFloUtils.getComment(stepReport);
 			final TestStepStatus status = TestStepStatus.get(stepReport.getResult());

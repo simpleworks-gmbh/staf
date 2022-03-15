@@ -1,21 +1,27 @@
 package de.simpleworks.staf.framework.elements.api;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import com.google.inject.Module;
+
 import de.simpleworks.staf.commons.api.APITeststep;
 import de.simpleworks.staf.commons.api.Assertion;
 import de.simpleworks.staf.commons.api.HttpRequest;
 import de.simpleworks.staf.commons.api.HttpResponse;
+import de.simpleworks.staf.commons.api.ResponseEntity;
 import de.simpleworks.staf.commons.enums.ContentTypeEnum;
 import de.simpleworks.staf.commons.enums.ValidateMethodEnum;
 import de.simpleworks.staf.commons.exceptions.SystemException;
+import de.simpleworks.staf.commons.mapper.Mapper;
 import de.simpleworks.staf.commons.mapper.api.MapperAPITeststep;
 import de.simpleworks.staf.commons.report.artefact.HarFile;
 import de.simpleworks.staf.commons.utils.Convert;
@@ -23,12 +29,14 @@ import de.simpleworks.staf.commons.utils.UtilsCollection;
 import de.simpleworks.staf.commons.utils.UtilsIO;
 import de.simpleworks.staf.framework.api.httpclient.HttpClient;
 import de.simpleworks.staf.framework.api.httpclient.TeststepProvider;
+import de.simpleworks.staf.framework.api.httpclient.properties.HttpClientProperties;
 import de.simpleworks.staf.framework.elements.commons.TemplateTestCase;
 import de.simpleworks.staf.framework.util.AssertionUtils;
 import de.simpleworks.staf.framework.util.HttpResponseUtils;
 import de.simpleworks.staf.framework.util.assertion.File_ComparerAssertionValidator;
 import de.simpleworks.staf.framework.util.assertion.HeaderAssertionValidator;
 import de.simpleworks.staf.framework.util.assertion.JSONPATHAssertionValidator;
+import de.simpleworks.staf.framework.util.assertion.ResponseBodyAssertionValidator;
 import de.simpleworks.staf.framework.util.assertion.XPATHAssertionValidator;
 import net.lightbody.bmp.BrowserMobProxyServer;
 import net.lightbody.bmp.core.har.Har;
@@ -36,14 +44,20 @@ import net.lightbody.bmp.core.har.Har;
 public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResponse> {
 	private static final Logger logger = LogManager.getLogger(APITestCase.class);
 	private final static String ENVIRONMENT_VARIABLES_NAME = "APITestCase";
+	private static final HttpClientProperties httpClientProperties = HttpClientProperties.getInstance();
+
 	private String currentstepname;
 	private HttpRequest currentHttpRequest;
 	private HttpResponse currentExpetcedHttpResponse;
+
+	private final Map<String, ResponseEntity> extractedResponseEntities;
+
 	private Assertion[] currentAssertions;
 	private final HttpClient client = new HttpClient();
 
 	protected APITestCase(final String resource, final Module... modules) throws SystemException {
 		super(resource, ENVIRONMENT_VARIABLES_NAME, new MapperAPITeststep(), modules);
+		extractedResponseEntities = new HashMap<>();
 	}
 
 	private static final Map<String, String> checkHeader(final HttpResponse response, final Assertion assertion) {
@@ -54,8 +68,12 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 		return new XPATHAssertionValidator().validateAssertion(response, assertion);
 	}
 
-	private static final Map<String, String> checkJSon(final HttpResponse response, final Assertion assertion) {
+	private static final Map<String, String> checkJSonPath(final HttpResponse response, final Assertion assertion) {
 		return new JSONPATHAssertionValidator().validateAssertion(response, assertion);
+	}
+
+	private static final Map<String, String> checkResponseBody(final HttpResponse response, final Assertion assertion) {
+		return new ResponseBodyAssertionValidator().validateAssertion(response, assertion);
 	}
 
 	private static final Map<String, String> checkFile(final HttpResponse response, final Assertion assertion) {
@@ -63,47 +81,149 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 	}
 
 	@Override
-	protected Map<String, String> validateAssertions(HttpResponse response, List<Assertion> assertions)
+	protected Map<String, String> runAssertion(final HttpResponse response, final Assertion assertion)
 			throws SystemException {
-		if (response == null) {
-			throw new IllegalArgumentException("response can't be null.");
+
+		final Map<String, String> results;
+
+		final ValidateMethodEnum method = assertion.getValidateMethod();
+
+		switch (method) {
+		case HEADER:
+			results = APITestCase.checkHeader(response, assertion);
+			break;
+		case XPATH:
+			results = APITestCase.checkXpath(response, assertion);
+			break;
+		case JSONPATH:
+			results = APITestCase.checkJSonPath(response, assertion);
+			break;
+		case RESPONSEBODY:
+			results = APITestCase.checkResponseBody(response, assertion);
+			break;
+		case FILE_COMPARER:
+			results = APITestCase.checkFile(response, assertion);
+			break;
+		default:
+			throw new SystemException(
+					String.format("The validateMethod '%s' is not implemented yet.", method.getValue()));
 		}
-		HttpResponse httpResponse = response;
-		if (Convert.isEmpty(assertions)) {
-			throw new IllegalArgumentException("assertions can't be null or empty.");
+
+		return results;
+	}
+
+	/**
+	 * @brief method, that fetches entities from the response {@param content} as it
+	 *        as requested from {@param expectedResponse}.
+	 * @param HttpResponse expectedResponse
+	 * @param String       content (from a received response)
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Object[] fetchResponseEntity(final HttpResponse expectedResponse, final String content) {
+
+		if (expectedResponse == null) {
+			throw new IllegalArgumentException("expectedResponse can't be null.");
 		}
-		if (APITestCase.logger.isDebugEnabled()) {
-			APITestCase.logger.debug("run assertions");
+
+		if (!expectedResponse.validate()) {
+			throw new IllegalArgumentException("expectedResponse is invalid.");
 		}
-		final Map<String, String> result = new HashMap<>();
-		for (final Assertion assertion : assertions) {
-			if (APITestCase.logger.isDebugEnabled()) {
-				APITestCase.logger.debug(String.format("work with assertion: '%s'.", assertion));
+
+		if (Convert.isEmpty(content)) {
+			throw new IllegalArgumentException("content can't be null or empty string.");
+		}
+
+		final ResponseEntity entity = expectedResponse.getEntity();
+
+		if (entity == null) {
+			throw new IllegalArgumentException("entity can't be null.");
+		}
+
+		if (!(entity.validate())) {
+			throw new IllegalArgumentException(String.format("entity is invalid '%s'.", entity));
+		}
+
+		Object[] result = new Object[0];
+
+		final String className = entity.getClassname();
+		Class<?> entityClass = null;
+
+		try {
+			entityClass = Class.forName(className);
+		} catch (Exception ex) {
+			final String msg = String.format("can't load entityClass '%s'.", className);
+			APITestCase.logger.error(msg, ex);
+			throw new RuntimeException(msg);
+		}
+
+		final String mapperClassName = entity.getMapperClassname();
+		Class<?> mapperClass = null;
+
+		try {
+			mapperClass = Class.forName(mapperClassName);
+		} catch (Exception ex) {
+			final String msg = String.format("can't load mapperClass '%s'.", mapperClassName);
+			APITestCase.logger.error(msg, ex);
+			throw new RuntimeException(msg);
+		}
+
+		Mapper mapper = null;
+
+		try {
+			mapper = (Mapper) mapperClass.newInstance();
+		} catch (InstantiationException ex) {
+			final String msg = String.format("can't initialize mapper from class '%s'.", mapperClassName);
+			APITestCase.logger.error(msg, ex);
+			throw new RuntimeException(msg);
+		} catch (IllegalAccessException ex) {
+			final String msg = String.format("can't access mapper.", mapperClassName);
+			APITestCase.logger.error(msg, ex);
+			throw new RuntimeException(msg);
+		}
+
+		List pojos = new ArrayList<>();
+		try {
+			pojos = mapper.readAll(content);
+		} catch (SystemException ex) {
+			final String msg = "can't parse pojos.";
+			APITestCase.logger.error(msg, ex);
+			throw new RuntimeException(msg);
+		}
+
+		if (Convert.isEmpty(pojos)) {
+			throw new RuntimeException("no response entities were fetched, expected is at least one.");
+		}
+
+		try {
+
+			result = new Object[pojos.size()];
+
+			for (int itr = 0; itr < pojos.size(); itr += 1) {
+
+				try {
+					final Object entit = pojos.get(itr);
+
+					Object obj = entityClass.cast(entit);
+					result[itr] = obj;
+				} catch (Exception ex) {
+
+					String msg = Convert.EMPTY_STRING;
+
+					if (ex instanceof ClassCastException) {
+						msg = String.format("can't cast entity to instance of '%s'.", entityClass.getName());
+					} else {
+						msg = String.format("can't fetch entities.");
+					}
+					APITestCase.logger.error(msg, ex);
+					throw new RuntimeException(msg);
+				}
 			}
-			assertion.validate();
-			final ValidateMethodEnum method = assertion.getValidateMethod();
-			final Map<String, String> results;
-			switch (method) {
-			case HEADER:
-				results = APITestCase.checkHeader(httpResponse, assertion);
-				break;
-			case XPATH:
-				results = APITestCase.checkXpath(httpResponse, assertion);
-				break;
-			case JSONPATH:
-				results = APITestCase.checkJSon(httpResponse, assertion);
-				break;
-			case FILE_COMPARER:
-				results = APITestCase.checkFile(httpResponse, assertion);
-				break;
-			default:
-				throw new SystemException(
-						String.format("The validateMethod '%s' is not implemented yet.", method.getValue()));
-			}
-			results.keySet().stream().forEach(key -> {
-				result.put(key, results.get(key));
-			});
+		} catch (Exception ex) {
+			final String msg = String.format("can't fetch entities from response '%s'.", content);
+			APITestCase.logger.error(msg, ex);
+			result = new Object[0];
 		}
+
 		return result;
 	}
 
@@ -111,15 +231,26 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 	 * @brief method, that checks, if a {@param HttpRequest} request, returns the
 	 *        expected {@param HttpResponse} response.
 	 */
-	protected APITestResult checkRequest(final HttpRequest request, final HttpResponse expected,
+	protected APITestResult checkRequest(final HttpRequest request, final HttpResponse expectedResponse,
 			final List<Assertion> assertions) {
+
 		if (request == null) {
 			throw new IllegalArgumentException("request can't be null.");
 		}
-		if (expected == null) {
+
+		if (!request.validate()) {
+			throw new IllegalArgumentException(String.format("request \"%s\" is invalid.", request));
+		}
+
+		if (expectedResponse == null) {
 			throw new IllegalArgumentException("expectedResponse can't be null.");
 		}
-		final APITestResult result = new APITestResult(request, expected);
+
+		if (!expectedResponse.validate()) {
+			throw new IllegalArgumentException(String.format("expectedResponse \"%s\" is invalid.", expectedResponse));
+		}
+
+		final APITestResult result = new APITestResult(request, expectedResponse);
 		if (APITestCase.logger.isDebugEnabled()) {
 			APITestCase.logger.debug(String.format("created test result: %s.", result));
 		}
@@ -130,16 +261,27 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 				APITestCase.logger.debug(String.format("get response: %s.", response));
 			}
 			result.setResponse(response);
-			HttpResponseUtils.compare(response, expected);
+			HttpResponseUtils.compare(response, expectedResponse);
+
+			if (expectedResponse.getEntity() != null) {
+				final Object[] entities = fetchResponseEntity(expectedResponse, response.getJsonBody());
+				final ResponseEntity entity = new ResponseEntity(expectedResponse.getEntity());
+				entity.setEntities(entities);
+
+				response.setEntity(entity);
+				result.setResponseEntities(entity);
+			}
+
 			if (!Convert.isEmpty(assertions)) {
 				final Map<String, String> values = validateAssertions(response, UtilsCollection.toList(assertions));
 				result.setExtractedValues(values);
 			}
+
 			result.setSuccessfull(true);
 		} catch (final Throwable th) {
 			final String msg = String.format(
-					"Request '%s' failed, expected is Response '%s', but the Response is '%s'.", request, expected,
-					response);
+					"Request '%s' failed, expected is Response '%s', but the Response is '%s'.", request,
+					expectedResponse, response);
 			APITestCase.logger.error(msg, th);
 			result.setErrormessage(th.getMessage());
 			result.setSuccessfull(false);
@@ -151,6 +293,30 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 		if (request == null) {
 			throw new IllegalArgumentException("request can't be null.");
 		}
+
+		int timeout = httpClientProperties.getTimeout();
+
+		try {
+
+			if (timeout > -1) {
+				Thread.sleep(timeout * 1000);
+			}
+
+		} catch (Exception ex) {
+
+			if (ex instanceof NumberFormatException) {
+				APITestCase.logger.error(String.format("pacing \"%s\" can't be parsed to an integer.", timeout), ex);
+			}
+
+			else if (ex instanceof InterruptedException) {
+				APITestCase.logger.error(String.format("can't wait whole pacing \"%s\".", timeout), ex);
+			}
+
+			else {
+				APITestCase.logger.error("pacing can't be applied.", ex);
+			}
+		}
+
 		final BrowserMobProxyServer proxy = client.getBrowserMobProxyServer();
 		if (proxy != null) {
 			proxy.newHar(currentstepname);
@@ -212,6 +378,9 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 			throw new IllegalArgumentException("provider can't be null.");
 		}
 		APITeststep apiteststep = provider.get();
+		if (apiteststep == null) {
+			return;
+		}
 		if (!apiteststep.validate()) {
 			throw new IllegalArgumentException(String.format("Step '%s' is invalid.", apiteststep));
 		}
@@ -330,6 +499,31 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 		final APITestResult result = checkRequest(request, expectedResponse, UtilsCollection.toList(assertions));
 		AssertionUtils.assertTrue(result.getErrormessage(), result.isSuccessfull());
 		addExtractedValues(currentstepname, result.getExtractedValues());
+		addResponseEntitiy(currentstepname, result.getResponseEntities());
+	}
+
+	protected void addResponseEntitiy(final String key, final ResponseEntity entity) {
+		if (Convert.isEmpty(key)) {
+			throw new IllegalArgumentException("key can't be null or empty string.");
+		}
+
+		if (entity == null) {
+			return;
+		}
+
+		if (!(entity.validate())) {
+			throw new IllegalArgumentException(String.format("entity is invalid '%s'.", entity));
+		}
+
+		if (APITestCase.logger.isDebugEnabled()) {
+			APITestCase.logger.debug(String.format("add variables for key: '%s'.", key));
+		}
+
+		if (getExtractedResponseEntities() == null) {
+			throw new IllegalStateException("extractedResponseEntities can't be null.");
+		}
+
+		getExtractedResponseEntities().put(key, entity);
 	}
 
 	protected HttpRequest getCurrentHttpRequest() {
@@ -346,5 +540,9 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 
 	public HttpClient getHttpClient() {
 		return client;
+	}
+
+	public Map<String, ResponseEntity> getExtractedResponseEntities() {
+		return extractedResponseEntities;
 	}
 }

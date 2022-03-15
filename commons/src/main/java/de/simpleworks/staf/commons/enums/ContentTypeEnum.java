@@ -10,6 +10,7 @@ import de.simpleworks.staf.commons.utils.UtilsFormat;
 
 public enum ContentTypeEnum implements IEnum {
 	NONE("NONE", ContentTypeValue.NONE), UNKNOWN("unkown", ContentTypeValue.UNKNOWN),
+	OCTET_STREAM("application/octet-stream", ContentTypeValue.OCTET_STREAM),
 	JSON("application/json", ContentTypeValue.JSON), ZIP("application/zip", ContentTypeValue.ZIP),
 	PDF("application/pdf", ContentTypeValue.PDF), DOC("application/msword", ContentTypeValue.DOC),
 	DOCX("application/vnd.openxmlformats-officedocument.wordprocessingml.document", ContentTypeValue.DOCX),

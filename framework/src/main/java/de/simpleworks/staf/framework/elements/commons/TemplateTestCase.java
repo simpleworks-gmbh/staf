@@ -1,15 +1,11 @@
 package de.simpleworks.staf.framework.elements.commons;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -32,6 +28,8 @@ import de.simpleworks.staf.framework.api.httpclient.TeststepProvider;
 
 public abstract class TemplateTestCase<Teststep extends ITeststep, Response> extends TestCase {
 	private static final Logger logger = LogManager.getLogger(TemplateTestCase.class);
+
+	public final static String CURRENT_STEP_STORAGE_NAME = "CURRENT_STEP_STORAGE";
 
 	private final String environmentName;
 	private final TeststepProvider<Teststep> provider;
@@ -69,6 +67,10 @@ public abstract class TemplateTestCase<Teststep extends ITeststep, Response> ext
 
 			provider = new TeststepProvider<>(steps, methodSteps);
 
+			// reset current "Step Storage"
+			addExtractedValues(TemplateTestCase.CURRENT_STEP_STORAGE_NAME,
+					Collections.singletonMap("class", this.getClass().toString()));
+
 		} catch (final Exception ex) {
 			final String msg = String.format("can't initialize instance of class '%s'.",
 					Convert.getClassFullName(this));
@@ -77,13 +79,59 @@ public abstract class TemplateTestCase<Teststep extends ITeststep, Response> ext
 		}
 	}
 
-	protected abstract Map<String, String> validateAssertions(final Response response, final List<Assertion> assertions)
-			throws SystemException;
-
 	protected abstract Teststep updateTeststep(final Teststep step, final Map<String, Map<String, String>> values)
 			throws SystemException;
 
+	protected abstract Map<String, String> runAssertion(final Response response, final Assertion assertions)
+			throws SystemException;
+
 	protected abstract void getNextTeststep() throws SystemException;
+
+	protected final Map<String, String> validateAssertions(final Response response, final List<Assertion> assertions)
+			throws Exception {
+
+		if (response == null) {
+			throw new IllegalArgumentException("response can't be null.");
+		}
+
+		if (Convert.isEmpty(assertions)) {
+			throw new IllegalArgumentException("assertions can't be null or empty.");
+		}
+
+		final Map<String, String> result = new HashMap<>();
+
+		if (TemplateTestCase.logger.isDebugEnabled()) {
+			TemplateTestCase.logger.debug("run assertions");
+		}
+
+		for (final Assertion assertion : assertions) {
+
+			if (!assertion.validate()) {
+				throw new IllegalArgumentException(String.format("assertion is invaid [\"5s\"].", assertion));
+			}
+
+			final Assertion updatedAssertion = updateFields(Assertion.class, assertion, getExtractedValues());
+
+			if (TemplateTestCase.logger.isDebugEnabled()) {
+				TemplateTestCase.logger.debug(String.format("work with assertion: '%s'.", assertion));
+			}
+
+			final Map<String, String> results = runAssertion(response, updatedAssertion);
+
+			results.keySet().stream().forEach(key -> {
+				result.put(key, results.get(key));
+			});
+
+			addExtractedValues(TemplateTestCase.CURRENT_STEP_STORAGE_NAME, results);
+		}
+
+		// reset current "Step Storage"
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("class", this.getClass().toString());
+
+		addExtractedValues(TemplateTestCase.CURRENT_STEP_STORAGE_NAME, map);
+		return result;
+	}
 
 	protected void addExtractedValues(final String key, final Map<String, String> values) {
 		if (Convert.isEmpty(key)) {
@@ -107,7 +155,9 @@ public abstract class TemplateTestCase<Teststep extends ITeststep, Response> ext
 
 			tmp.keySet().stream().forEach(k -> {
 				if (!values.containsKey(k)) {
-					values.put(k, tmp.get(k));
+
+					final String str = tmp.get(k);
+					values.put(k, str);
 				}
 			});
 		}
@@ -192,7 +242,14 @@ public abstract class TemplateTestCase<Teststep extends ITeststep, Response> ext
 	 * @throws Exception
 	 *
 	 **/
+	
+	
 	protected final <T> T updateFields(final Class<? extends T> clazz, final T ob,
+			final Map<String, Map<String, String>> storage) throws Exception {
+		return FieldUpdater.updateFields(clazz, ob, storage);
+	}
+	
+	/*protected final <T> T updateFields(final Class<? extends T> clazz, final T ob,
 			final Map<String, Map<String, String>> storage) throws Exception {
 		if (clazz == null) {
 			throw new IllegalArgumentException("clazz can't be null.");
@@ -259,6 +316,15 @@ public abstract class TemplateTestCase<Teststep extends ITeststep, Response> ext
 							final Object fieldValue = currentField.get(ob);
 
 							final Object obj = theClass.cast(fieldValue);
+
+							if (obj == null) {
+								if (TemplateTestCase.logger.isDebugEnabled()) {
+									TemplateTestCase.logger.debug(String.format(
+											"field '%s' has value null, will skip update.", currentField.getName()));
+								}
+								continue;
+							}
+
 							final Object updatedField = updateFields(currentField.getType(), obj, storage);
 							final Object castedupdatedField = theClass.cast(updatedField);
 
@@ -299,6 +365,15 @@ public abstract class TemplateTestCase<Teststep extends ITeststep, Response> ext
 									final Map<String, String> map = storage.getOrDefault(lefthandassignment, null);
 
 									if (map == null) {
+										if (CURRENT_STEP_STORAGE_NAME.equals(lefthandassignment)) {
+											if (TemplateTestCase.logger.isInfoEnabled()) {
+												TemplateTestCase.logger.info(String.format(
+														"storage '%s', has not been loaded, will not substitute.",
+														CURRENT_STEP_STORAGE_NAME));
+											}
+											continue;
+										}
+
 										throw new Exception(
 												String.format("storage \"%s\" is unknown.", lefthandassignment));
 									}
@@ -306,6 +381,16 @@ public abstract class TemplateTestCase<Teststep extends ITeststep, Response> ext
 									final String value = map.getOrDefault(assertion, null);
 
 									if (Convert.isEmpty(value)) {
+
+										if (CURRENT_STEP_STORAGE_NAME.equals(lefthandassignment)) {
+											if (TemplateTestCase.logger.isInfoEnabled()) {
+												TemplateTestCase.logger.info(String.format(
+														"storage '%s', has not been loaded, will not substitute.",
+														CURRENT_STEP_STORAGE_NAME));
+											}
+											continue;
+										}
+
 										throw new Exception(String.format("variable \"%s\" is unknown.", assertion));
 									}
 
@@ -329,6 +414,6 @@ public abstract class TemplateTestCase<Teststep extends ITeststep, Response> ext
 		}
 
 		return ob;
-	}
-
+	}*/
+	
 }

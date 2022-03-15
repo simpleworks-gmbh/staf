@@ -6,6 +6,7 @@ import java.util.Map;
 
 import de.simpleworks.staf.commons.api.HttpRequest;
 import de.simpleworks.staf.commons.api.HttpResponse;
+import de.simpleworks.staf.commons.api.ResponseEntity;
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.UtilsFormat;
 import de.simpleworks.staf.framework.elements.commons.ATestResult;
@@ -16,6 +17,7 @@ public class APITestResult extends ATestResult {
 
 	private HttpResponse response;
 	private Map<String, String> extractedValues;
+	private ResponseEntity responseEntities;
 
 	public APITestResult(final HttpRequest request, final HttpResponse expectedResponse) {
 		if (request == null) {
@@ -42,6 +44,10 @@ public class APITestResult extends ATestResult {
 		return extractedValues;
 	}
 
+	public ResponseEntity getResponseEntities() {
+		return responseEntities;
+	}
+
 	public HttpResponse getExpectedResponse() {
 		return expectedResponse;
 	}
@@ -52,6 +58,10 @@ public class APITestResult extends ATestResult {
 
 	public void setExtractedValues(final Map<String, String> extractedValues) {
 		this.extractedValues = extractedValues;
+	}
+
+	public void setResponseEntities(ResponseEntity responseEntities) {
+		this.responseEntities = responseEntities;
 	}
 
 	@Override
@@ -67,9 +77,10 @@ public class APITestResult extends ATestResult {
 			vals = null;
 		}
 
-		return String.format("[%s: %s, %s, %s, %s, %s, %s]", Convert.getClassName(APITestResult.class),
+		return String.format("[%s: %s, %s, %s, %s, %s, %s, %s]", Convert.getClassName(APITestResult.class),
 				UtilsFormat.format("request", request), UtilsFormat.format("expectedResponse", expectedResponse),
 				UtilsFormat.format("response", response), UtilsFormat.format("successfull", isSuccessfull()),
-				UtilsFormat.format("errormessage", getErrormessage()), UtilsFormat.format("extractedValues", vals));
+				UtilsFormat.format("errormessage", getErrormessage()), UtilsFormat.format("extractedValues", vals),
+				UtilsFormat.format("responseEntities", responseEntities));
 	}
 }
