@@ -17,13 +17,15 @@ public class STAFList extends STAFElement {
 
 	public STAFList(final WebDriver webDriver, final By by) {
 		super(webDriver, by);
-
 	}
 
 	public List<WebElement> getAllElements() throws SystemException {
 		if (!exists()) {
 			throw new SystemException(String.format("No webElement can be found at '%s'.", getBy()));
 		}
+
+		final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
+		wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(getBy()));
 
 		final List<WebElement> result = getWebDriver().findElements(getBy());
 
@@ -35,132 +37,138 @@ public class STAFList extends STAFElement {
 		return result;
 	}
 
-	public WebElement getElement(final int i) throws SystemException {
+	public WebElement getElement(final int index) throws SystemException {
 
-		if (i <= 0) {
-			throw new IllegalArgumentException("Number of list can't be small or equals 0");
+		if (index < 0) {
+			throw new IllegalArgumentException(
+					String.format("index is less than 0, which is not supported '%s'.", Integer.toString(index)));
 		}
 
-		if (STAFList.logger.isDebugEnabled()) {
-			STAFList.logger.debug(String.format("List element can't be found '%s' with '%s'.", getBy(), i));
-		}
+		final List<WebElement> elements = getAllElements();
 
-		final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
-		wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(getBy()));
-
-		final List<WebElement> elements = getWebDriver().findElements(getBy());
-
-		if (Convert.isEmpty(elements)) {
+		if (elements.size() <= index) {
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("No list can be found at with '%s'.", getBy()));
+				logger.debug(String.format("The index '%s' is greater or equal than the element list of '%s'",
+						Integer.toString(index), Integer.toString(elements.size())));
+			}
+
+			return null;
+		}
+
+		final WebElement result = elements.get(index);
+
+		if (result == null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug((String.format("No element can't be found at '%s'", Integer.toString(index))));
 			}
 		}
 
-		return elements.get(i - 1);
+		return result;
 	}
 
-	public void clickOnElement(final int i) throws SystemException {
+	public void clickOnElement(final int index) throws SystemException {
 
-		if (i <= 0) {
-			throw new IllegalArgumentException("Number of list can't be small or equals 0");
+		if (index < 0) {
+			throw new IllegalArgumentException(
+					String.format("index is less than 0, which is not supported '%s'.", Integer.toString(index)));
 		}
 
 		if (STAFList.logger.isDebugEnabled()) {
 			STAFList.logger.debug(String.format("click on element at '%s'.", getBy()));
 		}
 
-		final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
-		wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(getBy()));
-		wait.until(ExpectedConditions.elementToBeClickable(getAllElements().get(i - 1)));
+		final WebElement element = getElement(index);
 
-		final List<WebElement> elements = getWebDriver().findElements(getBy());
-
-		if (Convert.isEmpty(elements)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("No list can be found at with '%s'.", getBy()));
-			}
+		if (element == null) {
+			throw new SystemException(String.format("No element can't be found at '%s'", Integer.toString(index)));
 		}
 
-		elements.get(i - 1).click();
+		final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
+		wait.until(ExpectedConditions.elementToBeClickable(element));
 
+		element.click();
 	}
 
-	public String getElementText(final int i) throws SystemException {
+	public String getElementText(final int index) throws SystemException {
 
-		if (i <= 0) {
-			throw new IllegalArgumentException("Number of list can't be small or equals 0");
+		if (index < 0) {
+			throw new IllegalArgumentException(
+					String.format("index is less than 0, which is not supported '%s'.", Integer.toString(index)));
 		}
 
 		if (STAFList.logger.isDebugEnabled()) {
-			STAFList.logger.debug(String.format("get element text at '%s'.", getBy()));
+			STAFList.logger.debug(String.format("click on element at '%s'.", getBy()));
 		}
 
-		final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
-		wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(getBy()));
+		final WebElement element = getElement(index);
 
-		final List<WebElement> elements = getWebDriver().findElements(getBy());
-
-		if (Convert.isEmpty(elements)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("No list can be found at with '%s'.", getBy()));
-			}
+		if (element == null) {
+			throw new SystemException(String.format("No element can't be found at '%s'", Integer.toString(index)));
 		}
 
-		final String text = elements.get(i - 1).getText();
+		final String result = element.getText();
 
-		if (Convert.isEmpty(text)) {
+		if (Convert.isEmpty(result)) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("text is null or empty string.");
+				logger.warn("result is null or empty string.");
 			}
 		}
-		return text;
+		return result;
 	}
 
-	public String getElementAttribute(final int i, final String attributeName) throws SystemException {
+	public String getElementAttribute(final int index, final String attributeName) throws SystemException {
 
-		if (i <= 0) {
-			throw new IllegalArgumentException("Number of list can't be small or equals 0");
+		if (index < 0) {
+			throw new IllegalArgumentException(
+					String.format("index is less than 0, which is not supported '%s'.", Integer.toString(index)));
 		}
+
 		if (Convert.isEmpty(attributeName)) {
 			throw new IllegalArgumentException("attributeName can't be null or empty.");
 		}
 
-		final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
-		wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(getBy()));
-
-		final List<WebElement> elements = getWebDriver().findElements(getBy());
-
-		if (Convert.isEmpty(elements)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("No list can be found at with '%s'.", getBy()));
-			}
+		if (STAFList.logger.isDebugEnabled()) {
+			STAFList.logger.debug(String.format("click on element at '%s'.", getBy()));
 		}
 
-		return elements.get(i - 1).getAttribute(attributeName);
+		final WebElement element = getElement(index);
+
+		if (element == null) {
+			throw new SystemException(String.format("No element can't be found at '%s'", Integer.toString(index)));
+		}
+
+		final String result = element.getAttribute(attributeName);
+
+		if (Convert.isEmpty(result)) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("result is null or empty string.");
+			}
+		}
+		return result;
+
 	}
 
-	public void enterTextAtElement(final int i, final String text) throws SystemException {
+	public void enterTextAtElement(final int index, final String text) throws SystemException {
 
-		if (i <= 0) {
-			throw new IllegalArgumentException("Number of list can't be small or equals 0");
+		if (index < 0) {
+			throw new IllegalArgumentException(
+					String.format("index is less than 0, which is not supported '%s'.", Integer.toString(index)));
 		}
 
 		if (STAFList.logger.isDebugEnabled()) {
-			STAFList.logger.debug(String.format("enter '%s' into the Input at '%s' . index '%s'.", text, getBy(), i));
+			STAFList.logger.debug(String.format("click on element at '%s'.", getBy()));
+		}
+
+		final WebElement element = getElement(index);
+
+		if (element == null) {
+			throw new SystemException(String.format("No element can't be found at '%s'", Integer.toString(index)));
 		}
 
 		final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
-		wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(getBy()));
+		wait.until(ExpectedConditions.elementToBeClickable(element));
 
-		final List<WebElement> elements = getWebDriver().findElements(getBy());
-
-		if (Convert.isEmpty(elements)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("No list can be found at with '%s'.", getBy()));
-			}
-		}
-
-		elements.get(i - 1).click();
+		element.click();
 
 		if (!markText()) {
 			STAFList.logger.error("cannot mark text for deletion.");
@@ -170,6 +178,6 @@ public class STAFList extends STAFElement {
 			STAFList.logger.error("cannot delete.");
 		}
 
-		elements.get(i - 1).sendKeys(text);
+		element.sendKeys(text);
 	}
 }
