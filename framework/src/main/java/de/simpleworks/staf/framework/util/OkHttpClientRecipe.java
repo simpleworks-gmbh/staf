@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.Proxy.Type;
 import java.security.cert.CertificateException;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -25,17 +26,21 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import okhttp3.logging.HttpLoggingInterceptor.Level;
 
 public class OkHttpClientRecipe {
-	private final Logger logger = LoggerFactory.getLogger(OkHttpClientRecipe.class);
+	private final static Logger logger = LoggerFactory.getLogger(OkHttpClientRecipe.class);
 
 	private final boolean ignoreCertificate;
 	private final CookiePolicy cookiePolicy;
 	private final Level loggingLevel;
+	private final boolean retryConnection;
+	private final int timeout;
+
 	private OkHttpClient client;
 
 	private final BrowserMobProxyServer browsermobProxy;
 
 	public OkHttpClientRecipe(final boolean ignoreCertificate, final CookiePolicy cookiePolicy,
-			final Level loggingLevel, final BrowserMobProxyServer browsermobProxy) throws SystemException {
+			final Level loggingLevel, final BrowserMobProxyServer browsermobProxy, final boolean retryConnection,
+			final int timeout) throws SystemException {
 		if (cookiePolicy == null) {
 			throw new IllegalArgumentException("cookiePolicy can't be null.");
 		}
@@ -47,6 +52,9 @@ public class OkHttpClientRecipe {
 		this.ignoreCertificate = ignoreCertificate;
 		this.cookiePolicy = cookiePolicy;
 		this.loggingLevel = loggingLevel;
+		this.retryConnection = retryConnection;
+		this.timeout = timeout;
+
 		this.browsermobProxy = browsermobProxy;
 		buildOkHttpClient();
 	}
@@ -90,6 +98,7 @@ public class OkHttpClientRecipe {
 				logger.debug(String.format("proxy: '%s'.", proxy));
 			}
 			client = builder.addNetworkInterceptor(interceptor).cookieJar(cookieJar).proxy(proxy).build();
+
 		}
 
 		if (logger.isDebugEnabled()) {
@@ -128,7 +137,27 @@ public class OkHttpClientRecipe {
 		Builder builder = new Builder();
 
 		if (ignoreCert) {
+			if (OkHttpClientRecipe.logger.isDebugEnabled()) {
+				OkHttpClientRecipe.logger.debug("ignore certificates.");
+			}
+
 			builder = configureToIgnoreCertificate(builder);
+		}
+
+		if (OkHttpClientRecipe.logger.isDebugEnabled()) {
+			OkHttpClientRecipe.logger.debug(String.format("use timeout \"%s\".", Integer.toString(timeout)));
+		}
+
+		builder.connectTimeout(timeout * 1000, TimeUnit.MILLISECONDS)
+				.writeTimeout(timeout * 1000, TimeUnit.MILLISECONDS).readTimeout(timeout * 1000, TimeUnit.MILLISECONDS);
+
+		if (retryConnection) {
+
+			if (OkHttpClientRecipe.logger.isDebugEnabled()) {
+				OkHttpClientRecipe.logger.debug("retry connections.");
+			}
+
+			builder.retryOnConnectionFailure(retryConnection);
 		}
 
 		return builder;
