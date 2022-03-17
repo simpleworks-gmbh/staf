@@ -24,7 +24,7 @@ public class HttpClientProperties extends PropertiesReader {
 	@Property(FrameworkConsts.IGNORE_CERTIFICATE)
 	private boolean ignoreCertificate;
 
-	@Default("60")
+	@Default("1")
 	@Property(FrameworkConsts.API_TIMEOUT)
 	private int timeout;
 
