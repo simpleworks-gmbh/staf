@@ -127,8 +127,10 @@ public abstract class PropertiesReader {
 						final Default defaultValue = field.getAnnotation(Default.class);
 						if (defaultValue != null) {
 							value = defaultValue.value();
-							PropertiesReader.logger
-									.info(String.format("Property '%s' is set to default value: '%s'.", key, value));
+							if (PropertiesReader.logger.isDebugEnabled()) {
+								PropertiesReader.logger.debug(
+										String.format("Property '%s' is set to default value: '%s'.", key, value));
+							}
 						}
 					}
 
