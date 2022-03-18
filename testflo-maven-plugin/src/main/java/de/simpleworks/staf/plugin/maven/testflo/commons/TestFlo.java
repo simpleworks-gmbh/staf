@@ -37,6 +37,7 @@ public class TestFlo {
 	private final TestFloTms tms;
 	private final TestFloFixVersion testFloFixVersion;
 	private final TestFloLabel testFloLabel;
+	private final TestFloFields testFloFields;
 
 	public TestFlo(final IssueRestClient jira, final OkHttpClient client, final URL urlTms) {
 		if (jira == null) {
@@ -46,6 +47,7 @@ public class TestFlo {
 		tms = new TestFloTms(client, urlTms);
 		testFloFixVersion = new TestFloFixVersion(client, jira, JiraProperties.getInstance());
 		testFloLabel = new TestFloLabel(jira);
+		testFloFields = new TestFloFields(jira);
 	}
 
 	private void logTransitions(final Issue issue) {
@@ -329,7 +331,7 @@ public class TestFlo {
 		}
 	}
 
-	public void addLabel(List<String> labels, TestPlan testPlan) {
+	public void addLabels(List<String> labels, TestPlan testPlan) {
 		if (Convert.isEmpty(labels)) {
 			throw new IllegalArgumentException("labels can't be null or empty.");
 		}
@@ -346,7 +348,31 @@ public class TestFlo {
 			try {
 				testFloLabel.addLabels(testcase.getId(), labels);
 			} catch (Exception ex) {
-				final String msg = String.format("can't add Fix Version, for testcase '%s'.", testcase.getId());
+				final String msg = String.format("can't add Labels, for testcase '%s'.", testcase.getId());
+				TestFlo.logger.error(msg, ex);
+			}
+		}
+	}
+
+	public void addFields(List<String> customFields, TestPlan testPlan) {
+		if (Convert.isEmpty(customFields)) {
+			throw new IllegalArgumentException("customFields can't be null or empty.");
+		}
+		if (testPlan == null) {
+			throw new IllegalArgumentException("testPlan can't be null.");
+		}
+
+		for (TestCase testcase : testPlan.getTestCases()) {
+
+			if (TestFlo.logger.isDebugEnabled()) {
+				TestFlo.logger.debug(String.format("add customFields '%s' to issue '%s'.",
+						String.join(", ", customFields), testcase.getId()));
+			}
+			try {
+
+				testFloFields.addFields(testcase.getId(), customFields);
+			} catch (Exception ex) {
+				final String msg = String.format("can't add CustomFields, for testcase '%s'.", testcase.getId());
 				TestFlo.logger.error(msg, ex);
 			}
 		}

@@ -32,27 +32,30 @@ public class FetchTestPlanMojo extends TestfloMojo {
 	private static final Logger logger = LogManager.getLogger(FetchTestPlanMojo.class);
 	@Inject
 	private IssueRestClient clientJira;
-	
+
 	@Inject
 	@Named(Consts.BASIC_AUTHENTICATED_CLIENT)
 	private OkHttpClient clientHttp;
-	
+
 	@Parameter(property = "id", required = true)
 	private String testPlanId;
-	
+
 	@Parameter(property = "file", required = true)
 	private String fileName;
-	
+
 	@Parameter(property = "fixVersions")
 	private List<String> fixVersions;
-	
+
 	@Parameter(property = "labels")
 	private List<String> labels;
-	
+
+	@Parameter(property = "customFields")
+	private List<String> customFields;
+
 	@Inject
 	@Named(Consts.JIRA_REST_TMS)
 	private URL urlTms;
-	
+
 	private TestFlo testFlo;
 
 	protected FetchTestPlanMojo() {
@@ -100,15 +103,19 @@ public class FetchTestPlanMojo extends TestfloMojo {
 			testFlo.moveTestPlanToNextIteration(testPlanId);
 			final TestPlan testPlan = testFlo.readTestPlan(testPlanId);
 			testFlo.startTestPlan(testPlan);
-			
+
 			if (!Convert.isEmpty(fixVersions)) {
 				testFlo.addFixVersions(fixVersions, testPlan);
 			}
-			
+
 			if (!Convert.isEmpty(labels)) {
-				testFlo.addLabel(labels, testPlan);
+				testFlo.addLabels(labels, testPlan);
 			}
-			
+
+			if (!Convert.isEmpty(customFields)) {
+				testFlo.addFields(customFields, testPlan);
+			}
+
 			final File file = new File(fileName);
 			if (FetchTestPlanMojo.logger.isInfoEnabled()) {
 				FetchTestPlanMojo.logger.info(String.format("write test plan into file: '%s'.", file));
