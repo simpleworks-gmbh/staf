@@ -401,6 +401,10 @@ One can also put several directories in a "comma separated list"
 
 - `gui.timeout`: (Integer) value, determines how long the html will be pulled, until the "Timeout Exception" is thrown *Default value* is `60`
 
+- `api.timeout`: (Integer) value, determines the connection timeout (connect, read, write) of the http client  *Default value* is `1`
+
+- `retry.connection`: (Boolean) value, determines if the connection should be established again, if an error happens *Default value* is `true`
+
 - `database.connection_pool.config_file`: (String) value, the file that contains the *Database Connection - Configuration Files*
 
 > © Simpleworks GmbH, Philosophenweg 31, 47051 Duisburg

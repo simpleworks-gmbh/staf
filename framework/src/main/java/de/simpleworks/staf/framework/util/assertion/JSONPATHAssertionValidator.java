@@ -1,19 +1,25 @@
 package de.simpleworks.staf.framework.util.assertion;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Random;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+
 import com.jayway.jsonpath.JsonPath;
+
 import de.simpleworks.staf.commons.api.Assertion;
 import de.simpleworks.staf.commons.api.HttpResponse;
 import de.simpleworks.staf.commons.enums.AllowedValueEnum;
 import de.simpleworks.staf.commons.enums.ValidateMethodEnum;
 import de.simpleworks.staf.commons.utils.Convert;
+import de.simpleworks.staf.commons.utils.JSONUtils;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
@@ -63,7 +69,7 @@ public class JSONPATHAssertionValidator extends AssertionUtils<HttpResponse> {
 			JSONPATHAssertionValidator.logger
 					.debug(String.format("using allowedValue '%s' to validate response.", allowedValueEnum.getValue()));
 		}
-		final String content = JSONPATHAssertionValidator.executeJsonPath(response.getJsonBody(), jsonpath);
+		String content = JSONPATHAssertionValidator.executeJsonPath(response.getJsonBody(), jsonpath);
 		if (JSONPATHAssertionValidator.logger.isDebugEnabled()) {
 			JSONPATHAssertionValidator.logger.debug(String.format("content '%s'.", content));
 		}
@@ -75,6 +81,9 @@ public class JSONPATHAssertionValidator extends AssertionUtils<HttpResponse> {
 		if (JSONPATHAssertionValidator.logger.isDebugEnabled()) {
 			JSONPATHAssertionValidator.logger.debug(String.format("assertion value '%s'.", assertionValue));
 		}
+
+		final String originalContent = content;
+
 		switch (allowedValueEnum) {
 		case EVERYTHING:
 			if (JSONPATHAssertionValidator.logger.isDebugEnabled()) {
@@ -82,6 +91,102 @@ public class JSONPATHAssertionValidator extends AssertionUtils<HttpResponse> {
 						.debug(String.format("jsonpath '%s' returned '%s'.", jsonpath, content));
 			}
 			break;
+
+		case RANDOM:
+
+			if (!JSONUtils.isJSONArray(content)) {
+				throw new RuntimeException(String.format(
+						"The assertion \"%s\" was not met. Value can't be fetched randomly, because content is no json array [\"%s\"].",
+						assertionId, content));
+			}
+
+			final JSONArray arrayToFetchRandomElement = JSONUtils.transformToJSONArray(content);
+
+			if (arrayToFetchRandomElement == null) {
+				throw new RuntimeException(
+						String.format("The assertion \"%s\" was not met. JSONArray can't be fetched from [\"%s\"].",
+								assertionId, content));
+			}
+
+			if (arrayToFetchRandomElement.size() == 0) {
+				throw new RuntimeException(String.format(
+						"The assertion \"%s\" was not met. JSONArray is empty [\"%s\"].", assertionId, content));
+			}
+
+			Object ob = arrayToFetchRandomElement
+					.get((new Random()).nextInt(Math.max(arrayToFetchRandomElement.size(), 1)));
+
+			content = ob.toString();
+
+			if (JSONPATHAssertionValidator.logger.isDebugEnabled()) {
+				JSONPATHAssertionValidator.logger
+						.debug(String.format("fetched '%s' randomly from '%s'.", content, originalContent));
+			}
+			break;
+
+		case MAX:
+
+			if (!JSONUtils.isJSONArray(content)) {
+				throw new RuntimeException(String.format(
+						"The assertion \"%s\" was not met. Value can't be fetched randomly, because content is no json array [\"%s\"].",
+						assertionId, content));
+			}
+
+			final JSONArray arrayToFetchMaxElement = JSONUtils.transformToJSONArray(originalContent);
+
+			if (arrayToFetchMaxElement == null) {
+				throw new RuntimeException(
+						String.format("The assertion \"%s\" was not met. JSONArray can't be fetched from [\"%s\"].",
+								assertionId, content));
+			}
+
+			if (arrayToFetchMaxElement.size() == 0) {
+				throw new RuntimeException(String.format(
+						"The assertion \"%s\" was not met. JSONArray is empty [\"%s\"].", assertionId, content));
+			}
+
+			Integer max = new Integer(0);
+
+			final Iterator<Object> iterator = arrayToFetchMaxElement.iterator();
+
+			Object nextElement = null;
+
+			while (iterator.hasNext()) {
+
+				Integer tmp = null;
+
+				try {
+
+					nextElement = iterator.next();
+
+					if (nextElement instanceof Integer) {
+						tmp = (Integer) nextElement;
+					} else if (nextElement instanceof Integer) {
+						tmp = new Integer((String) nextElement);
+					} else {
+						throw new Exception(String.format("type '%s' is not implemented yet.", nextElement.getClass()));
+					}
+
+					if (tmp.compareTo(max) > 0) {
+						max = tmp;
+					}
+				} catch (Exception ex) {
+					final String msg = String.format(
+							"The assertion \"%s\" was not met. can't fetch value from [\"%s\"].", assertionId,
+							nextElement);
+					JSONPATHAssertionValidator.logger.error(msg, ex);
+					throw new RuntimeException(msg);
+				}
+			}
+
+			content = max.toString();
+
+			if (JSONPATHAssertionValidator.logger.isDebugEnabled()) {
+				JSONPATHAssertionValidator.logger
+						.debug(String.format("'%s' is max value from '%s'.", content, originalContent));
+			}
+			break;
+
 		case NOT:
 			if ((content.equals(assertionValue))) {
 				throw new RuntimeException(String.format(

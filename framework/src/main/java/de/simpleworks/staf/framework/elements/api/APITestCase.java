@@ -29,6 +29,7 @@ import de.simpleworks.staf.commons.utils.UtilsCollection;
 import de.simpleworks.staf.commons.utils.UtilsIO;
 import de.simpleworks.staf.framework.api.httpclient.HttpClient;
 import de.simpleworks.staf.framework.api.httpclient.TeststepProvider;
+import de.simpleworks.staf.framework.api.httpclient.properties.HttpClientProperties;
 import de.simpleworks.staf.framework.elements.commons.TemplateTestCase;
 import de.simpleworks.staf.framework.util.AssertionUtils;
 import de.simpleworks.staf.framework.util.HttpResponseUtils;
@@ -43,6 +44,8 @@ import net.lightbody.bmp.core.har.Har;
 public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResponse> {
 	private static final Logger logger = LogManager.getLogger(APITestCase.class);
 	private final static String ENVIRONMENT_VARIABLES_NAME = "APITestCase";
+	private static final HttpClientProperties httpClientProperties = HttpClientProperties.getInstance();
+
 	private String currentstepname;
 	private HttpRequest currentHttpRequest;
 	private HttpResponse currentExpetcedHttpResponse;
@@ -65,7 +68,7 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 		return new XPATHAssertionValidator().validateAssertion(response, assertion);
 	}
 
-	private static final Map<String, String> checkJSon(final HttpResponse response, final Assertion assertion) {
+	private static final Map<String, String> checkJSonPath(final HttpResponse response, final Assertion assertion) {
 		return new JSONPATHAssertionValidator().validateAssertion(response, assertion);
 	}
 
@@ -78,51 +81,35 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 	}
 
 	@Override
-	protected Map<String, String> validateAssertions(HttpResponse response, List<Assertion> assertions)
+	protected Map<String, String> runAssertion(final HttpResponse response, final Assertion assertion)
 			throws SystemException {
-		if (response == null) {
-			throw new IllegalArgumentException("response can't be null.");
+
+		final Map<String, String> results;
+
+		final ValidateMethodEnum method = assertion.getValidateMethod();
+
+		switch (method) {
+		case HEADER:
+			results = APITestCase.checkHeader(response, assertion);
+			break;
+		case XPATH:
+			results = APITestCase.checkXpath(response, assertion);
+			break;
+		case JSONPATH:
+			results = APITestCase.checkJSonPath(response, assertion);
+			break;
+		case RESPONSEBODY:
+			results = APITestCase.checkResponseBody(response, assertion);
+			break;
+		case FILE_COMPARER:
+			results = APITestCase.checkFile(response, assertion);
+			break;
+		default:
+			throw new SystemException(
+					String.format("The validateMethod '%s' is not implemented yet.", method.getValue()));
 		}
-		HttpResponse httpResponse = response;
-		if (Convert.isEmpty(assertions)) {
-			throw new IllegalArgumentException("assertions can't be null or empty.");
-		}
-		if (APITestCase.logger.isDebugEnabled()) {
-			APITestCase.logger.debug("run assertions");
-		}
-		final Map<String, String> result = new HashMap<>();
-		for (final Assertion assertion : assertions) {
-			if (APITestCase.logger.isDebugEnabled()) {
-				APITestCase.logger.debug(String.format("work with assertion: '%s'.", assertion));
-			}
-			assertion.validate();
-			final ValidateMethodEnum method = assertion.getValidateMethod();
-			final Map<String, String> results;
-			switch (method) {
-			case HEADER:
-				results = APITestCase.checkHeader(httpResponse, assertion);
-				break;
-			case XPATH:
-				results = APITestCase.checkXpath(httpResponse, assertion);
-				break;
-			case JSONPATH:
-				results = APITestCase.checkJSon(httpResponse, assertion);
-				break;
-			case RESPONSEBODY:
-				results = APITestCase.checkResponseBody(httpResponse, assertion);
-				break;
-			case FILE_COMPARER:
-				results = APITestCase.checkFile(httpResponse, assertion);
-				break;
-			default:
-				throw new SystemException(
-						String.format("The validateMethod '%s' is not implemented yet.", method.getValue()));
-			}
-			results.keySet().stream().forEach(key -> {
-				result.put(key, results.get(key));
-			});
-		}
-		return result;
+
+		return results;
 	}
 
 	/**
@@ -131,7 +118,7 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 	 * @param HttpResponse expectedResponse
 	 * @param String       content (from a received response)
 	 */
-	@SuppressWarnings({ "unchecked", "deprecation", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Object[] fetchResponseEntity(final HttpResponse expectedResponse, final String content) {
 
 		if (expectedResponse == null) {
@@ -180,7 +167,6 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 			throw new RuntimeException(msg);
 		}
 
-		
 		Mapper mapper = null;
 
 		try {
@@ -307,6 +293,30 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 		if (request == null) {
 			throw new IllegalArgumentException("request can't be null.");
 		}
+
+		int timeout = httpClientProperties.getTimeout();
+
+		try {
+
+			if (timeout > -1) {
+				Thread.sleep(timeout * 1000);
+			}
+
+		} catch (Exception ex) {
+
+			if (ex instanceof NumberFormatException) {
+				APITestCase.logger.error(String.format("pacing \"%s\" can't be parsed to an integer.", timeout), ex);
+			}
+
+			else if (ex instanceof InterruptedException) {
+				APITestCase.logger.error(String.format("can't wait whole pacing \"%s\".", timeout), ex);
+			}
+
+			else {
+				APITestCase.logger.error("pacing can't be applied.", ex);
+			}
+		}
+
 		final BrowserMobProxyServer proxy = client.getBrowserMobProxyServer();
 		if (proxy != null) {
 			proxy.newHar(currentstepname);

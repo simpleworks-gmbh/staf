@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -12,9 +13,11 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.junit.Assert;
+
 import com.atlassian.jira.rest.client.api.IssueRestClient;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+
 import de.simpleworks.staf.commons.elements.TestPlan;
 import de.simpleworks.staf.commons.exceptions.SystemException;
 import de.simpleworks.staf.commons.mapper.elements.MapperTestplan;
@@ -29,18 +32,30 @@ public class FetchTestPlanMojo extends TestfloMojo {
 	private static final Logger logger = LogManager.getLogger(FetchTestPlanMojo.class);
 	@Inject
 	private IssueRestClient clientJira;
+
 	@Inject
 	@Named(Consts.BASIC_AUTHENTICATED_CLIENT)
 	private OkHttpClient clientHttp;
+
 	@Parameter(property = "id", required = true)
 	private String testPlanId;
+
 	@Parameter(property = "file", required = true)
 	private String fileName;
+
 	@Parameter(property = "fixVersions")
 	private List<String> fixVersions;
+
+	@Parameter(property = "labels")
+	private List<String> labels;
+
+	@Parameter(property = "customFields")
+	private List<String> customFields;
+
 	@Inject
 	@Named(Consts.JIRA_REST_TMS)
 	private URL urlTms;
+
 	private TestFlo testFlo;
 
 	protected FetchTestPlanMojo() {
@@ -88,10 +103,19 @@ public class FetchTestPlanMojo extends TestfloMojo {
 			testFlo.moveTestPlanToNextIteration(testPlanId);
 			final TestPlan testPlan = testFlo.readTestPlan(testPlanId);
 			testFlo.startTestPlan(testPlan);
-			
+
 			if (!Convert.isEmpty(fixVersions)) {
 				testFlo.addFixVersions(fixVersions, testPlan);
 			}
+
+			if (!Convert.isEmpty(labels)) {
+				testFlo.addLabels(labels, testPlan);
+			}
+
+			if (!Convert.isEmpty(customFields)) {
+				testFlo.addFields(customFields, testPlan);
+			}
+
 			final File file = new File(fileName);
 			if (FetchTestPlanMojo.logger.isInfoEnabled()) {
 				FetchTestPlanMojo.logger.info(String.format("write test plan into file: '%s'.", file));

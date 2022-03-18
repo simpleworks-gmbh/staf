@@ -23,7 +23,9 @@ public class OkHttpBuilder {
 				: null;
 		return new OkHttpClientRecipe(OkHttpBuilder.httpClientProperties.isIgnoreCertificate(),
 				OkHttpBuilder.httpClientProperties.getCookiePolicy(),
-				OkHttpBuilder.httpClientProperties.getLoggingLevel(), proxy);
+				OkHttpBuilder.httpClientProperties.getLoggingLevel(), proxy,
+				OkHttpBuilder.httpClientProperties.isRetryConnection(),
+				OkHttpBuilder.httpClientProperties.getTimeout());
 	}
 
 	private static BrowserMobProxyServer setUpProxyServer() {
