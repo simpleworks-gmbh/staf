@@ -21,12 +21,14 @@ Basic Information
 Jira Settings
 - jira.url: `Url of the used Jira Instance`
 
-
 Fix Versions
 - fixVersions: `Comma separated list of existing Fix Versions`
 
-Fix Versions
+Labels
 - labels: `Comma separated list of Jira Labels`
+
+Custom Fields
+- customFields: `Comma separated list of Custom Labels, that will be added as a Jira Label`
 
 
 TestFLO Settings
