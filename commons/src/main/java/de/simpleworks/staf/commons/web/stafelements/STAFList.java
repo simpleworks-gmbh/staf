@@ -2,8 +2,6 @@ package de.simpleworks.staf.commons.web.stafelements;
 
 import java.util.List;
 
-import de.simpleworks.staf.commons.exceptions.SystemException;
-import de.simpleworks.staf.commons.utils.Convert;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
@@ -11,6 +9,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
+import de.simpleworks.staf.commons.exceptions.SystemException;
+import de.simpleworks.staf.commons.utils.Convert;
 
 public class STAFList extends STAFElement {
 	private static final Logger logger = LogManager.getLogger(STAFList.class);
@@ -37,7 +38,7 @@ public class STAFList extends STAFElement {
 		return result;
 	}
 
-	public WebElement getElement(final int index) throws SystemException {
+	public WebElement getElement(int index) throws SystemException {
 
 		if (index < 0) {
 			throw new IllegalArgumentException(
@@ -66,7 +67,7 @@ public class STAFList extends STAFElement {
 		return result;
 	}
 
-	public void clickOnElement(final int index) throws SystemException {
+	public void clickOnElement(int index) throws SystemException {
 
 		if (index < 0) {
 			throw new IllegalArgumentException(
@@ -89,7 +90,7 @@ public class STAFList extends STAFElement {
 		element.click();
 	}
 
-	public String getElementText(final int index) throws SystemException {
+	public String getElementText(int index) throws SystemException {
 
 		if (index < 0) {
 			throw new IllegalArgumentException(
@@ -116,7 +117,7 @@ public class STAFList extends STAFElement {
 		return result;
 	}
 
-	public String getElementAttribute(final int index, final String attributeName) throws SystemException {
+	public String getElementAttribute(int index, String attributeName) throws SystemException {
 
 		if (index < 0) {
 			throw new IllegalArgumentException(
@@ -148,7 +149,7 @@ public class STAFList extends STAFElement {
 
 	}
 
-	public void enterTextAtElement(final int index, final String text) throws SystemException {
+	public void enterTextAtElement(int index, String text) throws SystemException {
 
 		if (index < 0) {
 			throw new IllegalArgumentException(
