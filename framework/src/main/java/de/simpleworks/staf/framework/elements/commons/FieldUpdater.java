@@ -18,12 +18,18 @@ import org.apache.logging.log4j.Logger;
 import de.simpleworks.staf.commons.exceptions.SystemException;
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.UtilsCollection;
+import de.simpleworks.staf.framework.elements.commons.properties.TestCaseProperties;
 
 public class FieldUpdater {
 
 	private static final Logger logger = LogManager.getLogger(FieldUpdater.class);
 
+	public final static String PARAM_CLASS = "PARAM_CLASS";
+	public final static String PARAM_VALUE = "PARAM_VALUE";
+
 	public final static String CURRENT_STEP_STORAGE_NAME = "CURRENT_STEP_STORAGE";
+
+	private final static TestCaseProperties testCaseProperties = TestCaseProperties.getInstance();
 
 	public static final <T> T updateFields(final Class<? extends T> clazz, final T ob,
 			final Map<String, Map<String, String>> storage) throws Exception {
@@ -139,7 +145,13 @@ public class FieldUpdater {
 
 		final List<String> keys = UtilsCollection.toList(storage.keySet());
 
-		final String valuePattern = "(?<=\\<&)(.*?)(?=\\&>)";
+		final String valuePattern = testCaseProperties.getValueSubstitutionRegularExpression();
+
+		if (FieldUpdater.logger.isDebugEnabled()) {
+			FieldUpdater.logger
+					.debug(String.format("use \"%s\" as regular expression for substitution.", valuePattern));
+		}
+
 		final String literal = "#";
 		final String substitutePattern = "<&%s" + literal + "%s&>";
 
@@ -219,37 +231,30 @@ public class FieldUpdater {
 			throw new IllegalArgumentException("currentField can't be null.");
 		}
 
-		final String valuePattern = "([a-z._,:|@A-Z0-9]+)";
+		final String valuePattern = testCaseProperties.getFunctionSubstitutionRegularExpression();
+
+		if (FieldUpdater.logger.isDebugEnabled()) {
+			FieldUpdater.logger.debug(String.format("use \"%s\" as regular expression for functions.", valuePattern));
+		}
 
 		final String fieldValue = (String) currentField.get(obs[0]);
 
-		if (fieldValue.contains("FUNCTION#") && fieldValue.contains("#FUNCTION")) {
+		final String template = testCaseProperties.getFunctionTemplateRegularExpression();
 
-			String[] tokens = fieldValue.split("#FUNCTION");
+		if (FieldUpdater.logger.isDebugEnabled()) {
+			FieldUpdater.logger
+					.debug(String.format("use \"%s\" as regular expression for function templates.", template));
+		}
 
-			if (Convert.isEmpty(tokens)) {
-				throw new RuntimeException("tokens can't be null or empty.");
-			}
+		final Pattern pattern = Pattern.compile(template);
 
-			final String leftAssignment = tokens[0];
+		final Matcher mm = pattern.matcher(fieldValue);
 
-			tokens = leftAssignment.split("FUNCTION#");
-
-			if (Convert.isEmpty(tokens)) {
-				throw new RuntimeException(
-						String.format("value is malformed, for rule substitution '%s'.", fieldValue));
-			}
-
-			if (tokens.length != 2) {
-				throw new RuntimeException(
-						String.format("value is malformed, for rule substitution '%s'.", fieldValue));
-			}
+		while (mm.find()) {
 
 			final Pattern r = Pattern.compile(valuePattern);
 
-			final String replacement = String.format("%s%s%s", "FUNCTION#", tokens[1], "#FUNCTION");
-
-			final Matcher m = r.matcher(tokens[1].replace(Convert.BLANK_STRING, Convert.EMPTY_STRING));
+			final Matcher m = r.matcher(mm.group(1));
 
 			List<String> arguments = new ArrayList<String>();
 
@@ -265,24 +270,23 @@ public class FieldUpdater {
 			// find Parameter
 			for (final String argument : arguments) {
 
-				@SuppressWarnings("serial")
-				Map<String, String> args = new HashMap<String, String>() {
-					{
-						put("PARAM_CLASS", Convert.EMPTY_STRING);
-						put("PARAM_VALUE", Convert.EMPTY_STRING);
-					}
-				};
+				FieldArgument args = new FieldArgument();
 
-				final String argumentsRegEx = "([a-z._,:;@A-Z0-9]+)";
+				final String argumentsRegEx = testCaseProperties.getArgumentSubstitutionRegularExpression();
+
+				if (FieldUpdater.logger.isDebugEnabled()) {
+					FieldUpdater.logger
+							.debug(String.format("use \"%s\" as regular expression for arguments.", argumentsRegEx));
+				}
 
 				final Pattern argumentsPattern = Pattern.compile(argumentsRegEx);
 				final Matcher matchedArgument = argumentsPattern.matcher(argument);
 
 				while (matchedArgument.find()) {
-					if (Convert.isEmpty(args.get("PARAM_CLASS"))) {
-						args.put("PARAM_CLASS", matchedArgument.group());
-					} else if (Convert.isEmpty(args.get("PARAM_VALUE"))) {
-						args.put("PARAM_VALUE", matchedArgument.group());
+					if (Convert.isEmpty(args.get(PARAM_CLASS))) {
+						args.put(PARAM_CLASS, matchedArgument.group());
+					} else if (Convert.isEmpty(args.get(PARAM_VALUE))) {
+						args.put(PARAM_VALUE, matchedArgument.group());
 					}
 				}
 
@@ -293,12 +297,12 @@ public class FieldUpdater {
 			List<Object> paramValues = new ArrayList<>();
 
 			for (Map<String, String> param : params) {
-				if (Convert.isEmpty(param.getOrDefault("PARAM_CLASS", Convert.EMPTY_STRING))) {
+				if (Convert.isEmpty(param.getOrDefault(PARAM_CLASS, Convert.EMPTY_STRING))) {
 					FieldUpdater.logger.error("'PARAM_CLASS' is null or empty string, will skip.");
 					continue;
 				}
 
-				if (Convert.isEmpty(param.getOrDefault("PARAM_VALUE", Convert.EMPTY_STRING))) {
+				if (Convert.isEmpty(param.getOrDefault(PARAM_VALUE, Convert.EMPTY_STRING))) {
 					FieldUpdater.logger.error("'PARAM_VALUE' is null or empty string, will skip.");
 					continue;
 				}
@@ -306,7 +310,7 @@ public class FieldUpdater {
 				Class<?> paramTypeClass = null;
 
 				try {
-					paramTypeClass = Class.forName(param.get("PARAM_CLASS"));
+					paramTypeClass = Class.forName(param.get(PARAM_CLASS));
 					paramClasses.add(paramTypeClass);
 				} catch (Exception ex) {
 					if (ex instanceof ClassNotFoundException) {
@@ -320,7 +324,7 @@ public class FieldUpdater {
 					throw ex;
 				}
 
-				final String paramValue = param.get("PARAM_VALUE");
+				final String paramValue = param.get(PARAM_VALUE);
 
 				if (Integer.class.getName().equals(paramTypeClass.getTypeName())) {
 					Integer value = Integer.parseInt(paramValue);
@@ -346,19 +350,32 @@ public class FieldUpdater {
 				paramArray[itr] = paramValues.get(itr);
 			}
 
-			Object result = (Object) functionMethod.invoke(functionClass.newInstance(), paramArray);
+			Object result = functionMethod.invoke(functionClass.newInstance(), paramArray);
 
 			if (result instanceof Integer) {
 				Integer convertedToInteger = (Integer) result;
-				currentField.set(obs[0], fieldValue.replace(replacement, convertedToInteger.toString()));
+				currentField.set(obs[0], convertedToInteger.toString());
 			} else if (result instanceof String) {
 				String convertedToString = (String) result;
-				currentField.set(obs[0], fieldValue.replace(replacement, convertedToString));
+				currentField.set(obs[0], convertedToString);
 			} else {
 				final String msg = String.format("%s as result type is not implemented yet.", result.getClass());
 				FieldUpdater.logger.error(msg);
 				throw new SystemException(msg);
 			}
 		}
+	}
+}
+
+class FieldArgument extends HashMap<String, String> {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7476704748181228390L;
+
+	FieldArgument() {
+		put(FieldUpdater.PARAM_CLASS, Convert.EMPTY_STRING);
+		put(FieldUpdater.PARAM_VALUE, Convert.EMPTY_STRING);
 	}
 }
