@@ -27,6 +27,22 @@ public class TestCaseProperties extends PropertiesReader {
 	@Property(FrameworkConsts.TESTCASE_CREATE_ARTEFACT)
 	private CreateArtefactEnum createArtefactOn;
 
+	@Default("(?<=\\<&)(.*?)(?=\\&>)")
+	@Property(FrameworkConsts.VALUE_SUBSTITUTION_REGULAR_EXPRESSION)
+	private String valueSubstitutionRegularExpression;
+
+	@Default("([\\\\a-z._,$:*{}\";|@A-Z0-9ÄÜÖäöü\\/\\p{javaSpaceChar}-]+)")
+	@Property(FrameworkConsts.FUNCTION_SUBSTITUTION_REGULAR_EXPRESSION)
+	private String functionSubstitutionRegularExpression;
+
+	@Default("([\\\\a-z._,$:*{}\";@A-Z0-9ÄÜÖäöü\\/\\p{javaSpaceChar}-]+)")
+	@Property(FrameworkConsts.ARGUMENT_SUBSTITUTION_REGULAR_EXPRESSION)
+	private String argumentSubstitutionRegularExpression;
+
+	@Default("FUNCTION#(.+)#FUNCTION")
+	@Property(FrameworkConsts.FUNCTION_TEMPLATE_REGULAR_EXPRESSION)
+	private String functionTemplateRegularExpression;
+
 	public String getTestCaseHeaderName() {
 		return testCaseHeaderName;
 	}
@@ -37,6 +53,22 @@ public class TestCaseProperties extends PropertiesReader {
 
 	public CreateArtefactEnum getCreateArtefactOn() {
 		return createArtefactOn;
+	}
+
+	public String getValueSubstitutionRegularExpression() {
+		return valueSubstitutionRegularExpression;
+	}
+
+	public String getFunctionSubstitutionRegularExpression() {
+		return functionSubstitutionRegularExpression;
+	}
+
+	public String getArgumentSubstitutionRegularExpression() {
+		return argumentSubstitutionRegularExpression;
+	}
+
+	public String getFunctionTemplateRegularExpression() {
+		return functionTemplateRegularExpression;
 	}
 
 	@Override
