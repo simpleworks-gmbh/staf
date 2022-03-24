@@ -99,11 +99,28 @@ public class FetchTestPlanMojo extends TestfloMojo {
 			FetchTestPlanMojo.logger.info(String.format("fetch test plan: '%s'.", testPlanId));
 		}
 		init();
+
+		TestPlan testPlan = null;
+
 		try {
 			testFlo.moveTestPlanToNextIteration(testPlanId);
-			final TestPlan testPlan = testFlo.readTestPlan(testPlanId);
+			testPlan = testFlo.readTestPlan(testPlanId);
 			testFlo.startTestPlan(testPlan);
 
+			final File file = new File(fileName);
+			if (FetchTestPlanMojo.logger.isInfoEnabled()) {
+				FetchTestPlanMojo.logger.info(String.format("write test plan into file: '%s'.", file));
+			}
+			UtilsIO.deleteFile(file);
+			new MapperTestplan().write(file, Arrays.asList(testPlan));
+
+		} catch (final SystemException ex) {
+			final String message = String.format("can't start test plan: '%s'.", testPlanId);
+			FetchTestPlanMojo.logger.error(message, ex);
+			throw new MojoExecutionException(message);
+		}
+
+		try {
 			if (!Convert.isEmpty(fixVersions)) {
 				testFlo.addFixVersions(fixVersions, testPlan);
 			}
@@ -115,17 +132,8 @@ public class FetchTestPlanMojo extends TestfloMojo {
 			if (!Convert.isEmpty(customFields)) {
 				testFlo.addFields(customFields, testPlan);
 			}
-
-			final File file = new File(fileName);
-			if (FetchTestPlanMojo.logger.isInfoEnabled()) {
-				FetchTestPlanMojo.logger.info(String.format("write test plan into file: '%s'.", file));
-			}
-			UtilsIO.deleteFile(file);
-			new MapperTestplan().write(file, Arrays.asList(testPlan));
-		} catch (final SystemException ex) {
-			final String message = String.format("can't start test plan: '%s'.", testPlanId);
-			FetchTestPlanMojo.logger.error(message, ex);
-			throw new MojoExecutionException(message);
+		} catch (Throwable th) {
+			FetchTestPlanMojo.logger.error("can't set jira properties.", th);
 		}
 	}
 }
