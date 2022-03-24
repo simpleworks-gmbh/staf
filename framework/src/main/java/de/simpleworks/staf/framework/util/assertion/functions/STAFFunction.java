@@ -40,14 +40,14 @@ public class STAFFunction {
 	public Integer sub(String subtrahend1, Integer subtrahend2) {
 
 		if (STAFFunction.logger.isInfoEnabled()) {
-			STAFFunction.logger.info(String.format("%s: Add %s to %s.", this.getClass(), subtrahend1, subtrahend2.toString()));
+			STAFFunction.logger
+					.info(String.format("%s: Add %s to %s.", this.getClass(), subtrahend1, subtrahend2.toString()));
 		}
 
 		Integer result = new Integer(Integer.parseInt(subtrahend1)) - subtrahend2;
 		return result;
 	}
 
-	
 	public String concat(String element1, String element2) {
 
 		if (STAFFunction.logger.isInfoEnabled()) {

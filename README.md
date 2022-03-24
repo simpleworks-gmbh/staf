@@ -407,4 +407,13 @@ One can also put several directories in a "comma separated list"
 
 - `database.connection_pool.config_file`: (String) value, the file that contains the *Database Connection - Configuration Files*
 
+- `value.substitution.regex`: (String) value, regular expression to determine the value substitution 'Default value' is `(?<=\\<&)(.*?)(?=\\&>)`
+
+- `function.substitution.regex`: (String) value, regular expression to determine the function substitution 'Default value' is `([\\\\a-z._,$:*{}\";|@A-Z0-9ÄÜÖäöü\\/\\p{javaSpaceChar}-]+)`
+
+- `argument.substitution.regex`: (String) value, regular expression to determine the (function) argument substitution 'Default value' is `([\\\\a-z._,$:*{}\";@A-Z0-9ÄÜÖäöü\\/\\p{javaSpaceChar}-]+)`
+
+- `function.template.regex`: (String) value, regular expression to determine the (function) template 'Default value' is `FUNCTION#(.+)#FUNCTION`
+
+
 > © Simpleworks GmbH, Philosophenweg 31, 47051 Duisburg
