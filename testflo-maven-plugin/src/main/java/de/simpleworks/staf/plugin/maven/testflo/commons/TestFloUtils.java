@@ -162,12 +162,19 @@ public class TestFloUtils {
 
 		final IssueField field = issue.getFieldByName(name);
 		Assert.assertNotNull(String.format("test case '%s': can't get field '%s'.", issue.getKey(), name), field);
-		Assert.assertNotNull(String.format("test case '%s': field '%s' without value.", issue.getKey(), name),
-				field.getValue());
 
-		final String result = field.getValue().toString();
-		Assert.assertFalse(String.format("test case '%s': field '%s' has empty value.", issue.getKey(), name),
-				Convert.isEmpty(result));
+		String result = Convert.EMPTY_STRING;
+
+		if (field.getValue() != null) {
+			result = field.getValue().toString();
+			if (Convert.isEmpty(result)) {
+				if (TestFloUtils.logger.isDebugEnabled()) {
+					TestFloUtils.logger.debug(
+							String.format("test case '%s': field '%s' without value.", issue.getKey(), name),
+							field.getValue());
+				}
+			}
+		}
 
 		return result;
 	}
@@ -308,7 +315,7 @@ public class TestFloUtils {
 			if (testStep.getOrder() != (row + 1)) {
 
 				System.out.println("");
-				
+
 //				throw new SystemException(
 //						String.format("test case '%s', report '%s' have different order (test case: %d, report: %d).",
 //								testCase.getId(), report.getId(), Integer.valueOf(testStep.getOrder()),
@@ -318,7 +325,6 @@ public class TestFloUtils {
 			else {
 				map.remove(key);
 			}
-			
 
 			final String comment = TestFloUtils.getComment(stepReport);
 			final TestStepStatus status = TestStepStatus.get(stepReport.getResult());

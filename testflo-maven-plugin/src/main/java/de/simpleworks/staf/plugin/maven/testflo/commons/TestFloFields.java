@@ -45,22 +45,25 @@ public class TestFloFields {
 		for (String customField : customFields) {
 			final String fieldValue = TestFloUtils.getField(jiraIssue, customField);
 
-			if (TestFloFields.logger.isDebugEnabled()) {
-				TestFloFields.logger.debug(String.format("fetched '%s':'%s'", customField, fieldValue));
-			}
+			if (!Convert.isEmpty(fieldValue)) {
 
-			TestFloField[] fields = (new ObjectMapper()).readValue(fieldValue, TestFloField[].class);
-
-			if (fields.length == 0) {
 				if (TestFloFields.logger.isDebugEnabled()) {
-					TestFloFields.logger.debug(String.format("customField '%s' is empty, will skip.", customField));
+					TestFloFields.logger.debug(String.format("fetched '%s':'%s'", customField, fieldValue));
 				}
-				continue;
+
+				TestFloField[] fields = (new ObjectMapper()).readValue(fieldValue, TestFloField[].class);
+
+				if (Convert.isEmpty(fields)) {
+					if (TestFloFields.logger.isDebugEnabled()) {
+						TestFloFields.logger.debug(String.format("customField '%s' is empty, will skip.", customField));
+					}
+					continue;
+				}
+
+				TestFloField field = fields[0];
+
+				result.add(field.getValue());
 			}
-
-			TestFloField field = fields[0];
-
-			result.add(field.getValue());
 		}
 
 		return result;
