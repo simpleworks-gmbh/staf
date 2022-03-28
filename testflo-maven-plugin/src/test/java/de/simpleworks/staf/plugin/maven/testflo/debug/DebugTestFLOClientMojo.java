@@ -23,6 +23,7 @@ import com.google.inject.name.Named;
 
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.module.jira.module.JiraModule;
+import de.simpleworks.staf.module.jira.util.consts.ClientConsts;
 import de.simpleworks.staf.plugin.maven.testflo.commons.TestFlo;
 import de.simpleworks.staf.plugin.maven.testflo.consts.Consts;
 import de.simpleworks.staf.plugin.maven.testflo.mojo.TestfloMojo;
@@ -49,9 +50,14 @@ public class DebugTestFLOClientMojo extends TestfloMojo {
 	@Named(Consts.JIRA_REST_TMS)
 	private final URL urlTms;
 
+	@Inject
+	@Named(ClientConsts.URL)
+	private URL jiraUrl;
+
 	protected final TestFlo clientNG;
 
-	protected DebugTestFLOClientMojo(final String testPlanId, final String fileName, final URL urlTms) {
+	protected DebugTestFLOClientMojo(final String testPlanId, final String fileName, final URL urlTms,
+			final URL jiraUrl) {
 		super(new JiraModule());
 
 		if (Convert.isEmpty(testPlanId)) {
@@ -69,8 +75,9 @@ public class DebugTestFLOClientMojo extends TestfloMojo {
 		this.testPlanId = testPlanId;
 		this.fileName = fileName;
 		this.urlTms = urlTms;
+		this.jiraUrl = jiraUrl;
 
-		clientNG = new TestFlo(client, clientHttp, urlTms);
+		clientNG = new TestFlo(client, clientHttp, urlTms, jiraUrl);
 	}
 
 	@Override
@@ -143,8 +150,8 @@ public class DebugTestFLOClientMojo extends TestfloMojo {
 		final DebugArgsFetch arguments = new DebugArgsFetch();
 		JCommander.newBuilder().addObject(arguments).build().parse(args);
 
-		final DebugTestFLOClientMojo client = new DebugTestFLOClientMojo(arguments.id, arguments.file,
-				arguments.urlTms);
+		final DebugTestFLOClientMojo client = new DebugTestFLOClientMojo(arguments.id, arguments.file, arguments.urlTms,
+				arguments.jiraUrl);
 		client.dumpIssue();
 
 		DebugTestFLOClientMojo.logger.info("DONE.");

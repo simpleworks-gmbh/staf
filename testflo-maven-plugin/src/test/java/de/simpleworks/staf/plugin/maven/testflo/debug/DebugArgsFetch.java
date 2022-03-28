@@ -13,4 +13,7 @@ public class DebugArgsFetch {
 
 	@Parameter(names = "--urlTms", required = true)
 	public URL urlTms;
+
+	@Parameter(names = "--jiraUrl", required = true)
+	public URL jiraUrl;
 }

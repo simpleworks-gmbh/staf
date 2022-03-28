@@ -33,6 +33,7 @@ public class TestFloTms {
 	private static final Logger logger = LogManager.getLogger(TestFloTms.class);
 
 	private static final String JSON_MOVE_TO_NEXT_ITERATION = "{\"nextIterationStrategy\": \"all-test-cases\"}";
+
 	private static final String MARKUP_THUMBNAIL = "!%s|thumbnail!";
 
 	private final OkHttpClient client;
@@ -79,7 +80,7 @@ public class TestFloTms {
 		return result;
 	}
 
-	private String tmsSend(final HttpMethod method, final HttpUrl.Builder builder, final RequestBody requestBody)
+	public String tmsSend(final HttpMethod method, final HttpUrl.Builder builder, final RequestBody requestBody)
 			throws SystemException {
 		Assert.assertNotNull("builder can't be null.", builder);
 

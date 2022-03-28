@@ -15,8 +15,9 @@ public class DebugUploadResultMojo extends UploadResultMojo {
 
 	private static final Logger logger = LogManager.getLogger(DebugUploadResultMojo.class);
 
-	protected DebugUploadResultMojo(final String testplanFile, final String reportFile, final URL urlTms) {
-		super(testplanFile, reportFile, urlTms);
+	protected DebugUploadResultMojo(final String testplanFile, final String reportFile, final URL urlTms,
+			final URL jiraUrl) {
+		super(testplanFile, reportFile, urlTms, jiraUrl);
 	}
 
 	public static void main(final String[] args) throws MojoExecutionException, MojoFailureException {
@@ -26,7 +27,7 @@ public class DebugUploadResultMojo extends UploadResultMojo {
 		JCommander.newBuilder().addObject(arguments).build().parse(args);
 
 		final DebugUploadResultMojo debug = new DebugUploadResultMojo(arguments.testplanFile, arguments.reportFile,
-				arguments.urlTms);
+				arguments.urlTms, arguments.jiraUrl);
 		debug.execute();
 
 		DebugUploadResultMojo.logger.info("DONE.");

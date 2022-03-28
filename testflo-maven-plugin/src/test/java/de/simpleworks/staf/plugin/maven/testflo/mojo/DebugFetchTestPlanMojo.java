@@ -15,8 +15,8 @@ public class DebugFetchTestPlanMojo extends FetchTestPlanMojo {
 
 	private static final Logger logger = LogManager.getLogger(DebugFetchTestPlanMojo.class);
 
-	public DebugFetchTestPlanMojo(final String testplanId, final String fileName, final URL urlTms) {
-		super(testplanId, fileName, urlTms);
+	public DebugFetchTestPlanMojo(final String testplanId, final String fileName, final URL urlTms, final URL jiraUrl) {
+		super(testplanId, fileName, urlTms, jiraUrl);
 	}
 
 	public static void main(final String[] args) throws MojoExecutionException, MojoFailureException {
@@ -25,7 +25,8 @@ public class DebugFetchTestPlanMojo extends FetchTestPlanMojo {
 		final DebugArgsFetch arguments = new DebugArgsFetch();
 		JCommander.newBuilder().addObject(arguments).build().parse(args);
 
-		final DebugFetchTestPlanMojo debug = new DebugFetchTestPlanMojo(arguments.id, arguments.file, arguments.urlTms);
+		final DebugFetchTestPlanMojo debug = new DebugFetchTestPlanMojo(arguments.id, arguments.file, arguments.urlTms,
+				arguments.jiraUrl);
 		debug.execute();
 
 		DebugFetchTestPlanMojo.logger.info("DONE.");

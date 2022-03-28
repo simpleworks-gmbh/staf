@@ -28,6 +28,7 @@ import de.simpleworks.staf.commons.mapper.report.MapperTestcaseReport;
 import de.simpleworks.staf.commons.report.TestcaseReport;
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.module.jira.module.JiraModule;
+import de.simpleworks.staf.module.jira.util.consts.ClientConsts;
 import de.simpleworks.staf.plugin.maven.testflo.commons.TestFlo;
 import de.simpleworks.staf.plugin.maven.testflo.consts.Consts;
 import de.simpleworks.staf.plugin.maven.testflo.mojo.TestfloMojo;
@@ -54,9 +55,14 @@ public class DebugTestPlanUpload extends TestfloMojo {
 	@Named(Consts.JIRA_REST_TMS)
 	private final URL urlTms;
 
+	@Inject
+	@Named(ClientConsts.URL)
+	private URL jiraUrl;
+
 	private TestFlo testFlo;
 
-	protected DebugTestPlanUpload(final String testplanFile, final String reportFile, final URL urlTms) {
+	protected DebugTestPlanUpload(final String testplanFile, final String reportFile, final URL urlTms,
+			final URL jiraUrl) {
 		super(new JiraModule());
 
 		if (Convert.isEmpty(testplanFile)) {
@@ -71,9 +77,14 @@ public class DebugTestPlanUpload extends TestfloMojo {
 			throw new IllegalArgumentException("urlTms can't be null.");
 		}
 
+		if (jiraUrl == null) {
+			throw new IllegalArgumentException("jiraUrl can't be null.");
+		}
+
 		this.testplanFile = testplanFile;
 		this.reportFile = reportFile;
 		this.urlTms = urlTms;
+		this.jiraUrl = jiraUrl;
 	}
 
 	private void init() {
@@ -94,10 +105,11 @@ public class DebugTestPlanUpload extends TestfloMojo {
 				(new File(reportFile)).exists());
 
 		Assert.assertNotNull("urlTms can't be null.", urlTms);
+		Assert.assertNotNull("jiraUrl can't be null.", jiraUrl);
 		Assert.assertNotNull("client can't be null.", clientJira);
 		Assert.assertNotNull("clientHttp can't be null.", clientHttp);
 
-		testFlo = new TestFlo(clientJira, clientHttp, urlTms);
+		testFlo = new TestFlo(clientJira, clientHttp, urlTms, jiraUrl);
 	}
 
 	private Map<String, TestcaseReport> readReports() throws SystemException {
@@ -219,7 +231,7 @@ public class DebugTestPlanUpload extends TestfloMojo {
 		final DebugArgsUpload arguments = new DebugArgsUpload();
 		JCommander.newBuilder().addObject(arguments).build().parse(args);
 
-		new DebugTestPlanUpload(arguments.testplanFile, arguments.reportFile, arguments.urlTms).execute();
+		new DebugTestPlanUpload(arguments.testplanFile, arguments.reportFile, arguments.urlTms, arguments.jiraUrl).execute();
 
 		DebugTestPlanUpload.logger.info("DONE.");
 	}

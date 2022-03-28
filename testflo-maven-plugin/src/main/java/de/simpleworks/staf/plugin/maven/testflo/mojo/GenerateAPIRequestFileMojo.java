@@ -24,6 +24,7 @@ import de.simpleworks.staf.commons.mapper.api.MapperAPITeststep;
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.UtilsIO;
 import de.simpleworks.staf.commons.utils.UtilsTestcase;
+import de.simpleworks.staf.module.jira.util.consts.ClientConsts;
 import de.simpleworks.staf.plugin.maven.testflo.commons.TestFlo;
 import de.simpleworks.staf.plugin.maven.testflo.consts.Consts;
 import okhttp3.OkHttpClient;
@@ -52,6 +53,10 @@ public class GenerateAPIRequestFileMojo extends TestfloMojo {
 	@Named(Consts.JIRA_REST_TMS)
 	private URL urlTms;
 
+	@Inject
+	@Named(ClientConsts.URL)
+	private URL jiraUrl;
+
 	private TestFlo testFlo;
 
 	protected GenerateAPIRequestFileMojo() {
@@ -76,7 +81,7 @@ public class GenerateAPIRequestFileMojo extends TestfloMojo {
 		Assert.assertNotNull("clientHttp can't be null.", clientHttp);
 
 		requestFile = new File(file);
-		testFlo = new TestFlo(clientJira, clientHttp, urlTms);
+		testFlo = new TestFlo(clientJira, clientHttp, urlTms, jiraUrl);
 
 	}
 

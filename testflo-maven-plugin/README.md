@@ -16,6 +16,23 @@ Credentials
 - jira.username: `Jira Username`
 - jira.password: `Jira Password` ([API Token](https://id.atlassian.com/manage-profile/security/api-tokens) in newer versions of jira)
 
+
+## `reset testplan`
+
+### Parameter
+
+- id: `Jira Key of any testflo testplan` (f.e. ABC-123)
+
+You may want to put the follwoing information in a property file
+
+Property File
+- property.file.root: `Root Folder where .property files were stored`
+
+Credentials
+- jira.username: `Jira Username`
+- jira.password: `Jira Password` ([API Token](https://id.atlassian.com/manage-profile/security/api-tokens) in newer versions of jira)
+
+
 Basic Information
 
 Jira Settings

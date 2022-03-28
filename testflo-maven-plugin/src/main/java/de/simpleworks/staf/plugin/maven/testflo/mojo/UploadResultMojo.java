@@ -27,6 +27,7 @@ import de.simpleworks.staf.commons.mapper.elements.MapperTestplan;
 import de.simpleworks.staf.commons.mapper.report.MapperTestcaseReport;
 import de.simpleworks.staf.commons.report.TestcaseReport;
 import de.simpleworks.staf.commons.utils.Convert;
+import de.simpleworks.staf.module.jira.util.consts.ClientConsts;
 import de.simpleworks.staf.plugin.maven.testflo.commons.TestFlo;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestPlanStatus;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestPlanTransition;
@@ -55,13 +56,17 @@ public class UploadResultMojo extends TestfloMojo {
 	@Named(Consts.JIRA_REST_TMS)
 	private URL urlTms;
 
+	@Inject
+	@Named(ClientConsts.URL)
+	private URL jiraUrl;
+
 	private TestFlo testFlo;
 
 	protected UploadResultMojo() {
 		super();
 	}
 
-	protected UploadResultMojo(final String testplanFile, final String resultFile, final URL urlTms) {
+	protected UploadResultMojo(final String testplanFile, final String resultFile, final URL urlTms, final URL jiraUrl) {
 		super();
 
 		if (Convert.isEmpty(testplanFile)) {
@@ -79,6 +84,7 @@ public class UploadResultMojo extends TestfloMojo {
 		this.testplanFile = testplanFile;
 		this.resultFile = resultFile;
 		this.urlTms = urlTms;
+		this.jiraUrl = jiraUrl;
 	}
 
 	private void init() {
@@ -102,7 +108,7 @@ public class UploadResultMojo extends TestfloMojo {
 		Assert.assertNotNull("client can't be null.", clientJira);
 		Assert.assertNotNull("clientHttp can't be null.", clientHttp);
 
-		testFlo = new TestFlo(clientJira, clientHttp, urlTms);
+		testFlo = new TestFlo(clientJira, clientHttp, urlTms, jiraUrl);
 	}
 
 	@SuppressWarnings("unchecked")

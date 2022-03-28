@@ -23,6 +23,7 @@ import de.simpleworks.staf.commons.exceptions.SystemException;
 import de.simpleworks.staf.commons.mapper.elements.MapperTestplan;
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.UtilsIO;
+import de.simpleworks.staf.module.jira.util.consts.ClientConsts;
 import de.simpleworks.staf.plugin.maven.testflo.commons.TestFlo;
 import de.simpleworks.staf.plugin.maven.testflo.consts.Consts;
 import okhttp3.OkHttpClient;
@@ -56,13 +57,17 @@ public class FetchTestPlanMojo extends TestfloMojo {
 	@Named(Consts.JIRA_REST_TMS)
 	private URL urlTms;
 
+	@Inject
+	@Named(ClientConsts.URL)
+	private URL jiraUrl;
+
 	private TestFlo testFlo;
 
 	protected FetchTestPlanMojo() {
 		super();
 	}
 
-	protected FetchTestPlanMojo(final String testPlanId, final String fileName, final URL urlTms) {
+	protected FetchTestPlanMojo(final String testPlanId, final String fileName, final URL urlTms, final URL jiraUrl) {
 		this();
 		if (Convert.isEmpty(testPlanId)) {
 			throw new IllegalArgumentException("testPlanId can't be null or empty string.");
@@ -73,6 +78,7 @@ public class FetchTestPlanMojo extends TestfloMojo {
 		this.testPlanId = testPlanId;
 		this.fileName = fileName;
 		this.urlTms = urlTms;
+		this.jiraUrl = jiraUrl;
 	}
 
 	private void init() {
@@ -90,7 +96,7 @@ public class FetchTestPlanMojo extends TestfloMojo {
 		Assert.assertNotNull("urlTms can't be null.", urlTms);
 		Assert.assertNotNull("client can't be null.", clientJira);
 		Assert.assertNotNull("clientHttp can't be null.", clientHttp);
-		testFlo = new TestFlo(clientJira, clientHttp, urlTms);
+		testFlo = new TestFlo(clientJira, clientHttp, urlTms, jiraUrl);
 	}
 
 	@Override

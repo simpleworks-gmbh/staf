@@ -20,8 +20,8 @@ public class DebugTestPlanStart extends DebugTestFLOClientMojo {
 
 	private static final Logger logger = LogManager.getLogger(DebugTestPlanStart.class);
 
-	protected DebugTestPlanStart(final String testPlanId, final String fileName, final URL urlTms) {
-		super(testPlanId, fileName, urlTms);
+	protected DebugTestPlanStart(final String testPlanId, final String fileName, final URL urlTms, final URL jiraURL) {
+		super(testPlanId, fileName, urlTms, jiraURL);
 	}
 
 	@Override
@@ -57,7 +57,7 @@ public class DebugTestPlanStart extends DebugTestFLOClientMojo {
 		final DebugArgsFetch arguments = new DebugArgsFetch();
 		JCommander.newBuilder().addObject(arguments).build().parse(args);
 
-		new DebugTestPlanStart(arguments.id, arguments.file, arguments.urlTms).execute();
+		new DebugTestPlanStart(arguments.id, arguments.file, arguments.urlTms, arguments.jiraUrl).execute();
 
 		DebugTestPlanStart.logger.info("DONE.");
 	}

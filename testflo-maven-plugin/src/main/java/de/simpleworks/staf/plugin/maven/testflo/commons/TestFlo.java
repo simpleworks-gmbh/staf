@@ -15,6 +15,7 @@ import com.atlassian.jira.rest.client.api.domain.Subtask;
 import com.atlassian.jira.rest.client.api.domain.Transition;
 import com.atlassian.jira.rest.client.api.domain.input.TransitionInput;
 
+import de.simpleworks.staf.commons.consts.ContentTypeValue;
 import de.simpleworks.staf.commons.elements.TestCase;
 import de.simpleworks.staf.commons.elements.TestPlan;
 import de.simpleworks.staf.commons.enums.Result;
@@ -22,13 +23,17 @@ import de.simpleworks.staf.commons.exceptions.SystemException;
 import de.simpleworks.staf.commons.report.TestcaseReport;
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.module.jira.util.JiraProperties;
+import de.simpleworks.staf.plugin.maven.testflo.commons.enums.HttpMethod;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestCaseGeneral;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestCaseStatus;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestCaseTransition;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestPlanStatus;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestPlanTransition;
 import de.simpleworks.staf.plugin.maven.testflo.commons.pojo.FixVersion;
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
 
 public class TestFlo {
 	private static final Logger logger = LogManager.getLogger(TestFlo.class);
@@ -39,7 +44,9 @@ public class TestFlo {
 	private final TestFloLabel testFloLabel;
 	private final TestFloFields testFloFields;
 
-	public TestFlo(final IssueRestClient jira, final OkHttpClient client, final URL urlTms) {
+	private final URL jiraUrl;
+
+	public TestFlo(final IssueRestClient jira, final OkHttpClient client, final URL urlTms, URL jiraUrl) {
 		if (jira == null) {
 			throw new IllegalArgumentException("jira can't be null.");
 		}
@@ -48,6 +55,7 @@ public class TestFlo {
 		testFloFixVersion = new TestFloFixVersion(client, jira, JiraProperties.getInstance());
 		testFloLabel = new TestFloLabel(jira);
 		testFloFields = new TestFloFields(jira);
+		this.jiraUrl = jiraUrl;
 	}
 
 	private void logTransitions(final Issue issue) {
@@ -229,24 +237,35 @@ public class TestFlo {
 		}
 	}
 
-	public void testPlanReset(final String testPlanId) {
+	public void testPlanReset(final String testPlanId) throws SystemException {
 		if (Convert.isEmpty(testPlanId)) {
 			throw new IllegalArgumentException("testPlanId can't be null or empty string.");
 		}
 		final Issue issue = jira.getIssue(testPlanId).claim();
 		Assert.assertNotNull(String.format("can't get issue for: '%s'.", testPlanId), issue);
-		try {
-			transition(issue, TestPlanStatus.InProgress, TestPlanTransition.Stop);
-		} catch (final SystemException ex) {
-			TestFlo.logger.info(String.format("ignore error '%s'.", ex.getMessage()));
+
+		// reset testplan
+		transition(issue, TestPlanStatus.Closed, TestPlanTransition.Close);
+
+		// reset iteration
+		resetCurrentIteration(issue);
+	}
+
+	public void resetCurrentIteration(final Issue issue) throws SystemException {
+		if (issue == null) {
+			throw new IllegalArgumentException("issue can't be null.");
 		}
-		for (final Subtask subtask : issue.getSubtasks()) {
-			try {
-				transition(subtask, TestCaseStatus.InProgress, TestCaseTransition.Open);
-			} catch (final SystemException ex) {
-				TestFlo.logger.info(String.format("ignore error '%s'.", ex.getMessage()));
-			}
+
+		if (TestFlo.logger.isDebugEnabled()) {
+			TestFlo.logger.debug(String.format("reset current iteration of '%s'.", issue.getKey()));
 		}
+
+		HttpUrl.Builder builder = new HttpUrl.Builder().scheme(this.jiraUrl.getProtocol()).host(this.jiraUrl.getHost())
+				.addPathSegment(this.jiraUrl.getPath().substring(1, this.jiraUrl.getPath().length()))
+				.addPathSegment("secure").addPathSegment("ResetIteration.jspa");
+
+		tms.tmsSend(HttpMethod.POST, builder, RequestBody.create(MediaType.parse(ContentTypeValue.FORM_URLENCODED),
+				String.format("inline=true&decorator=dialog&testPlanId=%s", issue.getId())));
 	}
 
 	private Issue updateStepResults(final TestCase testCase, final List<StepResult> stepResults)
