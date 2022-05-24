@@ -27,17 +27,23 @@ public class JSONPATHAssertionValidator extends AssertionUtils<HttpResponse> {
 	private static final Logger logger = LogManager.getLogger(JSONPATHAssertionValidator.class);
 
 	@SuppressWarnings("unchecked")
-	private static String executeJsonPath(final String body, final String path) {
+	public static String executeJsonPath(final String body, final String path) {
 		if (Convert.isEmpty(body)) {
 			throw new IllegalArgumentException("body can't be null or empty string.");
 		}
 		if (Convert.isEmpty(path)) {
 			throw new IllegalArgumentException("path can't be null or empty string.");
 		}
+		
+		if (JSONPATHAssertionValidator.logger.isInfoEnabled()) {
+			JSONPATHAssertionValidator.logger.info(String.format("run jsonpath '%s' on '%s'.", path, body));
+		}
+
 		final Object response = JsonPath.read(body, path);
 		if (response == null) {
 			throw new RuntimeException(String.format("can't get path: '%s' from body: '%s'.", path, body));
 		}
+
 		String result = Convert.EMPTY_STRING;
 		if (response instanceof String) {
 			result = (String) response;

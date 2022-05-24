@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>staf-parent</artifactId>
+		<groupId>de.simpleworks.staf</groupId>
+		<version>0.110.7</version>
+	</parent>
+
+	<artifactId>kafka-module</artifactId>
+	<name>kafka-module</name>
+
+	<properties>
+		<project.version>0.110.7</project.version>
+		<kafka-clients.version>3.2.0</kafka-clients.version>
+	</properties>
+
+	<dependencies>
+		<!--START 3rd Party Dependencies -->
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka-clients</artifactId>
+			<version>${kafka-clients.version}</version>
+		</dependency>
+		<!--END 3rd Party Dependencies -->
+		<!--START STAF Dependencies -->
+		<dependency>
+			<groupId>de.simpleworks.staf</groupId>
+			<artifactId>commons</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.simpleworks.staf</groupId>
+			<artifactId>framework</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<!--END STAF Dependencies -->
+	</dependencies>
+
+</project>

@@ -187,6 +187,14 @@ public class Assertion implements IPojo {
 					}
 				}
 
+			case KAFKAMESSAGE_VALIDATION:
+				if (allowedValue.equals(AllowedValueEnum.EXACT_VALUE)) {
+					if (Convert.isEmpty(jsonpath)) {
+						Assertion.logger.error("jsonpath can't be null or empty string.");
+						result = false;
+					}
+				}
+				
 				break;
 			default:
 				Assertion.logger
@@ -195,8 +203,8 @@ public class Assertion implements IPojo {
 				break;
 			}
 
-		}
-		return result;
+		}return result;
+
 	}
 
 	@Override
