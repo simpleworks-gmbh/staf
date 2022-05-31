@@ -328,7 +328,10 @@ public class KafkaClient {
 				}
 
 				if (totalLengthofPartition == 0) {
-					KafkaClient.logger.error(String.format("can't determine length of partition '%s'.", topic));
+					totalLengthofPartition = kafkaProperties.getMaxOffsetBytes();
+					KafkaClient.logger
+							.error(String.format("can't determine length of partition '%s', will set to '%s'.", topic,
+									totalLengthofPartition));
 				}
 
 				if (KafkaClient.logger.isInfoEnabled()) {
@@ -347,7 +350,8 @@ public class KafkaClient {
 										topic, partition, Long.toString(currentOffset)));
 					}
 
-					ConsumerRecords<?, ?> records = consumer.poll(Duration.ofMillis(1 * 1000));
+					ConsumerRecords<?, ?> records = consumer
+							.poll(Duration.ofMillis(1 * kafkaProperties.getPolltimeoutMs()));
 					consumer.commitAsync();
 
 					if (records.count() != 0) {
