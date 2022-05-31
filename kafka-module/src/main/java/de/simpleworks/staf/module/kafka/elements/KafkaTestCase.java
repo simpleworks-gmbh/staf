@@ -1,5 +1,7 @@
 package de.simpleworks.staf.module.kafka.elements;
 
+import java.net.URI;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -11,18 +13,15 @@ import org.apache.logging.log4j.Logger;
 import com.google.inject.Module;
 
 import de.simpleworks.staf.commons.api.Assertion;
-import de.simpleworks.staf.commons.api.HttpResponse;
 import de.simpleworks.staf.commons.enums.ValidateMethodEnum;
 import de.simpleworks.staf.commons.exceptions.SystemException;
 import de.simpleworks.staf.commons.report.artefact.CsvFile;
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.UtilsCollection;
 import de.simpleworks.staf.framework.api.httpclient.TeststepProvider;
-import de.simpleworks.staf.framework.elements.api.APITestCase;
 import de.simpleworks.staf.framework.elements.api.RewriteUrlObject;
 import de.simpleworks.staf.framework.elements.commons.TemplateTestCase;
 import de.simpleworks.staf.framework.util.AssertionUtils;
-import de.simpleworks.staf.framework.util.assertion.HeaderAssertionValidator;
 import de.simpleworks.staf.module.kafka.api.IKafkaRequest;
 import de.simpleworks.staf.module.kafka.api.IKafkaResponse;
 import de.simpleworks.staf.module.kafka.api.IKafkaTeststep;
@@ -36,15 +35,18 @@ import de.simpleworks.staf.module.kafka.api.KafkaProduceRequestKey;
 import de.simpleworks.staf.module.kafka.api.KafkaProduceResponse;
 import de.simpleworks.staf.module.kafka.api.kafkaclient.KafkaClient;
 import de.simpleworks.staf.module.kafka.api.mapper.MapperKafkaTeststep;
-import de.simpleworks.staf.module.kafka.consume.KafkaTeststep;
+import de.simpleworks.staf.module.kafka.api.properties.KafkaProperties;
+import de.simpleworks.staf.module.kafka.consts.KafkaConsts;
 import de.simpleworks.staf.module.kafka.elements.api.KafkaTestResult;
 import de.simpleworks.staf.module.kafka.util.KAFKAMessageAssertionValidator;
+import de.simpleworks.staf.module.kafka.util.UtilsNetwork;
 import net.lightbody.bmp.BrowserMobProxyServer;
 
 public class KafkaTestCase extends TemplateTestCase<IKafkaTeststep, KafkaConsumeResponse> {
 
 	private static final Logger logger = LogManager.getLogger(KafkaTestCase.class);
-	private final static String ENVIRONMENT_VARIABLES_NAME = "KafkaTestCase";
+	private static final String ENVIRONMENT_VARIABLES_NAME = "KafkaTestCase";
+	private static final KafkaProperties kafkaProperties = KafkaProperties.getInstance();
 
 	private String currentstepname;
 
@@ -56,6 +58,7 @@ public class KafkaTestCase extends TemplateTestCase<IKafkaTeststep, KafkaConsume
 
 	protected KafkaTestCase(String resource, Module... modules) throws SystemException {
 		super(resource, ENVIRONMENT_VARIABLES_NAME, new MapperKafkaTeststep(), modules);
+
 	}
 
 	private static final Map<String, String> checkKafkaMessage(final KafkaConsumeResponse response,
@@ -158,25 +161,15 @@ public class KafkaTestCase extends TemplateTestCase<IKafkaTeststep, KafkaConsume
 		}
 
 		KafkaTestResult result = null;
-
-		KafkaProduceRequest kafkaProduceRequest = (KafkaProduceRequest) request;
-
 		KafkaProduceResponse response = null;
 
 		try {
-			response = KafkaClient.produceMessage(kafkaProduceRequest);
+			response = KafkaClient.produceMessage(request);
 			if (KafkaTestCase.logger.isDebugEnabled()) {
 				KafkaTestCase.logger.debug(String.format("get response: %s.", response));
 			}
 
-			result = new KafkaTestResult(kafkaProduceRequest, response);
-
-			// implement me???
-			/*
-			 * if (!Convert.isEmpty(assertions)) { final Map<String, String> values =
-			 * validateAssertions(response, UtilsCollection.toList(assertions));
-			 * result.setExtractedValues(values); }
-			 */
+			result = new KafkaTestResult(request, response);
 
 			result.setSuccessfull(true);
 		} catch (final Throwable th) {
@@ -212,6 +205,11 @@ public class KafkaTestCase extends TemplateTestCase<IKafkaTeststep, KafkaConsume
 
 		try {
 			response = KafkaClient.consumeMessage(request);
+
+			if (response == null) {
+				throw new Throwable("no messages have been pulled.");
+			}
+
 			if (KafkaTestCase.logger.isDebugEnabled()) {
 				KafkaTestCase.logger.debug(String.format("get response: %s.", response));
 			}
@@ -276,6 +274,28 @@ public class KafkaTestCase extends TemplateTestCase<IKafkaTeststep, KafkaConsume
 			KafkaTestCase.logger
 					.debug(String.format("bootstrap '%s'-TestCase (%s).", KafkaTestCase.class, getTestCaseName()));
 		}
+
+		final String bootstrapServers = kafkaProperties.getBootstrapServers();
+
+		if (Convert.isEmpty(bootstrapServers)) {
+			throw new IllegalArgumentException(
+					String.format("Property: '%s' can't be null or empty string.", KafkaConsts.BOOTSTRAP_SERVERS));
+		}
+
+		final List<String> bootstrapServerLists = Arrays.asList(bootstrapServers.split(","));
+
+		if (Convert.isEmpty(bootstrapServerLists)) {
+			throw new IllegalArgumentException(String.format("bootstrapServerLists can't be null or empty string."));
+		}
+
+		for (final String bootstrapServer : bootstrapServerLists) {
+			final URI uri = new URI(bootstrapServer);
+
+			if (!UtilsNetwork.isServerAvailable(uri)) {
+				throw new SystemException(String.format("Server at '%s' is not available.", uri));
+			}
+		}
+
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.Future;
@@ -20,6 +21,9 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.Metric;
+import org.apache.kafka.common.MetricName;
+import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.header.Header;
 import org.apache.logging.log4j.LogManager;
@@ -146,7 +150,7 @@ public class KafkaClient {
 		final String topic = request.getTopic();
 		final String keyValue = key.getValue();
 
-		KafkaConsumeResponse result = getMessages(consumer, topic, keyValue);
+		final KafkaConsumeResponse result = getMessages(consumer, topic, keyValue);
 
 		return result;
 	}
@@ -226,7 +230,9 @@ public class KafkaClient {
 
 			if (metadata.hasTimestamp()) {
 				result.setTimestamp(metadata.timestamp());
-			} else if (metadata.hasOffset()) {
+			}
+
+			if (metadata.hasOffset()) {
 				result.setOffset(metadata.offset());
 			}
 		} catch (Exception ex) {
@@ -239,6 +245,10 @@ public class KafkaClient {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
+	/**
+	 * 
+	 * @return respecting instance of KafkaConsumeResponse, null if an error occurs.
+	 */
 	public static KafkaConsumeResponse getMessages(Consumer consumer, String topic, String key) {
 
 		if (consumer == null) {
@@ -253,90 +263,155 @@ public class KafkaClient {
 			throw new IllegalArgumentException("key can't be null or empty string.");
 		}
 
-		final TopicPartition tp = new TopicPartition(topic, 0);
-		final List<TopicPartition> topics = Arrays.asList(tp);
+		List<PartitionInfo> partitions = new ArrayList<>();
 
 		try {
 
-			consumer.assign(topics);
-		} catch (Exception ex) {
-			final String msg = String.format("can't assign customer to topics '%s'.",
-					String.join(",", topics.stream().map(t -> t.toString()).collect(Collectors.toList())));
-			KafkaClient.logger.error(msg, ex);
+			if (KafkaClient.logger.isInfoEnabled()) {
+				KafkaClient.logger.info(String.format("fetch partitions for '%s'.", topic));
+			}
 
+			partitions = consumer.partitionsFor(topic);
+
+			if (KafkaClient.logger.isDebugEnabled()) {
+				KafkaClient.logger.debug(String.format("fetched '%s' partitions for topic '%s' ['%s'].",
+						partitions.size(), topic, String.join(",", partitions.stream()
+								.map(p -> Integer.toString(p.partition())).collect(Collectors.toList()))));
+			}
+		} catch (Exception ex) {
+			final String msg = String.format("no partitions have been fetched for '%s'.", topic);
+			KafkaClient.logger.error(msg, ex);
 			return null;
 		}
 
-		final List<KafkaConsumeRecord> kafkaConsumeRecords = new ArrayList<>();
+		final List<KafkaConsumeRecord> fetchedRecords = new ArrayList<>();
 
 		try {
 
-			Long offset = 0L;
-			// initial seek
-			consumer.seek(tp, offset);
+			final Long startOffset = 0L;
 
-			for (int itr = 0; itr < 10; itr += 1) {
+			for (PartitionInfo partition : partitions) {
 
-				ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1 * 1000));
+				final TopicPartition tp = new TopicPartition(topic, partition.partition());
+				final List<TopicPartition> topicPartition = Arrays.asList(tp);
 
-				if (records.count() == 0) {
-					offset += 1L;
-					consumer.seek(tp, offset);
-				} else {
-					for (ConsumerRecord<String, String> record : records) {
-						if (key.equals(record.key())) {
-							KafkaConsumeRecord rec = new KafkaConsumeRecord();
+				try {
 
-							final List<KafkaProduceRequestHeader> kafkaRequestHeader = new ArrayList<>();
+					if (KafkaClient.logger.isInfoEnabled()) {
+						KafkaClient.logger.info(String.format("assign to '%s'.", topicPartition));
+					}
 
-							for (Header header : record.headers()) {
-								KafkaProduceRequestHeader kafkaProduceRequestHeader = new KafkaProduceRequestHeader();
-								kafkaProduceRequestHeader.setKey(header.key());
-								kafkaProduceRequestHeader.setValue(new String(header.value(), StandardCharsets.UTF_8));
+					consumer.assign(topicPartition);
+				} catch (Exception ex) {
+					final String msg = String.format("can't assign customer to topics '%s'.", String.join(",",
+							topicPartition.stream().map(t -> t.toString()).collect(Collectors.toList())));
+					KafkaClient.logger.error(msg, ex);
+					consumer.unsubscribe();
+					continue;
+				}
 
-								kafkaRequestHeader.add(kafkaProduceRequestHeader);
-							}
+				final Map<MetricName, ? extends Metric> metrics = consumer.metrics();
 
-							rec.setHeaders(
-									UtilsCollection.toArray(KafkaProduceRequestHeader.class, kafkaRequestHeader));
-							rec.setTimestamp(record.timestamp());
-							rec.setContent(record.value());
-							rec.setPartition(record.partition());
-							rec.setOffset(record.offset());
-							rec.setTopic(record.topic());
+				long totalLengthofPartition = 0;
 
-							if (kafkaConsumeRecords.add(rec)) {
-								if (KafkaClient.logger.isDebugEnabled()) {
-									KafkaClient.logger.debug(rec);
+				if (KafkaClient.logger.isInfoEnabled()) {
+					KafkaClient.logger.info("determine length of partition.");
+				}
+
+				for (Map.Entry<MetricName, ? extends Metric> entry : metrics.entrySet()) {
+					MetricName metricName = entry.getKey();
+					Metric metric = entry.getValue();
+					Map<String, String> tags = metricName.tags();
+					if (metricName.name().equals("records-lag") && tags.containsKey("partition")) {
+						totalLengthofPartition += ((Number) metric.metricValue()).longValue();
+					}
+				}
+
+				if (totalLengthofPartition == 0) {
+					KafkaClient.logger.error(String.format("can't determine length of partition '%s'.", topic));
+				}
+
+				if (KafkaClient.logger.isInfoEnabled()) {
+					KafkaClient.logger.info(String
+							.format("start polling for messages from topic '%s' at partition '%s'.", topic, partition));
+				}
+
+				for (long currentOffset = startOffset; currentOffset <= totalLengthofPartition; currentOffset += 1) {
+
+					// initial seek
+					consumer.seek(tp, startOffset);
+
+					if (KafkaClient.logger.isDebugEnabled()) {
+						KafkaClient.logger.debug(
+								String.format("polling for messages from topic '%s' at partition '%s' on offset '%s'.",
+										topic, partition, Long.toString(currentOffset)));
+					}
+
+					ConsumerRecords<?, ?> records = consumer.poll(Duration.ofMillis(1 * 1000));
+					consumer.commitAsync();
+
+					if (records.count() != 0) {
+						for (ConsumerRecord<?, ?> record : records) {
+							if (key.equals(record.key())) {
+								KafkaConsumeRecord rec = new KafkaConsumeRecord();
+
+								final List<KafkaProduceRequestHeader> kafkaRequestHeader = new ArrayList<>();
+
+								for (Header header : record.headers()) {
+									KafkaProduceRequestHeader kafkaProduceRequestHeader = new KafkaProduceRequestHeader();
+									kafkaProduceRequestHeader.setKey(header.key());
+									kafkaProduceRequestHeader
+											.setValue(new String(header.value(), StandardCharsets.UTF_8));
+
+									kafkaRequestHeader.add(kafkaProduceRequestHeader);
 								}
 
-								if (KafkaClient.logger.isInfoEnabled()) {
-									KafkaClient.logger
-											.info(String.format("fetched '%s' messages.", kafkaConsumeRecords.size()));
-								}
-							}
+								rec.setHeaders(
+										UtilsCollection.toArray(KafkaProduceRequestHeader.class, kafkaRequestHeader));
+								rec.setTimestamp(record.timestamp());
+								rec.setContent(record.value());
+								rec.setPartition(record.partition());
+								rec.setOffset(record.offset());
+								rec.setTopic(record.topic());
 
-							if (offset < record.offset()) {
-								offset = record.offset() + 1L;
-								consumer.seek(tp, offset);
+								if (fetchedRecords.add(rec)) {
+									if (KafkaClient.logger.isDebugEnabled()) {
+										KafkaClient.logger.debug(rec);
+									}
+
+									if (KafkaClient.logger.isInfoEnabled()) {
+										KafkaClient.logger
+												.info(String.format("fetched '%s' messages.", fetchedRecords.size()));
+									}
+								}
+
+								// FIXME: should be irrelevant, needs to be tested
+								if (currentOffset < record.offset()) {
+									currentOffset = record.offset() + 1L;
+								}
 							}
 						}
 					}
 				}
-			}
 
-			consumer.unsubscribe();
-			consumer.commitAsync();
-			consumer.close();
+				consumer.unsubscribe();
+			}
 
 		} catch (Exception ex) {
 			final String msg = String.format("can't fetch messages from Kafka at '%s'.",
 					kafkaProperties.getBootstrapServers());
 			KafkaClient.logger.error(msg, ex);
+			return null;
+		}
+
+		try {
+			consumer.close();
+		} catch (Exception ex) {
+			KafkaClient.logger.error("can't close consumer.");
 		}
 
 		final KafkaConsumeResponse result = new KafkaConsumeResponse();
-		result.setRecords(UtilsCollection.toArray(KafkaConsumeRecord.class, kafkaConsumeRecords));
+		result.setRecords(UtilsCollection.toArray(KafkaConsumeRecord.class, fetchedRecords));
 
 		return result;
 	}

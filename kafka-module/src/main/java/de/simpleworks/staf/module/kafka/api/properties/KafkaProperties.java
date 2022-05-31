@@ -16,23 +16,16 @@ public class KafkaProperties extends PropertiesReader {
 	@Property(KafkaConsts.BOOTSTRAP_SERVERS)
 	private String bootstrapServers;
 
-	@Default("STAF")
+	@Default("STAF-Consumer-Group")
 	@Property(KafkaConsts.CONSUMER_GROUP_ID)
 	private String consumerGroupId;
-
-	@Property(KafkaConsts.LISTENERS)
-	private String listeners;
-
+ 
 	public String getBootstrapServers() {
 		return bootstrapServers;
 	}
 
 	public String getConsumerGroupId() {
 		return consumerGroupId;
-	}
-
-	public String getListeners() {
-		return listeners;
 	}
 
 	@Override

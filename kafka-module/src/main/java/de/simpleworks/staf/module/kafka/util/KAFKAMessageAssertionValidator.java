@@ -39,7 +39,7 @@ public class KAFKAMessageAssertionValidator extends AssertionUtils<KafkaConsumeR
 		if (KAFKAMessageAssertionValidator.logger.isDebugEnabled()) {
 			KAFKAMessageAssertionValidator.logger.debug(String.format("assertion value '%s'.", assertionValue));
 		}
-
+ 
 		String content = Convert.EMPTY_STRING;
 
 		switch (allowedValueEnum) {
@@ -80,7 +80,7 @@ public class KAFKAMessageAssertionValidator extends AssertionUtils<KafkaConsumeR
 
 			final KafkaConsumeRecord[] amountMoreThanRecords = response.getRecords();
 
-			if (amountMoreThan < amountMoreThanRecords.length) {
+			if (amountMoreThan > amountMoreThanRecords.length) {
 				throw new RuntimeException(String.format(
 						"The assertion \"%s\" was not met. The amount of records was expected to be more than '%s', but was '%s'.",
 						assertionId, assertionValue, Integer.toString(amountMoreThanRecords.length)));
