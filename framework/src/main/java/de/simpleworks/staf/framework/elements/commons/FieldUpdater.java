@@ -77,7 +77,7 @@ public class FieldUpdater {
 							final Object obj = theClass.cast(singleField);
 							final Object updatedObject = updateFields(currentField.getType().getComponentType(), obj,
 									storage);
-
+ 
 							updatedArray.add(theClass.cast(updatedObject));
 						}
 
@@ -254,6 +254,8 @@ public class FieldUpdater {
 
 			final Pattern r = Pattern.compile(valuePattern);
 
+			final String functionTemplate = mm.group(0);
+
 			final Matcher m = r.matcher(mm.group(1));
 
 			List<String> arguments = new ArrayList<String>();
@@ -354,10 +356,26 @@ public class FieldUpdater {
 
 			if (result instanceof Integer) {
 				Integer convertedToInteger = (Integer) result;
-				currentField.set(obs[0], convertedToInteger.toString());
+
+				final String substitutedValue = fieldValue.replace(functionTemplate, convertedToInteger.toString());
+
+				if (FieldUpdater.logger.isDebugEnabled()) {
+					FieldUpdater.logger
+							.debug(String.format("substitute '%s' with '%s'.", fieldValue, substitutedValue));
+				}
+
+				currentField.set(obs[0], substitutedValue);
 			} else if (result instanceof String) {
 				String convertedToString = (String) result;
-				currentField.set(obs[0], convertedToString);
+
+				final String substitutedValue = fieldValue.replace(functionTemplate, convertedToString);
+
+				if (FieldUpdater.logger.isDebugEnabled()) {
+					FieldUpdater.logger
+							.debug(String.format("substitute '%s' with '%s'.", fieldValue, substitutedValue));
+				}
+
+				currentField.set(obs[0], substitutedValue);
 			} else {
 				final String msg = String.format("%s as result type is not implemented yet.", result.getClass());
 				FieldUpdater.logger.error(msg);
