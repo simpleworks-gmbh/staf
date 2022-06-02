@@ -6,7 +6,7 @@
 	<description>Simpleworks Test Automation Framework</description>
 	<groupId>de.simpleworks.staf</groupId>
 	<artifactId>staf-parent</artifactId>
-	<version>0.110</version>
+	<version>0.110.10</version>
 	<packaging>pom</packaging>
 	<name>staf-parent</name>
 	<url>https://github.com/simpleworks-gmbh/staf</url>
@@ -47,7 +47,7 @@
 		<version.maven-jar-plugin>3.1.1</version.maven-jar-plugin>
 		<version.maven-gpg-plugin>1.6</version.maven-gpg-plugin>
 		<version.guice>4.0</version.guice>
-		<version.gson>2.8.2</version.gson>
+		<version.gson>2.8.9</version.gson>
 		<version.junit4>4.13.1</version.junit4>
 		<version.com.jayway.jsonpath.json-path>2.6.0</version.com.jayway.jsonpath.json-path>
 		<version.log4j>2.17.1</version.log4j>

@@ -7,15 +7,14 @@
 	<parent>
 		<groupId>de.simpleworks.staf</groupId>
 		<artifactId>staf-parent</artifactId>
-		<version>0.110</version>
+		<version>0.110.10</version>
 	</parent>
  
 	<artifactId>framework</artifactId>
 	<name>framework</name>
   
 	<properties>
-		<project.version>0.110</project.version>
-		<version.gson>2.8.2</version.gson>
+		<project.version>0.110.10</project.version>
 		<version.com.squareup.okhttp3>3.3.1</version.com.squareup.okhttp3>
 		<version.net.sourceforge.htmlcleaner.htmlcleaner>2.24</version.net.sourceforge.htmlcleaner.htmlcleaner>
 		<version.net.lightbody.bmp.browsermob-core>2.1.5</version.net.lightbody.bmp.browsermob-core>
@@ -52,11 +51,6 @@
 			<groupId>org.skyscreamer</groupId>
 			<artifactId>jsonassert</artifactId>
 			<version>${version.org.skyscreamer.jsonassert}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>${version.gson}</version>
 		</dependency>
 		<!--START STAF Dependencies -->
 		<dependency>
