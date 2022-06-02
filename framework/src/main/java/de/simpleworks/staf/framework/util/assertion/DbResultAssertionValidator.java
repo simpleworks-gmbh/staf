@@ -89,15 +89,26 @@ public class DbResultAssertionValidator extends AssertionUtils<QueuedDbResult> {
 			for (Map<String, String> map : response.getResult()) {
 				content = map.get(assertionAtribute);
 
-				if (content == null) {
-					throw new RuntimeException("Can't validate assertion. The fetched value was null.");
+				if (content == null && assertionValue != null) {
+					throw new RuntimeException(String.format(
+							"The assertion '%s' was not met. Fetched value is null, but '%s' was expected.",
+							assertion.getId(), assertionValue));
 				}
 
-				if (!content.equals(assertionValue)) {
+				if (content != null && assertionValue == null) {
 					throw new RuntimeException(String.format(
-							"The assertion '%s' was not met. Fetched value '%s' does not match the expected one '%s'.",
-							assertion.getId(), content, assertionValue));
+							"The assertion '%s' was not met. Fetched value is '%s', but null was expected.",
+							assertion.getId(), content));
 				}
+
+				if (content != null && assertionValue != null) {
+					if (!content.equals(assertionValue)) {
+						throw new RuntimeException(String.format(
+								"The assertion '%s' was not met. Fetched value '%s' does not match the expected one '%s'.",
+								assertion.getId(), content, assertionValue));
+					}
+				}
+
 			}
 			break;
 

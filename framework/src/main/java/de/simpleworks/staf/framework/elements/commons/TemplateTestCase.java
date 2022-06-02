@@ -107,7 +107,7 @@ public abstract class TemplateTestCase<Teststep extends ITeststep, Response> ext
 		for (final Assertion assertion : assertions) {
 
 			if (!assertion.validate()) {
-				throw new IllegalArgumentException(String.format("assertion is invaid [\"5s\"].", assertion));
+				throw new IllegalArgumentException(String.format("assertion is invalid [\"%s\"].", assertion));
 			}
 
 			final Assertion updatedAssertion = updateFields(Assertion.class, assertion, getExtractedValues());
