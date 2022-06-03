@@ -342,7 +342,7 @@ public class KafkaClient {
 				for (long currentOffset = startOffset; currentOffset <= totalLengthofPartition; currentOffset += 1) {
 
 					// initial seek
-					consumer.seek(tp, startOffset);
+					consumer.seek(tp, currentOffset);
 
 					if (KafkaClient.logger.isDebugEnabled()) {
 						KafkaClient.logger.debug(
