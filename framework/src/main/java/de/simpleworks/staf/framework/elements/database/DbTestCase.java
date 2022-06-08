@@ -220,11 +220,13 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 			for (final String column : columns.keySet()) {
 
 				final Object ob = rs.getObject(column);
-				String value = Convert.EMPTY_STRING;
+
 				if (ob == null) {
-					row.put(column, value);
+					row.put(column, null);
 					continue;
 				}
+
+				String value = Convert.EMPTY_STRING;
 
 				if (Integer.class.equals(ob.getClass())) {
 					value = Integer.toString(rs.getInt(column));
