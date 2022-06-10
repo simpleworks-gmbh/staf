@@ -17,10 +17,6 @@ public class KafkaProperties extends PropertiesReader {
 	@Property(KafkaConsts.POLL_TIMEOUT_MS)
 	private int polltimeoutMs;
 
-	@Default("1000L")
-	@Property(KafkaConsts.MAX_OFFSET_BYTES)
-	private long maxOffsetBytes;
-
 	@Property(KafkaConsts.BOOTSTRAP_SERVERS)
 	private String bootstrapServers;
 
@@ -30,10 +26,6 @@ public class KafkaProperties extends PropertiesReader {
 
 	public int getPolltimeoutMs() {
 		return polltimeoutMs;
-	}
-
-	public long getMaxOffsetBytes() {
-		return maxOffsetBytes;
 	}
 
 	public String getBootstrapServers() {

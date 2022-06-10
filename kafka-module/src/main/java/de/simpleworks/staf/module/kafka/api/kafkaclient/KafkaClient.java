@@ -5,7 +5,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.Future;
@@ -21,8 +20,6 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.common.Metric;
-import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.header.Header;
@@ -288,8 +285,6 @@ public class KafkaClient {
 
 		try {
 
-			final Long startOffset = 0L;
-
 			for (PartitionInfo partition : partitions) {
 
 				final TopicPartition tp = new TopicPartition(topic, partition.partition());
@@ -310,29 +305,44 @@ public class KafkaClient {
 					continue;
 				}
 
-				final Map<MetricName, ? extends Metric> metrics = consumer.metrics();
+				long totalLengthofPartition = -1;
+				long startOffset = -1;
 
-				long totalLengthofPartition = 0;
+				try {
 
-				if (KafkaClient.logger.isInfoEnabled()) {
-					KafkaClient.logger.info("determine length of partition.");
-				}
+					// seek to end of the topic
+					consumer.seekToEnd(topicPartition);
 
-				for (Map.Entry<MetricName, ? extends Metric> entry : metrics.entrySet()) {
-					MetricName metricName = entry.getKey();
-					Metric metric = entry.getValue();
-					Map<String, String> tags = metricName.tags();
-					if (metricName.name().equals("records-lag") && tags.containsKey("partition")) {
-						totalLengthofPartition += ((Number) metric.metricValue()).longValue();
+					// the position is the latest offset
+					totalLengthofPartition = consumer.position(tp);
+
+					if (totalLengthofPartition < 1) {
+						throw new RuntimeException(
+								String.format("totalLengthofPartition can't be zero or negative, but was \"%s\".",
+										totalLengthofPartition));
 					}
+
+					// seek to end of the topic
+					consumer.seekToBeginning(topicPartition);
+
+					// the position is the smallest offset
+					startOffset = consumer.position(tp);
+
+					if (startOffset < 0) {
+						throw new RuntimeException(
+								String.format("startOffset can't be less than zero, but was \"%s\".", startOffset));
+					}
+
+				} catch (Exception ex) {
+					final String msg = String.format("can't assign customer to topics '%s'.", String.join(",",
+							topicPartition.stream().map(t -> t.toString()).collect(Collectors.toList())));
+					KafkaClient.logger.error(msg, ex);
+					consumer.unsubscribe();
+					continue;
 				}
 
-				if (totalLengthofPartition == 0) {
-					totalLengthofPartition = kafkaProperties.getMaxOffsetBytes();
-					KafkaClient.logger
-							.error(String.format("can't determine length of partition '%s', will set to '%s'.", topic,
-									totalLengthofPartition));
-				}
+				// initial seek
+				consumer.seek(tp, startOffset);
 
 				if (KafkaClient.logger.isInfoEnabled()) {
 					KafkaClient.logger.info(String
@@ -341,7 +351,6 @@ public class KafkaClient {
 
 				for (long currentOffset = startOffset; currentOffset <= totalLengthofPartition; currentOffset += 1) {
 
-					// initial seek
 					consumer.seek(tp, currentOffset);
 
 					if (KafkaClient.logger.isDebugEnabled()) {
@@ -352,7 +361,6 @@ public class KafkaClient {
 
 					ConsumerRecords<?, ?> records = consumer
 							.poll(Duration.ofMillis(1 * kafkaProperties.getPolltimeoutMs()));
-					consumer.commitAsync();
 
 					if (records.count() != 0) {
 						for (ConsumerRecord<?, ?> record : records) {
