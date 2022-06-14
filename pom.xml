@@ -6,7 +6,7 @@
 	<description>Simpleworks Test Automation Framework</description>
 	<groupId>de.simpleworks.staf</groupId>
 	<artifactId>staf-parent</artifactId>
-	<version>0.110.16</version>
+	<version>0.120</version>
 	<packaging>pom</packaging>
 	<name>staf-parent</name>
 	<url>https://github.com/simpleworks-gmbh/staf</url>
@@ -51,7 +51,7 @@
 		<version.junit4>4.13.1</version.junit4>
 		<version.com.jayway.jsonpath.json-path>2.6.0</version.com.jayway.jsonpath.json-path>
 		<version.log4j>2.17.1</version.log4j>
-		<version.junit-jupiter-engine>5.4.0</version.junit-jupiter-engine> 
+		<version.junit-jupiter-engine>5.4.0</version.junit-jupiter-engine>
 	</properties>
 	<profiles>
 		<profile>
@@ -129,7 +129,7 @@
 			<version>${version.junit-jupiter-engine}</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -199,6 +199,7 @@
 		<module>framework</module>
 		<module>junit4-module</module>
 		<module>jira-module</module>
+		<module>kafka-module</module>
 		<module>xray-maven-plugin</module>
 		<module>testflo-maven-plugin</module>
 		<module>surefire-maven-plugin</module>
