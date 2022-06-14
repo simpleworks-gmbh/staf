@@ -42,7 +42,7 @@ public class TeststepProvider<Teststep extends ITeststep> {
 			throw new IllegalArgumentException("steps can't be null or empty.");
 		}
 
-		if (steps.size() != teststeps.size()) {
+		if (steps.size() != teststeps.size()) { 
 			final String msg = String.format(
 					"The amount of 'Step'-annotated methods %d does not match the amount of the API Test Steps %d.",
 					Integer.valueOf(steps.size()), Integer.valueOf(teststeps.size()));
@@ -57,7 +57,7 @@ public class TeststepProvider<Teststep extends ITeststep> {
 			final Teststep teststep = teststeps.get(i);
 
 			if (!teststep.validate()) {
-				final String msg = String.format("The API Test Step '%s' is invalid.", teststep);
+				final String msg = String.format("The Test Step '%s' is invalid.", teststep);
 				throw new InstantiationException(msg);
 			}
 

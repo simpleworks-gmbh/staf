@@ -13,7 +13,8 @@ public enum ValidateMethodEnum implements IEnum {
 	XPATH("XPATH", ValidateMethodValue.XPATH), JSONPATH("JSONPATH", ValidateMethodValue.JSONPATH),
 	RESPONSEBODY("RESPONSEBODY", ValidateMethodValue.RESPONSEBODY),
 	DB_RESULT("DB_RESULT", ValidateMethodValue.DB_RESULT),
-	FILE_COMPARER("FILE_COMPARER", ValidateMethodValue.FILE_COMPARER);
+	FILE_COMPARER("FILE_COMPARER", ValidateMethodValue.FILE_COMPARER),
+	KAFKAMESSAGE_VALIDATION("KAFKAMESSAGE_VALIDATION", ValidateMethodValue.KAFKAMESSAGE_VALIDATION);
 
 	final private String name;
 	final private String value;

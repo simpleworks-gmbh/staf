@@ -80,7 +80,6 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 		return new File_ComparerAssertionValidator().validateAssertion(response, assertion);
 	}
 
-	@Override
 	protected Map<String, String> runAssertion(final HttpResponse response, final Assertion assertion)
 			throws SystemException {
 
