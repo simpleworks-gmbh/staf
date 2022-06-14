@@ -8,14 +8,14 @@
 	<parent>
 		<groupId>de.simpleworks.staf</groupId>
 		<artifactId>staf-parent</artifactId> 
-		<version>0.110.9</version>
+		<version>0.110.3</version>
 	</parent>	
  
 	<artifactId>junit4-module</artifactId>
 	<name>junit4-module</name> 
 	 
 	<properties>
-		<project.version>0.110.9</project.version>
+		<project.version>0.110.3</project.version>
 	</properties>
  
 	<dependencies>
