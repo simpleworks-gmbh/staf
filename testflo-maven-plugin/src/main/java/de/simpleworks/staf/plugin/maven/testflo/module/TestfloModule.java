@@ -3,6 +3,7 @@ package de.simpleworks.staf.plugin.maven.testflo.module;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.EnumSet;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,6 +30,7 @@ import de.simpleworks.staf.plugin.maven.testflo.utils.TestFLOProperties;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.OkHttpClient.Builder;
 
 public class TestfloModule extends AbstractModule {
 	private static final Logger logger = LogManager.getLogger(TestfloModule.class);
@@ -120,8 +122,26 @@ public class TestfloModule extends AbstractModule {
 		bindURL(name, TestfloModule.getUrl(url));
 	}
 
+	private Builder getBuilder(int timeout) {
+
+		if (timeout < 0) {
+			throw new IllegalArgumentException(
+					String.format("timeout can't be less than zero, but was \"%s\".", Integer.toString(timeout)));
+		}
+
+		Builder result = new Builder();
+
+		result.connectTimeout(timeout * 1000, TimeUnit.MILLISECONDS).writeTimeout(timeout * 1000, TimeUnit.MILLISECONDS)
+				.readTimeout(timeout * 1000, TimeUnit.MILLISECONDS);
+
+		return result;
+	}
+
 	private OkHttpClient getBasicAuthHttpClient() {
-		final OkHttpClient result = new OkHttpClient.Builder().addInterceptor(chain -> {
+
+		Builder builder = getBuilder(this.testFlo.getTimeout());
+
+		final OkHttpClient result = builder.addInterceptor(chain -> {
 			final Request request = chain.request();
 			final Request authenticatedRequest = request.newBuilder()
 					.header("Authorization", Credentials.basic(jira.getUsername(), jira.getPassword())).build();

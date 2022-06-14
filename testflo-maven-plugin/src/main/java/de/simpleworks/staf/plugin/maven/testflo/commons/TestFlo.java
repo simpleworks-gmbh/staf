@@ -28,6 +28,7 @@ import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestCaseTransition
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestPlanStatus;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestPlanTransition;
 import de.simpleworks.staf.plugin.maven.testflo.commons.pojo.FixVersion;
+import de.simpleworks.staf.plugin.maven.testflo.utils.TestFLOProperties;
 import okhttp3.OkHttpClient;
 
 public class TestFlo {
@@ -44,7 +45,7 @@ public class TestFlo {
 			throw new IllegalArgumentException("jira can't be null.");
 		}
 		this.jira = jira;
-		tms = new TestFloTms(client, urlTms);
+		tms = new TestFloTms(client, urlTms, TestFLOProperties.getInstance());
 		testFloFixVersion = new TestFloFixVersion(client, jira, JiraProperties.getInstance());
 		testFloLabel = new TestFloLabel(jira);
 		testFloFields = new TestFloFields(jira);
