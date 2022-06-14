@@ -210,6 +210,11 @@ public abstract class TemplateTestCase<Teststep extends ITeststep, Response> ext
 					field.set(this, Long.valueOf(value));
 				} else if (String.class.equals(type)) {
 					field.set(this, value);
+				} else if (Object.class.equals(type)) {
+					if (Convert.isEmpty(value)) {
+						value = null;
+						field.set(this, value);
+					}
 				} else if (type.isEnum()) {
 					final Object typeValue = UtilsEnum.getEnum(type, value);
 					field.set(this, typeValue);
