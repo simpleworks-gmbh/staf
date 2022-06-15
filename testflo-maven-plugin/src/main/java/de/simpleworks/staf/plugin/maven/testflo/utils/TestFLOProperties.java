@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.simpleworks.staf.commons.annotation.Property;
+import de.simpleworks.staf.commons.annotation.Property.Default;
 import de.simpleworks.staf.commons.utils.PropertiesReader;
 import de.simpleworks.staf.plugin.maven.testflo.consts.Consts;
 
@@ -18,10 +19,13 @@ public class TestFLOProperties extends PropertiesReader {
 	@Property(Consts.JIRA_REST_TMS)
 	private String tms;
 
-	@Override
-	protected Class<?> getClazz() {
-		return TestFLOProperties.class;
-	}
+	@Default("1")
+	@Property(Consts.JIRA_REST_TIMEOUT)
+	private int timeout;
+
+	@Default("false")
+	@Property(Consts.JIRA_REST_SKIP_TIMEOUT)
+	private boolean skipTimeout;
 
 	public String getApi() {
 		return api;
@@ -29,6 +33,19 @@ public class TestFLOProperties extends PropertiesReader {
 
 	public String getTms() {
 		return tms;
+	}
+
+	public int getTimeout() {
+		return timeout;
+	}
+
+	public boolean isSkipTimeout() {
+		return skipTimeout;
+	}
+
+	@Override
+	protected Class<?> getClazz() {
+		return TestFLOProperties.class;
 	}
 
 	public static final synchronized TestFLOProperties getInstance() {
@@ -42,4 +59,5 @@ public class TestFLOProperties extends PropertiesReader {
 
 		return TestFLOProperties.instance;
 	}
+
 }

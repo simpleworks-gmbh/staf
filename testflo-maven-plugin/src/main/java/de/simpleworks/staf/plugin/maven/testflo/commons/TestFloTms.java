@@ -17,6 +17,7 @@ import de.simpleworks.staf.commons.exceptions.SystemException;
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.HttpMethod;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestStepStatus;
+import de.simpleworks.staf.plugin.maven.testflo.utils.TestFLOProperties;
 import okhttp3.Call;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
@@ -37,8 +38,9 @@ public class TestFloTms {
 
 	private final OkHttpClient client;
 	private final URL urlTms;
+	private final boolean skipTimeOut;
 
-	public TestFloTms(final OkHttpClient client, final URL urlTms) {
+	public TestFloTms(final OkHttpClient client, final URL urlTms, TestFLOProperties instance) {
 		if (client == null) {
 			throw new IllegalArgumentException("client can't be null.");
 		}
@@ -47,8 +49,13 @@ public class TestFloTms {
 			throw new IllegalArgumentException("urlTms can't be null.");
 		}
 
+		if (instance == null) {
+			throw new IllegalArgumentException("instance can't be null.");
+		}
+
 		this.client = client;
 		this.urlTms = urlTms;
+		this.skipTimeOut = instance.isSkipTimeout();
 	}
 
 	private HttpUrl.Builder createBuilder() {
@@ -133,8 +140,18 @@ public class TestFloTms {
 			return TestFloTms.getresponseBody(response);
 		} catch (final IOException ex) {
 			final String msg = String.format("can't execute request: '%s'.", request);
-			TestFloTms.logger.error(msg, ex);
-			throw new SystemException(msg);
+
+			if (!skipTimeOut) {
+				TestFloTms.logger.error(msg, ex);
+				throw new SystemException(msg);
+			} else {
+				if (TestFloTms.logger.isDebugEnabled()) {
+					TestFloTms.logger.debug(msg, ex);
+					TestFloTms.logger.debug("will return empty string.");
+				}
+
+				return Convert.EMPTY_STRING;
+			}
 		}
 	}
 

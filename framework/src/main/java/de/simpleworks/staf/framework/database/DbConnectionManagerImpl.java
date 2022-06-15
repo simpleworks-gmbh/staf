@@ -41,6 +41,11 @@ public class DbConnectionManagerImpl implements DbConnectionManager {
 
 	@Override
 	public DbConnectionPool get() {
+
+		if (!running) {
+			DbConnectionManagerImpl.logger.info("DbConnectionPool has not been started yet.");
+		}
+
 		if (pool == null) {
 			try {
 				pool = new DbConnectionPool(dbconnections);

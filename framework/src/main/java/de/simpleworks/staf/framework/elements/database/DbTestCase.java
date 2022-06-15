@@ -88,6 +88,30 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 		return currentStatement;
 	}
 
+	/**
+	 * @brief return connection to database
+	 * @param (String) connectionId, defined in the respecting db connection properties, returns null if an error happens, 
+	 * 		  of if the database connection pool stopped running.
+	 * @return (java.sql.Connection) connection to the respecting database
+	 * */
+	public Connection getConnection(final String connectionId) {
+
+		if (Convert.isEmpty(connectionId)) {
+			throw new IllegalArgumentException("connectionId can't be null or empty string.");
+		}
+
+		final DbConnectionPool connectionPool = databaseconnectionimpl.get();
+
+		if (connectionPool == null) {
+			DbTestCase.logger.error("connectionPool is null.");
+			return null;
+		}
+
+		final Connection result = connectionPool.getConnection(connectionId);
+
+		return result;
+	}
+
 	@Override
 	protected DbTeststep updateTeststep(final DbTeststep step, final Map<String, Map<String, String>> values)
 			throws SystemException {
@@ -163,6 +187,11 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 		final String connectionId = statement.getConnectionId();
 		final Connection conn = connectionPool.getConnection(connectionId);
 
+		if (conn == null) {
+			throw new SystemException(
+					String.format("connection '%s' has not been not been established or created.", connectionId));
+		}
+
 		try {
 
 			final StatementsEnum type = statement.getType();
@@ -220,11 +249,13 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 			for (final String column : columns.keySet()) {
 
 				final Object ob = rs.getObject(column);
-				String value = Convert.EMPTY_STRING;
+
 				if (ob == null) {
-					row.put(column, value);
+					row.put(column, null);
 					continue;
 				}
+
+				String value = Convert.EMPTY_STRING;
 
 				if (Integer.class.equals(ob.getClass())) {
 					value = Integer.toString(rs.getInt(column));

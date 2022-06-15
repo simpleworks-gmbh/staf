@@ -28,6 +28,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -660,7 +661,20 @@ public final class UtilsIO {
 				result.addAll(listFiles(file, wildcard));
 			}
 			try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(directory.toPath(), wildcard)) {
-				dirStream.forEach(path -> result.add(path.toFile()));
+				dirStream.forEach(path -> {
+
+					final File foundFile = path.toFile();
+
+					if (result.indexOf(foundFile) < 0) {
+						result.add(foundFile);
+
+						if (UtilsIO.logger.isDebugEnabled()) {
+							UtilsIO.logger
+									.debug(String.format("add file '%s' [%s]", foundFile.getName(), String.join(",",
+											result.stream().map(res -> res.getName()).collect(Collectors.toList()))));
+						}
+					}
+				});
 			} catch (final IOException ex) {
 				final String msg = String.format("can't read files from path '%s' and wildcard '%s'.",
 						directory.toString(), wildcard);

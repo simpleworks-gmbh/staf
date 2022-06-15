@@ -187,6 +187,14 @@ public class Assertion implements IPojo {
 					}
 				}
 
+			case KAFKAMESSAGE_VALIDATION:
+				if (allowedValue.equals(AllowedValueEnum.EXACT_VALUE)) {
+					if (Convert.isEmpty(jsonpath)) {
+						Assertion.logger.error("jsonpath can't be null or empty string.");
+						result = false;
+					}
+				}
+				
 				break;
 			default:
 				Assertion.logger
@@ -195,8 +203,8 @@ public class Assertion implements IPojo {
 				break;
 			}
 
-		}
-		return result;
+		}return result;
+
 	}
 
 	@Override
@@ -211,34 +219,49 @@ public class Assertion implements IPojo {
 		try {
 
 			if (!id.equals(assertion.getId())) {
+				Assertion.logger.error(String.format("id '%s' does not match expetced '%s'.", id, assertion.getId()));
 				return false;
 			}
 
 			if (!xpath.equals(assertion.getXpath())) {
+				Assertion.logger
+						.error(String.format("xpath '%s' does not match expetced '%s'.", xpath, assertion.getXpath()));
 				return false;
 			}
 
 			if (!jsonpath.equals(assertion.getJsonpath())) {
+				Assertion.logger.error(String.format("jsonpath '%s' does not match expetced '%s'.", jsonpath,
+						assertion.getJsonpath()));
 				return false;
 			}
 
 			if (!headername.equals(assertion.getHeadername())) {
+				Assertion.logger.error(String.format("headername '%s' does not match expetced '%s'.", headername,
+						assertion.getHeadername()));
 				return false;
 			}
 
 			if (!attribute.equals(assertion.getAttribute())) {
+				Assertion.logger.error(String.format("attribute '%s' does not match expetced '%s'.", attribute,
+						assertion.getAttribute()));
 				return false;
 			}
 
 			if (!allowedValue.equals(assertion.getAllowedValue())) {
+				Assertion.logger.error(String.format("allowedValue '%s' does not match expetced '%s'.", allowedValue,
+						assertion.getAllowedValue()));
 				return false;
 			}
 
 			if (!validateMethod.equals(assertion.getValidateMethod())) {
+				Assertion.logger.error(String.format("validateMethod '%s' does not match expetced '%s'.",
+						validateMethod, assertion.getValidateMethod()));
 				return false;
 			}
 
 			if (!value.equals(assertion.getValue())) {
+				Assertion.logger
+						.error(String.format("value '%s' does not match expetced '%s'.", value, assertion.getValue()));
 				return false;
 			}
 		} catch (Exception ex) {

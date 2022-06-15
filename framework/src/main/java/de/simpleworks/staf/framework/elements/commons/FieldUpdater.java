@@ -155,7 +155,26 @@ public class FieldUpdater {
 		final String literal = "#";
 		final String substitutePattern = "<&%s" + literal + "%s&>";
 
-		final String fieldValue = (String) currentField.get(obs[0]);
+		final Object currentFieldValue = currentField.get(obs[0]);
+
+		// Fields that are null, will not be substituted
+		if (currentFieldValue == null) {
+			currentField.set(obs[0], null);
+			return;
+		}
+
+		String tmpFieldValue = Convert.EMPTY_STRING;
+
+		try {
+			tmpFieldValue = (String) currentFieldValue;
+		} catch (Exception ex) {
+			final String msg = String.format("Value of field of type '%s' from class '%s' can't be casted to String.",
+					currentField.getType(), clazz);
+			FieldUpdater.logger.error(msg, ex);
+			throw new Exception(msg);
+		}
+
+		final String fieldValue = tmpFieldValue;
 		String substitute = fieldValue;
 
 		final Optional<String> op = keys.stream().filter(key -> fieldValue.contains(key)).findFirst();
@@ -198,9 +217,9 @@ public class FieldUpdater {
 					throw new Exception(String.format("storage \"%s\" is unknown.", lefthandassignment));
 				}
 
-				final String value = map.getOrDefault(assertion, null);
+				final String value = map.getOrDefault(assertion, "VARIABLE_UNKNOWN");
 
-				if (Convert.isEmpty(value)) {
+				if ("VARIABLE_UNKNOWN".equals(value)) {
 
 					if (CURRENT_STEP_STORAGE_NAME.equals(lefthandassignment)) {
 						if (FieldUpdater.logger.isInfoEnabled()) {
@@ -214,7 +233,12 @@ public class FieldUpdater {
 					throw new Exception(String.format("variable \"%s\" is unknown.", assertion));
 				}
 
-				substitute = substitute.replace(String.format(substitutePattern, lefthandassignment, assertion), value);
+				if(value == null) {
+					substitute = null;
+				}
+				else {
+					substitute = substitute.replace(String.format(substitutePattern, lefthandassignment, assertion), value);
+				}
 			}
 		}
 		currentField.set(obs[0], substitute);
@@ -236,9 +260,28 @@ public class FieldUpdater {
 		if (FieldUpdater.logger.isDebugEnabled()) {
 			FieldUpdater.logger.debug(String.format("use \"%s\" as regular expression for functions.", valuePattern));
 		}
+		
+		
+		final Object currentFieldValue = currentField.get(obs[0]);
 
-		final String fieldValue = (String) currentField.get(obs[0]);
+		// Fields that are null, will not be substituted
+		if (currentFieldValue == null) {
+			currentField.set(obs[0], null);
+			return;
+		}
 
+		String tmpFieldValue = Convert.EMPTY_STRING;
+
+		try {
+			tmpFieldValue = (String) currentFieldValue;
+		} catch (Exception ex) {
+			final String msg = String.format("Value of field of type '%s' from class '%s' can't be casted to String.",
+					currentField.getType(), clazz);
+			FieldUpdater.logger.error(msg, ex);
+			throw new Exception(msg);
+		}
+
+		final String fieldValue = tmpFieldValue;
 		final String template = testCaseProperties.getFunctionTemplateRegularExpression();
 
 		if (FieldUpdater.logger.isDebugEnabled()) {
