@@ -20,12 +20,14 @@ public class TestFloLabel {
 
 	private static final Logger logger = LogManager.getLogger(TestFloLabel.class);
 	private final IssueRestClient jira;
+	private final boolean keepJiraLabel;
 
-	public TestFloLabel(final IssueRestClient jira) {
+	public TestFloLabel(final IssueRestClient jira, final boolean keepJiraLabel) {
 		if (jira == null) {
 			throw new IllegalArgumentException("jira can't be null.");
 		}
 		this.jira = jira;
+		this.keepJiraLabel = keepJiraLabel;
 	}
 
 	public void addLabels(String issueKey, List<String> labels) {
@@ -40,17 +42,29 @@ public class TestFloLabel {
 
 		List<String> issueLabels = new ArrayList<String>();
 
+		if (!issueLabels.addAll(labels)) {
+			TestFloLabel.logger.error(String.format("can't add labels."));
+			return;
+		}
+
 		try {
-			Promise<Issue> promiseIssue = jira.getIssue(issueKey);
 
-			Issue jiraIssue = promiseIssue.claim();
+			if (this.keepJiraLabel) {
 
-			issueLabels = UtilsCollection.toList(jiraIssue.getLabels());
+				if (TestFloLabel.logger.isDebugEnabled()) {
+					TestFloLabel.logger.debug("Keep Jira Labels, while fetching.");
+				}
 
-			if (!issueLabels.addAll(labels)) {
-				TestFloLabel.logger.error(String.format("can't add labels."));
-				return;
+				Promise<Issue> promiseIssue = jira.getIssue(issueKey);
+
+				Issue jiraIssue = promiseIssue.claim();
+
+				if (!issueLabels.addAll(UtilsCollection.toList(jiraIssue.getLabels()))) {
+					TestFloLabel.logger.error(String.format("can't add labels."));
+					return;
+				}
 			}
+
 		} catch (Exception ex) {
 			TestFloLabel.logger.error(String.format("can't fetch issue \"%s\".", issueKey), ex);
 			return;
