@@ -1,7 +1,5 @@
 package de.simpleworks.staf.module.kafka.api.kafkaclient;
 
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,8 +10,6 @@ import java.util.stream.Collectors;
 
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -40,8 +36,10 @@ import de.simpleworks.staf.module.kafka.api.KafkaProduceRequestKey;
 import de.simpleworks.staf.module.kafka.api.KafkaProduceResponse;
 import de.simpleworks.staf.module.kafka.api.kafkaclient.utils.KafkaClientUtils;
 import de.simpleworks.staf.module.kafka.api.properties.KafkaProperties;
+import de.simpleworks.staf.module.kafka.enums.ConumeMessagesDirectionEnum;
 import de.simpleworks.staf.module.kafka.enums.DeserializerTypeEnum;
 import de.simpleworks.staf.module.kafka.enums.SerializerTypeEnum;
+import de.simpleworks.staf.module.kafka.util.UtilsKafkaConsumer;
 
 public class KafkaClient {
 
@@ -148,7 +146,7 @@ public class KafkaClient {
 		final String keyValue = key.getValue();
 
 		final KafkaConsumeResponse result = getMessages(consumer, topic, keyValue);
-
+		
 		return result;
 	}
 
@@ -244,9 +242,10 @@ public class KafkaClient {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	/**
 	 * 
+	 * @brief gets messages from Kafka-Broker. The consumer instance will (likely) be closed afterwards.
 	 * @return respecting instance of KafkaConsumeResponse, null if an error occurs.
 	 */
-	public static KafkaConsumeResponse getMessages(Consumer consumer, String topic, String key) {
+	private static KafkaConsumeResponse getMessages(Consumer consumer, String topic, String key) {
 
 		if (consumer == null) {
 			throw new IllegalArgumentException("consumer can't be null.");
@@ -341,69 +340,37 @@ public class KafkaClient {
 					continue;
 				}
 
-				// initial seek
-				consumer.seek(tp, startOffset);
+				final ConumeMessagesDirectionEnum direction = kafkaProperties.getConsumerConsumeMessagesDirection();
+				
+				switch (direction) {
+
+				case ASCENDING:
+
+					if (!fetchedRecords.addAll(UtilsKafkaConsumer.consumeMessagesAscendingOrder(consumer, partition, tp,
+							key, startOffset, totalLengthofPartition))) {
+						KafkaClient.logger.error(String.format(
+								"can't add new records of partition '%s' from topic '%s' in asecneding order",
+								Integer.toString(partition.partition()), tp.topic()));
+					}
+
+					break;
+				case DESCENDING:
+
+					if (!fetchedRecords.addAll(UtilsKafkaConsumer.consumeMessagesDescendingOrder(consumer, partition,
+							tp, key, totalLengthofPartition, startOffset))) {
+						KafkaClient.logger.error(String.format(
+								"can't add new records of partition '%s' from topic '%s' in desecending order",
+								Integer.toString(partition.partition()), tp.topic()));
+					}
+
+					break;
+				default:
+					throw new IllegalArgumentException(String.format("type '%s' is not implemented yet.", direction));
+				}
 
 				if (KafkaClient.logger.isInfoEnabled()) {
 					KafkaClient.logger.info(String
 							.format("start polling for messages from topic '%s' at partition '%s'.", topic, partition));
-				}
-
-				for (long currentOffset = startOffset; currentOffset <= totalLengthofPartition; currentOffset += 1) {
-
-					consumer.seek(tp, currentOffset);
-
-					if (KafkaClient.logger.isDebugEnabled()) {
-						KafkaClient.logger.debug(
-								String.format("polling for messages from topic '%s' at partition '%s' on offset '%s'.",
-										topic, partition, Long.toString(currentOffset)));
-					}
-
-					ConsumerRecords<?, ?> records = consumer
-							.poll(Duration.ofMillis(1 * kafkaProperties.getPolltimeoutMs()));
-
-					if (records.count() != 0) {
-						for (ConsumerRecord<?, ?> record : records) {
-							if (key.equals(record.key())) {
-								KafkaConsumeRecord rec = new KafkaConsumeRecord();
-
-								final List<KafkaProduceRequestHeader> kafkaRequestHeader = new ArrayList<>();
-
-								for (Header header : record.headers()) {
-									KafkaProduceRequestHeader kafkaProduceRequestHeader = new KafkaProduceRequestHeader();
-									kafkaProduceRequestHeader.setKey(header.key());
-									kafkaProduceRequestHeader
-											.setValue(new String(header.value(), StandardCharsets.UTF_8));
-
-									kafkaRequestHeader.add(kafkaProduceRequestHeader);
-								}
-
-								rec.setHeaders(
-										UtilsCollection.toArray(KafkaProduceRequestHeader.class, kafkaRequestHeader));
-								rec.setTimestamp(record.timestamp());
-								rec.setContent(record.value());
-								rec.setPartition(record.partition());
-								rec.setOffset(record.offset());
-								rec.setTopic(record.topic());
-
-								if (fetchedRecords.add(rec)) {
-									if (KafkaClient.logger.isDebugEnabled()) {
-										KafkaClient.logger.debug(rec);
-									}
-
-									if (KafkaClient.logger.isInfoEnabled()) {
-										KafkaClient.logger
-												.info(String.format("fetched '%s' messages.", fetchedRecords.size()));
-									}
-								}
-
-								// FIXME: should be irrelevant, needs to be tested
-								if (currentOffset < record.offset()) {
-									currentOffset = record.offset() + 1L;
-								}
-							}
-						}
-					}
 				}
 
 				consumer.unsubscribe();
