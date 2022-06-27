@@ -16,25 +16,25 @@ public class XrayProperties extends PropertiesReader {
 
 	private static XrayProperties instance;
 
-	@Property(XrayConsts.XRAY_AUTHENTICATE_URL)
+	@Property(value = XrayConsts.XRAY_AUTHENTICATE_URL, required = true)
 	private String authenticationUrl;
 
-	@Property(XrayConsts.XRAY_GRAPHQL_APT_URL)
+	@Property(value = XrayConsts.XRAY_GRAPHQL_APT_URL, required = true)
 	private String apiUrl;
 
-	@Property(XrayConsts.XRAY_CLIENT_ID)
+	@Property(value = XrayConsts.XRAY_CLIENT_ID, required = true)
 	private String clientId;
 
-	@Property(XrayConsts.XRAY_CLIENT_SECRET)
+	@Property(value = XrayConsts.XRAY_CLIENT_SECRET, required = true)
 	private String clientSecret;
 
-	@Property(XrayConsts.JIRA_PASSWORD)
+	@Property(value = XrayConsts.JIRA_PASSWORD, required = true)
 	private String jiraPassword;
 
-	@Property(XrayConsts.JIRA_USERNAME)
+	@Property(value = XrayConsts.JIRA_USERNAME, required = true)
 	private String jiraUsername;
 
-	@Property(XrayConsts.JIRA_URL)
+	@Property(value = XrayConsts.JIRA_URL, required = true)
 	private String jiraUrl;
 
 	public URL getAuthenticationUrl() throws InvalidConfiguration {

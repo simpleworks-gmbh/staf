@@ -8,7 +8,6 @@ import org.apache.logging.log4j.Logger;
 
 import de.simpleworks.staf.commons.annotation.Property;
 import de.simpleworks.staf.commons.annotation.Property.Default;
-import de.simpleworks.staf.commons.annotation.Property.NotNull;
 import de.simpleworks.staf.commons.utils.PropertiesReader;
 import de.simpleworks.staf.plugin.maven.stafutils.consts.TestclassGeneratorConsts;
 
@@ -18,12 +17,10 @@ public class TestclassGeneratorProperties extends PropertiesReader {
 
 	private static TestclassGeneratorProperties instance = null;
 
-	@NotNull
-	@Property(TestclassGeneratorConsts.TESTCLASS_GENERATOR_TESTCASE_FILE)
+	@Property(value = TestclassGeneratorConsts.TESTCLASS_GENERATOR_TESTCASE_FILE, required = true)
 	private String testcaseFile;
 
-	@NotNull
-	@Property(TestclassGeneratorConsts.TESTCLASS_GENERATOR_METHODS_FILE)
+	@Property(value = TestclassGeneratorConsts.TESTCLASS_GENERATOR_METHODS_FILE, required = true)
 	private String methodsFile;
 
 	@Default("UTF-8")

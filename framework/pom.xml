@@ -7,14 +7,14 @@
 	<parent>
 		<groupId>de.simpleworks.staf</groupId>
 		<artifactId>staf-parent</artifactId>
-		<version>0.120</version>
+		<version>0.120.4</version>
 	</parent>
  
 	<artifactId>framework</artifactId>
 	<name>framework</name>
   
 	<properties>
-		<project.version>0.120</project.version>
+		<project.version>0.120.4</project.version>
 		<version.com.squareup.okhttp3>3.3.1</version.com.squareup.okhttp3>
 		<version.net.sourceforge.htmlcleaner.htmlcleaner>2.24</version.net.sourceforge.htmlcleaner.htmlcleaner>
 		<version.net.lightbody.bmp.browsermob-core>2.1.5</version.net.lightbody.bmp.browsermob-core>
