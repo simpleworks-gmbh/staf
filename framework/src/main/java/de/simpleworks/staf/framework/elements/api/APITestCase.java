@@ -43,9 +43,9 @@ import net.lightbody.bmp.core.har.Har;
 
 public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResponse> {
 	private static final Logger logger = LogManager.getLogger(APITestCase.class);
-	private final static String ENVIRONMENT_VARIABLES_NAME = "APITestCase";
+	public final static String ENVIRONMENT_VARIABLES_NAME = "APITestCase";
 	private static final HttpClientProperties httpClientProperties = HttpClientProperties.getInstance();
-
+ 
 	private String currentstepname;
 	private HttpRequest currentHttpRequest;
 	private HttpResponse currentExpetcedHttpResponse;
