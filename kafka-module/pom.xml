@@ -6,7 +6,7 @@
 	<parent>
 		<artifactId>staf-parent</artifactId>
 		<groupId>de.simpleworks.staf</groupId>
-		<version>0.120</version>
+		<version>0.120.10</version>
 	</parent>
 
 	<artifactId>kafka-module</artifactId>
