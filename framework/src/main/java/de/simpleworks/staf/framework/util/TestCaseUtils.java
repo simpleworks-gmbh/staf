@@ -47,8 +47,8 @@ public class TestCaseUtils {
 		Class clazz = forClass;
 
 		do {
-			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("collectMethods from class '%s'.", clazz.getSimpleName()));
+			if (TestCaseUtils.logger.isDebugEnabled()) {
+				TestCaseUtils.logger.debug(String.format("collectMethods from class '%s'.", clazz.getSimpleName()));
 			}
 
 			final List<Method> methodsCurrentClass = Arrays.asList(clazz.getDeclaredMethods());
