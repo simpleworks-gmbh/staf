@@ -1,5 +1,6 @@
 package de.simpleworks.staf.plugin.maven.surefire;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -15,7 +16,7 @@ import de.simpleworks.staf.commons.elements.TestPlan;
 import de.simpleworks.staf.commons.elements.TestStep;
 import de.simpleworks.staf.commons.exceptions.SystemException;
 import de.simpleworks.staf.commons.utils.Scanner;
-import de.simpleworks.staf.commons.utils.UtilsCollection;
+import de.simpleworks.staf.framework.util.TestCaseUtils;
 
 public class TestplanValidator {
 	static final Logger logger = LogManager.getLogger(TestplanValidator.class);
@@ -38,8 +39,9 @@ public class TestplanValidator {
 		}
 
 		final List<TestStep> caseSteps = testcase.getTestSteps();
-		final List<Step> classSteps = UtilsCollection.toList(clazz.getDeclaredMethods()).stream()
-				.map(method -> method.getAnnotation(Step.class)).filter(Objects::nonNull).collect(Collectors.toList());
+		final List<Method> allMethods = TestCaseUtils.collectMethods(clazz);
+		final List<Step> classSteps = allMethods.stream().map(method -> method.getAnnotation(Step.class))
+				.filter(Objects::nonNull).collect(Collectors.toList());
 		Collections.sort(classSteps, (o1, o2) -> o1.order() - o2.order());
 
 		if (caseSteps.size() != classSteps.size()) {
