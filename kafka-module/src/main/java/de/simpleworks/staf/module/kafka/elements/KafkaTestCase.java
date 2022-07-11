@@ -18,6 +18,7 @@ import de.simpleworks.staf.commons.exceptions.SystemException;
 import de.simpleworks.staf.commons.report.artefact.CsvFile;
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.UtilsCollection;
+import de.simpleworks.staf.commons.utils.UtilsNetwork;
 import de.simpleworks.staf.framework.api.httpclient.TeststepProvider;
 import de.simpleworks.staf.framework.elements.api.RewriteUrlObject;
 import de.simpleworks.staf.framework.elements.commons.TemplateTestCase;
@@ -38,8 +39,7 @@ import de.simpleworks.staf.module.kafka.api.mapper.MapperKafkaTeststep;
 import de.simpleworks.staf.module.kafka.api.properties.KafkaProperties;
 import de.simpleworks.staf.module.kafka.consts.KafkaConsts;
 import de.simpleworks.staf.module.kafka.elements.api.KafkaTestResult;
-import de.simpleworks.staf.module.kafka.util.KAFKAMessageAssertionValidator;
-import de.simpleworks.staf.module.kafka.util.UtilsNetwork;
+import de.simpleworks.staf.module.kafka.util.KAFKAMessageAssertionValidator; 
 import net.lightbody.bmp.BrowserMobProxyServer;
 
 public class KafkaTestCase extends TemplateTestCase<IKafkaTeststep, KafkaConsumeResponse> {
