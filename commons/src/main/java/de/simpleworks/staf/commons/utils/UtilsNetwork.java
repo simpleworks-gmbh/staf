@@ -1,4 +1,4 @@
-package de.simpleworks.staf.module.kafka.util;
+package de.simpleworks.staf.commons.utils;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -8,8 +8,6 @@ import java.net.URI;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import de.simpleworks.staf.commons.utils.Convert;
 
 public class UtilsNetwork {
 
