@@ -11,8 +11,6 @@ public class OkHttpBuilder {
 	private static final HttpClientProperties httpClientProperties = HttpClientProperties.getInstance();
 	private static final ProxyServerProperties proxyServerProperties = ProxyServerProperties.getInstance();
 
-	private static BrowserMobProxyServer browsermobProxy = null;
-
 	public OkHttpBuilder() {
 		throw new InstantiationError("utility class.");
 	}
@@ -29,14 +27,6 @@ public class OkHttpBuilder {
 	}
 
 	private static BrowserMobProxyServer setUpProxyServer() {
-		if (OkHttpBuilder.browsermobProxy == null) {
-			OkHttpBuilder.browsermobProxy = ProxyUtils.createProxyServer(OkHttpBuilder.proxyServerProperties,
-					TestcaseKindEnum.API_TESTCASE);
-		} else if (OkHttpBuilder.browsermobProxy.isStopped()) {
-			OkHttpBuilder.browsermobProxy = ProxyUtils.createProxyServer(OkHttpBuilder.proxyServerProperties,
-					TestcaseKindEnum.API_TESTCASE);
-		}
-
-		return OkHttpBuilder.browsermobProxy;
+		return ProxyUtils.createProxyServer(OkHttpBuilder.proxyServerProperties, TestcaseKindEnum.API_TESTCASE);
 	}
 }
