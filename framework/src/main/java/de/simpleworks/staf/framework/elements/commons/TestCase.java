@@ -7,10 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.google.inject.Guice;
 import com.google.inject.Module;
+
 import de.simpleworks.staf.commons.annotation.Step;
 import de.simpleworks.staf.commons.annotation.Testcase;
 import de.simpleworks.staf.commons.enums.Result;
@@ -295,11 +298,19 @@ public abstract class TestCase {
 		if (testcase == null) {
 			throw new IllegalArgumentException("testcase can't be null.");
 		}
-		testcase.bootstrap();
+
+		if (testcase.isFailed()) {
+			throw new RuntimeException(String.format("testcase '%s' has already failed..", testcase.getTestCaseName()));
+		}
+
+		if (!testcase.start()) {
+			testcase.bootstrap();
+		}
+
 		try {
 			for (Method stepmethod : TestCaseUtils.fetchStepMethods(testcase.getClass())) {
 				if (stepmethod == null) {
-					TestCase.logger.error("Method '%s' can't be null.");
+					TestCase.logger.error("stepmethod can't be null.");
 					break;
 				}
 				final Step step = stepmethod.getAnnotation(Step.class);
@@ -312,6 +323,12 @@ public abstract class TestCase {
 					TestCase.logger.debug(String.format("Execute step '%s'.", step.description()));
 				}
 				testcase.executeTestStep();
+
+				@SuppressWarnings("rawtypes")
+				final Artefact current = testcase.createArtefact();
+				// transmit artefact
+				this.setArtefact(current);
+
 			}
 		} catch (final Throwable ex) {
 			@SuppressWarnings("rawtypes")
@@ -319,9 +336,13 @@ public abstract class TestCase {
 			// transmit artefact
 			this.setArtefact(current);
 			throw ex;
-		} finally {
+		}
+
+		if (testcase.start()) {
 			testcase.shutdown();
 		}
+
 		return testcase.getExtractedValues();
 	}
+
 }
