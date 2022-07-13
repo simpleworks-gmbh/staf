@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+ 
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,6 +31,7 @@ import okhttp3.OkHttpClient;
 @Mojo(name = "fetchTestPlan", defaultPhase = LifecyclePhase.INITIALIZE)
 public class FetchTestPlanMojo extends TestfloMojo {
 	private static final Logger logger = LogManager.getLogger(FetchTestPlanMojo.class);
+	
 	@Inject
 	private IssueRestClient clientJira;
 
@@ -52,6 +54,9 @@ public class FetchTestPlanMojo extends TestfloMojo {
 	@Parameter(property = "customFields")
 	private List<String> customFields;
 
+	@Parameter(property = "keepJiraLabel", defaultValue = "false")
+	private boolean keepJiraLabel;
+	
 	@Inject
 	@Named(Consts.JIRA_REST_TMS)
 	private URL urlTms;
@@ -84,13 +89,14 @@ public class FetchTestPlanMojo extends TestfloMojo {
 			FetchTestPlanMojo.logger.debug(String.format("urlTms: '%s'.", urlTms));
 			FetchTestPlanMojo.logger.debug(String.format("client: '%s'.", clientJira));
 			FetchTestPlanMojo.logger.debug(String.format("clientHttp: '%s'.", clientHttp));
+			FetchTestPlanMojo.logger.debug(String.format("keepJiraLabel: '%s'.", keepJiraLabel));
 		}
 		Assert.assertFalse("testPlanId can't be null or empty string.", Convert.isEmpty(testPlanId));
 		Assert.assertFalse("fileName can't be null or empty string.", Convert.isEmpty(fileName));
 		Assert.assertNotNull("urlTms can't be null.", urlTms);
 		Assert.assertNotNull("client can't be null.", clientJira);
 		Assert.assertNotNull("clientHttp can't be null.", clientHttp);
-		testFlo = new TestFlo(clientJira, clientHttp, urlTms);
+		testFlo = new TestFlo(clientJira, clientHttp, urlTms, keepJiraLabel);
 	}
 
 	@Override

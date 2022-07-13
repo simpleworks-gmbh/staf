@@ -20,14 +20,15 @@ public class TestFloFields {
 	private final IssueRestClient jira;
 
 	private final TestFloLabel testFloLabel;
+	
 
-	public TestFloFields(final IssueRestClient jira) {
+	public TestFloFields(final IssueRestClient jira, final boolean keepJiraLabel) {
 		if (jira == null) {
 			throw new IllegalArgumentException("jira can't be null.");
 		}
 		this.jira = jira;
 
-		this.testFloLabel = new TestFloLabel(this.jira);
+		this.testFloLabel = new TestFloLabel(this.jira, keepJiraLabel);
 	}
 
 	private List<String> fetchJiraFields(Issue jiraIssue, List<String> customFields) throws Exception {

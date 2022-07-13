@@ -30,6 +30,9 @@ Labels
 Custom Fields
 - customFields: `Comma separated list of Custom Labels, that will be added as a Jira Label`
 
+Keep Jira Label
+- keepJiraLabel: `flag idicating, if the labels of a specific issue, should be kept.`
+
 Extra Settings
 - testflo.jira_rest_timeout: `socket timeout in seconds, that shall be used`
 - testflo.jira_rest_skip_timeout: `flag, determines if socket timeout, shall be skipped` (needed if move to next iteration raises an error)
