@@ -45,9 +45,9 @@ import net.lightbody.bmp.BrowserMobProxyServer;
 public class KafkaTestCase extends TemplateTestCase<IKafkaTeststep, KafkaConsumeResponse> {
 
 	private static final Logger logger = LogManager.getLogger(KafkaTestCase.class);
-	private static final String ENVIRONMENT_VARIABLES_NAME = "KafkaTestCase";
+	public static final String ENVIRONMENT_VARIABLES_NAME = "KafkaTestCase";
 	private static final KafkaProperties kafkaProperties = KafkaProperties.getInstance();
-
+ 
 	private String currentstepname;
 
 	private IKafkaRequest kafkaRequest;
