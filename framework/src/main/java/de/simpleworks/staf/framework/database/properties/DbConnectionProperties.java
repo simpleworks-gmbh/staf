@@ -8,7 +8,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.simpleworks.staf.commons.annotation.Property;
-import de.simpleworks.staf.commons.annotation.Property.NotNull;
 import de.simpleworks.staf.commons.database.connection.DbConnection;
 import de.simpleworks.staf.commons.utils.PropertiesReader;
 import de.simpleworks.staf.framework.consts.FrameworkConsts;
@@ -21,8 +20,7 @@ public class DbConnectionProperties extends PropertiesReader {
 
 	private final static MapperDbConnection mapper = new MapperDbConnection();
 
-	@NotNull
-	@Property(FrameworkConsts.DATABASE_CONNECTION_POOL_CONFIG_FILE)
+	@Property(value = FrameworkConsts.DATABASE_CONNECTION_POOL_CONFIG_FILE, required = true)
 	private String dbConnections;
 
 	public List<DbConnection> getDbConnections() throws Exception {
