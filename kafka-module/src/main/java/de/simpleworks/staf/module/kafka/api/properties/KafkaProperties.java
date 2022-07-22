@@ -6,7 +6,9 @@ import org.apache.logging.log4j.Logger;
 import de.simpleworks.staf.commons.annotation.Property;
 import de.simpleworks.staf.commons.annotation.Property.Default;
 import de.simpleworks.staf.commons.utils.PropertiesReader;
+import de.simpleworks.staf.module.kafka.consts.ConumeMessagesDirectionValue;
 import de.simpleworks.staf.module.kafka.consts.KafkaConsts;
+import de.simpleworks.staf.module.kafka.enums.ConumeMessagesDirectionEnum;
 
 public class KafkaProperties extends PropertiesReader {
 	private static final Logger logger = LogManager.getLogger(KafkaProperties.class);
@@ -24,6 +26,16 @@ public class KafkaProperties extends PropertiesReader {
 	@Property(KafkaConsts.CONSUMER_GROUP_ID)
 	private String consumerGroupId;
 
+	@Default(ConumeMessagesDirectionValue.ASCENDING)
+	@Property(KafkaConsts.CONSUMER_CONSUME_MESSAGES_DIRECTION)
+	private ConumeMessagesDirectionEnum consumerConsumeMessagesDirection;
+
+	@Property(KafkaConsts.CONSUMER_CONSUME_MESSAGES_MAX)
+	private String consumerConsumeMessagesMax;
+	
+	@Property(KafkaConsts.CONSUMER_CONSUME_OFFSET_MAX)
+	private String consumerConsumeOffsetMax;
+
 	public int getPolltimeoutMs() {
 		return polltimeoutMs;
 	}
@@ -36,6 +48,18 @@ public class KafkaProperties extends PropertiesReader {
 		return consumerGroupId;
 	}
 
+	public ConumeMessagesDirectionEnum getConsumerConsumeMessagesDirection() {
+		return consumerConsumeMessagesDirection;
+	}
+
+	public String getConsumerConsumeMessagesMax() {
+		return consumerConsumeMessagesMax;
+	}
+	
+	public String getConsumerConsumeOffsetMax() {
+		return consumerConsumeOffsetMax;
+	}
+		
 	@Override
 	protected Class<?> getClazz() {
 		return KafkaProperties.class;
