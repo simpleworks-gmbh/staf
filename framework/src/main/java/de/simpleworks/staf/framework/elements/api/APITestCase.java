@@ -380,18 +380,23 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 		if (apiteststep == null) {
 			return;
 		}
-		if (!apiteststep.validate()) {
-			throw new IllegalArgumentException(String.format("Step '%s' is invalid.", apiteststep));
-		}
+		
 		if (getExtractedValues() == null) {
 			throw new IllegalStateException("extractedValues can't be null.");
 		}
-		if (APITestCase.logger.isDebugEnabled()) {
-			APITestCase.logger.debug(String.format("next apiteststep '%s'.", apiteststep));
-		}
+		
 		if (!getExtractedValues().keySet().isEmpty()) {
 			apiteststep = updateTeststep(apiteststep, getExtractedValues());
 		}
+		
+		if (!apiteststep.validate()) {
+			throw new IllegalArgumentException(String.format("Step '%s' is invalid.", apiteststep));
+		}
+		
+		if (APITestCase.logger.isDebugEnabled()) {
+			APITestCase.logger.debug(String.format("next apiteststep '%s'.", apiteststep));
+		}
+		
 		currentstepname = apiteststep.getName();
 		currentHttpRequest = apiteststep.getRequest();
 		currentExpetcedHttpResponse = apiteststep.getResponse();

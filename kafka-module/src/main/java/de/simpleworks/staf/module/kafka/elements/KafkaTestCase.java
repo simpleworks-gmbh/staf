@@ -238,24 +238,29 @@ public class KafkaTestCase extends TemplateTestCase<IKafkaTeststep, KafkaConsume
 
 		if (provider == null) {
 			throw new IllegalArgumentException("provider can't be null.");
-		}
+		} 
 
 		IKafkaTeststep kafkaTeststep = provider.get();
 		if (kafkaTeststep == null) {
 			return;
 		}
-		if (!kafkaTeststep.validate()) {
-			throw new IllegalArgumentException(String.format("Step '%s' is invalid.", kafkaTeststep));
-		}
+		
 		if (getExtractedValues() == null) {
 			throw new IllegalStateException("extractedValues can't be null.");
 		}
-		if (KafkaTestCase.logger.isDebugEnabled()) {
-			KafkaTestCase.logger.debug(String.format("next apiteststep '%s'.", kafkaTeststep));
-		}
+		
 		if (!getExtractedValues().keySet().isEmpty()) {
 			kafkaTeststep = updateTeststep(kafkaTeststep, getExtractedValues());
 		}
+		
+		if (!kafkaTeststep.validate()) {
+			throw new IllegalArgumentException(String.format("Step '%s' is invalid.", kafkaTeststep));
+		}
+		
+		if (KafkaTestCase.logger.isDebugEnabled()) {
+			KafkaTestCase.logger.debug(String.format("next apiteststep '%s'.", kafkaTeststep));
+		}
+		
 
 		currentstepname = kafkaTeststep.getName();
 		kafkaRequest = kafkaTeststep.getRequest();
