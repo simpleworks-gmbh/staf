@@ -93,18 +93,19 @@ public class KafkaTestCase extends TemplateTestCase<IKafkaTeststep, KafkaConsume
 		if (step == null) {
 			throw new IllegalArgumentException("step can't be null.");
 		}
-		if (!step.validate()) {
-			throw new IllegalArgumentException(String.format("Step '%s' is invalid.", step));
-		}
+		
 		if (values == null) {
 			throw new IllegalArgumentException("value can't be null.");
 		}
+		
 		if (values.keySet().isEmpty()) {
 			throw new IllegalArgumentException("extractedValues can't be empty.");
 		}
+		
 		if (KafkaTestCase.logger.isDebugEnabled()) {
 			KafkaTestCase.logger.debug("update values.");
 		}
+		
 		final IKafkaTeststep result = step;
 
 		try {

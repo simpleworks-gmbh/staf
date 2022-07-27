@@ -333,18 +333,19 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 		if (step == null) {
 			throw new IllegalArgumentException("step can't be null.");
 		}
-		if (!step.validate()) {
-			throw new IllegalArgumentException(String.format("Step '%s' is invalid.", step));
-		}
+		
 		if (values == null) {
 			throw new IllegalArgumentException("value can't be null.");
 		}
+		
 		if (values.keySet().isEmpty()) {
 			throw new IllegalArgumentException("extractedValues can't be empty.");
 		}
+		
 		if (APITestCase.logger.isDebugEnabled()) {
 			APITestCase.logger.debug("update values.");
 		}
+		
 		final APITeststep result = step;
 		try {
 			final HttpRequest request = step.getRequest();

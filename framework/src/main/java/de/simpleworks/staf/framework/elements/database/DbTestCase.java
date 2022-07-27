@@ -76,7 +76,7 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 
 		final Statement current = getCurrentStatement();
 		final Assertion[] assertions = getCurrentAssertions();
-		currentResult = new QueuedDbResult();
+		currentResult = new QueuedDbResult(); 
 
 		final DbTestResult result = runStatement(current, UtilsCollection.toList(assertions));
 		AssertionUtils.assertTrue(result.getErrormessage(), result.isSuccessfull());
@@ -119,10 +119,6 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 
 		if (step == null) {
 			throw new IllegalArgumentException("step can't be null.");
-		}
-
-		if (!step.validate()) {
-			throw new IllegalArgumentException(String.format("Step '%s' is invalid.", step));
 		}
 
 		if (values == null) {
