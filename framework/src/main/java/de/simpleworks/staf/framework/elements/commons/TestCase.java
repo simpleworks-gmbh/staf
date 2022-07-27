@@ -343,10 +343,14 @@ public abstract class TestCase {
 			throw th;
 		}
 
-		if (testcase.start()) {
+		
+		try {
 			testcase.shutdown();
 		}
-
+		catch (final Throwable th) {
+			TestCase.logger.error(String.format("testcase '%s' can't be shutdown.", this.getTestCaseName()), th);
+		}
+		
 		return testcase.getExtractedValues();
 	}
 
