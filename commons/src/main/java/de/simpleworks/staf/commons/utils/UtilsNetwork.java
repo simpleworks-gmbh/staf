@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.URI;
+import java.net.UnknownHostException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,10 +20,24 @@ public class UtilsNetwork {
 			throw new IllegalArgumentException("host can't be null or empty string.");
 		}
 
+		InetAddress hostAddress = null;
+
+		try {
+			hostAddress = InetAddress.getByName(host);
+		} catch (UnknownHostException ex) {
+			UtilsNetwork.logger.error(String.format("host '%s' can't be converted to '%s'.", host, InetAddress.class),
+					ex);
+			return false;
+		}
+
+		if (hostAddress.isAnyLocalAddress() || hostAddress.isLoopbackAddress()) {
+			return true;
+		}
+
 		boolean result = false;
 
 		try {
-			result = InetAddress.getByName(host).isReachable(10);
+			result = hostAddress.isReachable(10);
 		} catch (Exception ex) {
 			UtilsNetwork.logger.error(String.format("host '%s' is unavailable.", host), ex);
 		}
