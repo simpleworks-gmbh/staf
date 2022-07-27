@@ -7,13 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.google.inject.Guice;
 import com.google.inject.Module;
-
 import de.simpleworks.staf.commons.annotation.Step;
 import de.simpleworks.staf.commons.annotation.Testcase;
 import de.simpleworks.staf.commons.enums.Result;
@@ -330,12 +327,20 @@ public abstract class TestCase {
 				this.setArtefact(current);
 
 			}
-		} catch (final Throwable ex) {
+		} catch (final Throwable th) {
+
+			TestCase.logger.error(String.format("Testcase '%s' has failed.", this.getTestCaseName()), th);
+
 			@SuppressWarnings("rawtypes")
 			final Artefact current = testcase.createArtefact();
+
 			// transmit artefact
 			this.setArtefact(current);
-			throw ex;
+
+			// shutdown testcase after an error happened
+			testcase.shutdown();
+
+			throw th;
 		}
 
 		if (testcase.start()) {
