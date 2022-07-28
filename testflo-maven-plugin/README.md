@@ -137,6 +137,8 @@ mvn de.simpleworks.staf:testflo-maven-plugin:uploadTestResult \
 -Dproperty.file.root=`Root Folder where .property files were stored`
 ```
 
+## `fetch testplan`
+
 ## `fetch API Request File`
 
 ### Parameter
