@@ -218,52 +218,47 @@ public class Assertion implements IPojo {
 
 		try {
 
-			if (!id.equals(assertion.getId())) {
-				Assertion.logger.error(String.format("id '%s' does not match expetced '%s'.", id, assertion.getId()));
+			if (!id.equals(assertion.getId())) { 
 				return false;
 			}
 
-			if (!xpath.equals(assertion.getXpath())) {
-				Assertion.logger
-						.error(String.format("xpath '%s' does not match expetced '%s'.", xpath, assertion.getXpath()));
+			if (!xpath.equals(assertion.getXpath())) { 
 				return false;
 			}
 
-			if (!jsonpath.equals(assertion.getJsonpath())) {
-				Assertion.logger.error(String.format("jsonpath '%s' does not match expetced '%s'.", jsonpath,
-						assertion.getJsonpath()));
+			if (!jsonpath.equals(assertion.getJsonpath())) { 
 				return false;
 			}
 
-			if (!headername.equals(assertion.getHeadername())) {
-				Assertion.logger.error(String.format("headername '%s' does not match expetced '%s'.", headername,
-						assertion.getHeadername()));
+			if (!headername.equals(assertion.getHeadername())) { 
 				return false;
 			}
 
-			if (!attribute.equals(assertion.getAttribute())) {
-				Assertion.logger.error(String.format("attribute '%s' does not match expetced '%s'.", attribute,
-						assertion.getAttribute()));
+			if (!attribute.equals(assertion.getAttribute())) {  
 				return false;
 			}
 
-			if (!allowedValue.equals(assertion.getAllowedValue())) {
-				Assertion.logger.error(String.format("allowedValue '%s' does not match expetced '%s'.", allowedValue,
-						assertion.getAllowedValue()));
+			if (!allowedValue.equals(assertion.getAllowedValue())) { 
+						assertion.getAllowedValue();
 				return false;
 			}
 
-			if (!validateMethod.equals(assertion.getValidateMethod())) {
-				Assertion.logger.error(String.format("validateMethod '%s' does not match expetced '%s'.",
-						validateMethod, assertion.getValidateMethod()));
+			if (!validateMethod.equals(assertion.getValidateMethod())) { 
 				return false;
 			}
 
-			if (!value.equals(assertion.getValue())) {
-				Assertion.logger
-						.error(String.format("value '%s' does not match expetced '%s'.", value, assertion.getValue()));
-				return false;
+			
+			if(Convert.isEmpty(value)) {
+				if (!Convert.isEmpty(assertion.getValue())) { 
+					return false;
+				}
 			}
+			else {
+				if (!value.equals(assertion.getValue())) { 
+					return false;
+				}
+			}
+			
 		} catch (Exception ex) {
 			Assertion.logger.error("can't compare assertions.", ex);
 			return false;
