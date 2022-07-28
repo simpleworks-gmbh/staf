@@ -76,7 +76,7 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 
 		final Statement current = getCurrentStatement();
 		final Assertion[] assertions = getCurrentAssertions();
-		currentResult = new QueuedDbResult();
+		currentResult = new QueuedDbResult(); 
 
 		final DbTestResult result = runStatement(current, UtilsCollection.toList(assertions));
 		AssertionUtils.assertTrue(result.getErrormessage(), result.isSuccessfull());
@@ -90,10 +90,11 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 
 	/**
 	 * @brief return connection to database
-	 * @param (String) connectionId, defined in the respecting db connection properties, returns null if an error happens, 
-	 * 		  of if the database connection pool stopped running.
+	 * @param (String) connectionId, defined in the respecting db connection
+	 *                 properties, returns null if an error happens, of if the
+	 *                 database connection pool stopped running.
 	 * @return (java.sql.Connection) connection to the respecting database
-	 * */
+	 */
 	public Connection getConnection(final String connectionId) {
 
 		if (Convert.isEmpty(connectionId)) {
@@ -118,10 +119,6 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 
 		if (step == null) {
 			throw new IllegalArgumentException("step can't be null.");
-		}
-
-		if (!step.validate()) {
-			throw new IllegalArgumentException(String.format("Step '%s' is invalid.", step));
 		}
 
 		if (values == null) {
@@ -416,20 +413,20 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 			return;
 		}
 
-		if (!dbteststep.validate()) {
-			throw new IllegalArgumentException(String.format("Step '%s' is invalid.", dbteststep));
-		}
-
 		if (getExtractedValues() == null) {
 			throw new IllegalStateException("extractedValues can't be null.");
 		}
 
-		if (DbTestCase.logger.isDebugEnabled()) {
-			DbTestCase.logger.debug(String.format("next dbteststep '%s'.", dbteststep));
-		}
-
 		if (!getExtractedValues().keySet().isEmpty()) {
 			dbteststep = updateTeststep(dbteststep, getExtractedValues());
+		}
+
+		if (!dbteststep.validate()) {
+			throw new IllegalArgumentException(String.format("Step '%s' is invalid.", dbteststep));
+		}
+
+		if (DbTestCase.logger.isDebugEnabled()) {
+			DbTestCase.logger.debug(String.format("next dbteststep '%s'.", dbteststep));
 		}
 
 		currentstepname = dbteststep.getName();
