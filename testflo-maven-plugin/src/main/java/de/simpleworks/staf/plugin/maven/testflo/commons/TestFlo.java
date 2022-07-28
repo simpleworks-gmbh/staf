@@ -47,8 +47,21 @@ public class TestFlo {
 		this.jira = jira;
 		tms = new TestFloTms(client, urlTms, TestFLOProperties.getInstance());
 		testFloFixVersion = new TestFloFixVersion(client, jira, JiraProperties.getInstance());
-		testFloLabel = new TestFloLabel(jira);
-		testFloFields = new TestFloFields(jira);
+		testFloLabel = new TestFloLabel(jira, false);
+		testFloFields = new TestFloFields(jira, false);
+	}
+	
+	
+	public TestFlo(final IssueRestClient jira, final OkHttpClient client, final URL urlTms,
+			final boolean keepJiraLabel) {
+		if (jira == null) {
+			throw new IllegalArgumentException("jira can't be null.");
+		}
+		this.jira = jira;
+		tms = new TestFloTms(client, urlTms, TestFLOProperties.getInstance());
+		testFloFixVersion = new TestFloFixVersion(client, jira, JiraProperties.getInstance());
+		testFloLabel = new TestFloLabel(jira, keepJiraLabel);
+		testFloFields = new TestFloFields(jira, keepJiraLabel);
 	}
 
 	private void logTransitions(final Issue issue) {
