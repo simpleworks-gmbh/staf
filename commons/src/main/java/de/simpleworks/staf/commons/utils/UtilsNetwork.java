@@ -69,10 +69,9 @@ public class UtilsNetwork {
 			try (Socket socket = new Socket()) {
 				SocketAddress socketAddress = new InetSocketAddress(hostname, port);
 				socket.connect(socketAddress);
-				flag = true;
 			} catch (Exception ex) {
-				UtilsNetwork.logger
-						.error(String.format("can't access server at '%s':'%s'", hostname, Integer.toString(port)), ex);
+				//ignore error, no software to connect to, means the sw can connect to the rspecting port
+				flag = true;
 			}
 		}
 
