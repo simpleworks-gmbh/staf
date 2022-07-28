@@ -43,9 +43,7 @@ import net.lightbody.bmp.BrowserMobProxyServer;
 public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 
 	private static final Logger logger = LogManager.getLogger(DbTestCase.class);
-
-	private final static String ENVIRONMENT_VARIABLES_NAME = "DbTestCase";
-
+	public final static String ENVIRONMENT_VARIABLES_NAME = "DbTestCase";
 	private final DbConnectionManagerImpl databaseconnectionimpl;
 
 	private String currentstepname;
@@ -232,7 +230,7 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 		return result;
 	}
 
-	private static QueuedDbResult readData(final ResultSet rs) throws SQLException {
+	public static QueuedDbResult readData(final ResultSet rs) throws SQLException {
 		final QueuedDbResult result = new QueuedDbResult();
 
 		final ResultSetMetaData rsMetaData = rs.getMetaData();
