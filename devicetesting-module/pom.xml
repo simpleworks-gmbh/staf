@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>staf-parent</artifactId>
+		<groupId>de.simpleworks.staf</groupId>
+		<version>0.130</version>
+	</parent>
+
+	<artifactId>devicetesting-module</artifactId>
+	<name>devicetesting-module</name>
+
+	<properties>
+		<project.version>0.130</project.version>
+		<version.java-client>8.1.0</version.java-client>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>io.appium</groupId>
+			<artifactId>java-client</artifactId>
+			<version>${version.java-client}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.seleniumhq.selenium</groupId>
+					<artifactId>selenium-support</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!--START STAF Dependencies -->
+		<dependency>
+			<groupId>de.simpleworks.staf</groupId>
+			<artifactId>framework</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<!--END STAF Dependencies -->
+	</dependencies>
+</project>
