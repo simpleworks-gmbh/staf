@@ -17,13 +17,13 @@ public class JiraProperties extends PropertiesReader {
 
 	private static JiraProperties instance = null;
 
-	@Property(ClientConsts.URL)
+	@Property(value = ClientConsts.URL, required = true)
 	private String url;
 
-	@Property(ClientConsts.USERNAME)
+	@Property(value = ClientConsts.USERNAME, required = true)
 	private String username;
 
-	@Property(ClientConsts.PASSWORD)
+	@Property(value = ClientConsts.PASSWORD, required = true)
 	private String password;
 
 	@Default("png")

@@ -19,7 +19,7 @@ public class KafkaProperties extends PropertiesReader {
 	@Property(KafkaConsts.POLL_TIMEOUT_MS)
 	private int polltimeoutMs;
 
-	@Property(KafkaConsts.BOOTSTRAP_SERVERS)
+	@Property(value = KafkaConsts.BOOTSTRAP_SERVERS, required = true)
 	private String bootstrapServers;
 
 	@Default("STAF-Consumer-Group")

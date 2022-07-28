@@ -13,10 +13,10 @@ public class TestFLOProperties extends PropertiesReader {
 
 	private static TestFLOProperties instance = null;
 
-	@Property(Consts.JIRA_REST_API)
+	@Property(value = Consts.JIRA_REST_API, required = true)
 	private String api;
 
-	@Property(Consts.JIRA_REST_TMS)
+	@Property(value = Consts.JIRA_REST_TMS, required = true)
 	private String tms;
 
 	@Default("1")
