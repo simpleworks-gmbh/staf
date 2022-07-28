@@ -235,7 +235,15 @@ public abstract class Mapper<T> {
 			throw new SystemException("can't add elements.");
 		}
 
-		write(file, result);
+		final String content = getGson().toJson(result);
+
+		try (BufferedWriter writer = UtilsIO.createWriter(file, Mapper.ENCODING, false)) {
+			writer.write(content);
+		} catch (final IOException ex) {
+			final String message = String.format("can't append data to file '%s'.", file.getAbsolutePath());
+			Mapper.logger.error(message, ex);
+			throw new SystemException(message);
+		}
 	}
 
 	private final Gson getGson() {
