@@ -77,7 +77,6 @@ public class JsonReporter extends ReporterManager {
 
 	@Override
 	public boolean saveReport(final TestcaseReport report) {
-		final ReporterProperties properties = ReporterProperties.getInstance();
 
 		try {
 			final File file = setUpFilePath(report);
@@ -87,18 +86,14 @@ public class JsonReporter extends ReporterManager {
 				}
 
 				mapper.write(file, Arrays.asList(report));
-			} else {
-				if (!properties.isOverrideReport()) {
-					if (JsonReporter.logger.isInfoEnabled()) {
-						JsonReporter.logger.info(String.format("append report into file: '%s'.", file));
-					}
-					mapper.append(file, Arrays.asList(report));
-				} else {
-					if (JsonReporter.logger.isInfoEnabled()) {
-						JsonReporter.logger.info(String.format("save report into file: '%s'.", file));
-					}
-					mapper.write(file, Arrays.asList(report));
+			} 
+			else {
+				
+				if (JsonReporter.logger.isInfoEnabled()) {
+					JsonReporter.logger.info(String.format("append report into file: '%s'.", file));
 				}
+				
+				mapper.append(file, Arrays.asList(report));
 			}
 
 			return true;
