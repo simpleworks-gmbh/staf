@@ -56,11 +56,6 @@ public class TeststepProvider<Teststep extends ITeststep> {
 			final Step step = steps.get(i);
 			final Teststep teststep = teststeps.get(i);
 
-			if (!teststep.validate()) {
-				final String msg = String.format("The Test Step '%s' is invalid.", teststep);
-				throw new InstantiationException(msg);
-			}
-
 			if (step.order() != teststep.getOrder()) {
 				final String msg = String.format(
 						"The amount of 'Step'-annotated method '%s' does not match the order of the API Test Step '%s'.",
