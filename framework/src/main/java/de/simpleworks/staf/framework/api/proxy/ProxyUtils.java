@@ -156,7 +156,7 @@ public class ProxyUtils {
 		try {
 			final URI uri = new URI(String.format("PROTOCOL://0.0.0.0:%s", Integer.toString(port)));
 
-			result = UtilsNetwork.isServerAvailable(uri);
+			result = !UtilsNetwork.isServerAvailable(uri);
 		} catch (Exception ex) {
 			ProxyUtils.logger.error(String.format("can't validate host '%s'.",
 					String.format("0.0.0.0:%s", Integer.toString(port)), ex)); 
