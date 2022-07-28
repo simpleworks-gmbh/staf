@@ -23,7 +23,7 @@ public class DebugTestPlanReset extends DebugTestFLOClientMojo {
 			DebugTestPlanReset.logger.info(String.format("reset test plan: '%s'.", testPlanId));
 		}
 
-		clientNG.testPlanReset(testPlanId);
+		clientNG.reOpenTestplan(testPlanId);
 	}
 
 	public static void main(final String[] args) throws MojoExecutionException, MojoFailureException {

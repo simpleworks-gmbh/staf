@@ -19,7 +19,7 @@ import de.simpleworks.staf.commons.elements.TestCase;
 import de.simpleworks.staf.commons.elements.TestPlan;
 import de.simpleworks.staf.commons.enums.Result;
 import de.simpleworks.staf.commons.exceptions.SystemException;
-import de.simpleworks.staf.commons.report.TestcaseReport;
+import de.simpleworks.staf.commons.report.TestcaseReport; 
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.module.jira.util.JiraProperties;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestCaseGeneral;
@@ -91,7 +91,7 @@ public class TestFlo {
 			throws SystemException {
 		Assert.assertNotNull("expectedStatus can't be null.", expectedStatus);
 		Assert.assertNotNull("transition can't be null.", transition);
-		transition(issue, expectedStatus.getTestFloName(), transition.getTestFloId());
+		transition(issue, expectedStatus.getTestFloName(), 61);
 	}
 
 	public void transition(final TestPlan testPlan, final TestPlanStatus expectedStatus,
@@ -230,23 +230,38 @@ public class TestFlo {
 		}
 	}
 
-	public void testPlanReset(final String testPlanId) {
+	public void reOpenTestplan(final String testPlanId) {
+		
 		if (Convert.isEmpty(testPlanId)) {
 			throw new IllegalArgumentException("testPlanId can't be null or empty string.");
 		}
+
 		final Issue issue = jira.getIssue(testPlanId).claim();
 		Assert.assertNotNull(String.format("can't get issue for: '%s'.", testPlanId), issue);
 		try {
-			transition(issue, TestPlanStatus.InProgress, TestPlanTransition.Stop);
+			transition(issue, TestPlanStatus.Closed, TestPlanTransition.Close);
 		} catch (final SystemException ex) {
 			TestFlo.logger.info(String.format("ignore error '%s'.", ex.getMessage()));
 		}
 		for (final Subtask subtask : issue.getSubtasks()) {
+			
+			//FIXME: determine state of the teststep beforehand
 			try {
-				transition(subtask, TestCaseStatus.InProgress, TestCaseTransition.Open);
+				transition(subtask, TestCaseStatus.Pass, TestCaseTransition.Retest);
 			} catch (final SystemException ex) {
-				TestFlo.logger.info(String.format("ignore error '%s'.", ex.getMessage()));
+				// ignore error	
 			}
+			
+			try {
+				transition(subtask, TestCaseStatus.Fail, TestCaseTransition.Retest);
+			} catch (final SystemException ex) {
+				// ignore error
+			}
+			
+			final Issue subtaskIssue = jira.getIssue(subtask.getIssueKey()).claim();
+			Assert.assertNotNull(String.format("can't get subtaskIssue for: '%s'.", subtask.getIssueKey()), subtaskIssue);
+			
+			tms.resetTeststep(subtaskIssue);	
 		}
 	}
 
