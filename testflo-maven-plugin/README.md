@@ -137,6 +137,39 @@ mvn de.simpleworks.staf:testflo-maven-plugin:uploadTestResult \
 -Dproperty.file.root=`Root Folder where .property files were stored`
 ```
 
+## `unfetch testplan`
+
+### Parameter
+
+- moveTo: `command that describes unfetch policy`
+Open:= `reopen closed testplan`
+
+Property File
+- property.file.root: `Root Folder where .property files were stored`
+
+You may want to put the follwoing information in a property file
+
+Credentials
+- jira.username: `Jira Username`
+- jira.password: `Jira Password` ([API Token](https://id.atlassian.com/manage-profile/security/api-tokens) in newer versions of jira)
+
+Basic Information
+
+Jira Settings
+- jira.url: `Url of the used Jira Instance`
+
+TestFLO Settings
+- testflo.jira_rest_api: `Url of Jira REST API`
+- testflo.jira_rest_tms: `Url of the Tile Map Service`
+
+Execute
+```bash
+mvn de.simpleworks.staf:testflo-maven-plugin:unfetchTestPlan \
+-DmoveTo=Open \  
+-Dproperty.file.root='Folder to property files' \
+-Dtestflo.configuration='path to testflo properties' 
+```
+
 ## `fetch testplan`
 
 ## `fetch API Request File`
