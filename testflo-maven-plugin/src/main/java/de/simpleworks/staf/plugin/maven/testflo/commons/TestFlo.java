@@ -104,7 +104,7 @@ public class TestFlo {
 			throws SystemException {
 		Assert.assertNotNull("expectedStatus can't be null.", expectedStatus);
 		Assert.assertNotNull("transition can't be null.", transition);
-		transition(issue, expectedStatus.getTestFloName(), 61);
+		transition(issue, expectedStatus.getTestFloName(), transition.getTestFloId());
 	}
 
 	public void transition(final TestPlan testPlan, final TestPlanStatus expectedStatus,
