@@ -167,4 +167,27 @@ public final class Convert {
 
 		return false;
 	}
+
+	/**
+	 * @brief method that returns the numeric representation of a string input
+	 * @param (String) numericValue
+	 * @return numeric representation of {@param numericValue}, -1 if input can't be
+	 *         parsed.
+	 */
+	public static int getNumericValue(final String numericValue) {
+
+		if (Convert.isEmpty(numericValue)) {
+			return Integer.MAX_VALUE;
+		}
+
+		int result = -1;
+
+		try {
+			result = Integer.parseInt(numericValue);
+		} catch (NumberFormatException ex) {
+			Convert.logger.error(String.format("can't convert '%s' to a numeric value.", numericValue), ex);
+		}
+
+		return result;
+	}
 }
