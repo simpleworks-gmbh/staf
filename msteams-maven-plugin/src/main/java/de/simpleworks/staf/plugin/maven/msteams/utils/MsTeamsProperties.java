@@ -16,7 +16,7 @@ public class MsTeamsProperties extends PropertiesReader {
 
 	private static final Logger logger = LogManager.getLogger(MsTeamsProperties.class);
 
-	@Property(value = MsTeamsConsts.TEAMS_WEBHOOK, required = true)
+	@Property(MsTeamsConsts.TEAMS_WEBHOOK)
 	private String webhook;
 
 	private static MsTeamsProperties instance;

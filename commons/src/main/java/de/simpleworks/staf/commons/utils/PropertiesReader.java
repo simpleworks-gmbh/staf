@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import de.simpleworks.staf.commons.annotation.Property;
 import de.simpleworks.staf.commons.annotation.Property.ClassPath;
 import de.simpleworks.staf.commons.annotation.Property.Default;
+import de.simpleworks.staf.commons.annotation.Property.NotNull;
 import de.simpleworks.staf.commons.consts.PropertiesConsts;
 import de.simpleworks.staf.commons.exceptions.SystemException;
 
@@ -118,10 +119,9 @@ public abstract class PropertiesReader {
 				String value = System.getProperty(key, null);
 				try {
 					if (Convert.isEmpty(value)) {
-						
-						if (property.required()) {
+						if (field.getAnnotation(NotNull.class) != null) {
 							throw new SystemException(
-									String.format("Property '%s' may need to be set.", key));
+									String.format("Property '%s' may not be set to null value: ", key));
 						}
 
 						final Default defaultValue = field.getAnnotation(Default.class);

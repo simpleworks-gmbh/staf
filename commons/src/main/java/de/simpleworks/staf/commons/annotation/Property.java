@@ -10,8 +10,12 @@ import java.lang.annotation.Target;
 public @interface Property {
 	String value();
 
-	boolean required() default false;
-
+	@Retention(RetentionPolicy.RUNTIME)
+ 	@Target(ElementType.FIELD)
+ 	@interface NotNull {
+ 		// nothing to define.
+ 	}
+	
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
 	@interface Default {
