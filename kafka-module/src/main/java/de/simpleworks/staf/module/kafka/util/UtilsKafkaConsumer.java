@@ -53,11 +53,21 @@ public class UtilsKafkaConsumer {
 			UtilsKafkaConsumer.logger.info(String.format("start polling messages in ascending order."));
 		}
 
-		final int maxMessages = getMaxMessages();
+		final int maxMessages = Convert.getNumericValue(kafkaProperties.getConsumerConsumeMessagesMax());
+
+		if (maxMessages == -1) {
+			throw new RuntimeException("maxMessages can't be -1.");
+		}
+
+		final int maxOffset = Convert.getNumericValue(kafkaProperties.getConsumerConsumeOffsetMax());
+
+		if (maxOffset == -1) {
+			throw new RuntimeException("maxOffset can't be -1.");
+		}
 
 		final List<KafkaConsumeRecord> results = new ArrayList<>();
 
-		for (long currentOffset = startOffset; (currentOffset <= endOffset
+		for (long currentOffset = startOffset; (currentOffset <= (currentOffset + maxOffset)
 				&& (results.size() <= maxMessages)); currentOffset += 1) {
 
 			List<KafkaConsumeRecord> consumedMessages = consumeMessages(new Consumer[] { consumer }, partition, tp, key,
@@ -65,10 +75,10 @@ public class UtilsKafkaConsumer {
 
 			if (results.addAll(consumedMessages)) {
 				if (UtilsKafkaConsumer.logger.isDebugEnabled()) {
-					UtilsKafkaConsumer.logger.debug(results);
+					UtilsKafkaConsumer.logger
+							.debug(String.format("this messages were consumed [%s].", consumedMessages));
 				}
 			}
-
 		}
 
 		return results;
@@ -101,11 +111,21 @@ public class UtilsKafkaConsumer {
 			UtilsKafkaConsumer.logger.info(String.format("start polling messages in descending order."));
 		}
 
-		final int maxMessages = getMaxMessages();
+		final int maxMessages = Convert.getNumericValue(kafkaProperties.getConsumerConsumeMessagesMax());
+
+		if (maxMessages == -1) {
+			throw new RuntimeException("maxMessages can't be -1.");
+		}
+
+		final int maxOffset = Convert.getNumericValue(kafkaProperties.getConsumerConsumeOffsetMax());
+
+		if (maxOffset == -1) {
+			throw new RuntimeException("maxOffset can't be -1.");
+		}
 
 		final List<KafkaConsumeRecord> results = new ArrayList<>();
 
-		for (long currentOffset = startOffset; (currentOffset >= endOffset
+		for (long currentOffset = startOffset; ((currentOffset >= (startOffset - maxOffset))
 				&& (results.size() <= maxMessages)); currentOffset -= 1) {
 
 			List<KafkaConsumeRecord> consumedMessages = consumeMessages(new Consumer[] { consumer }, partition, tp, key,
@@ -113,7 +133,8 @@ public class UtilsKafkaConsumer {
 
 			if (results.addAll(consumedMessages)) {
 				if (UtilsKafkaConsumer.logger.isDebugEnabled()) {
-					UtilsKafkaConsumer.logger.debug(results);
+					UtilsKafkaConsumer.logger
+							.debug(String.format("this messages were consumed [%s].", consumedMessages));
 				}
 			}
 		}
@@ -179,23 +200,4 @@ public class UtilsKafkaConsumer {
 		return results;
 
 	}
-
-	private static int getMaxMessages() {
-
-		int result = -1;
-
-		if (Convert.isEmpty(kafkaProperties.getConsumerConsumeMessagesMax())) {
-			return Integer.MAX_VALUE;
-		}
-
-		try {
-			result = Integer.parseInt(kafkaProperties.getConsumerConsumeMessagesMax());
-		} catch (NumberFormatException ex) {
-			UtilsKafkaConsumer.logger.error(String.format("can't convert '%s' to a numeric value.",
-					kafkaProperties.getConsumerConsumeMessagesMax()), ex);
-		}
-
-		return result;
-	}
-
 }
