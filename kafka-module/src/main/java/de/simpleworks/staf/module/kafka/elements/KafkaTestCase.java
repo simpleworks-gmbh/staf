@@ -297,7 +297,7 @@ public class KafkaTestCase extends TemplateTestCase<IKafkaTeststep, KafkaConsume
 		for (final String bootstrapServer : bootstrapServerLists) {
 			final URI uri = new URI(bootstrapServer);
 
-			if (!UtilsNetwork.isServerAvailable(uri)) {
+			if (UtilsNetwork.isServerAvailable(uri)) {
 				throw new SystemException(String.format("Server at '%s' is not available.", uri));
 			}
 		}
