@@ -6,7 +6,7 @@
 	<description>Simpleworks Test Automation Framework</description>
 	<groupId>de.simpleworks.staf</groupId>
 	<artifactId>staf-parent</artifactId>
-	<version>0.120</version>
+	<version>0.130</version>
 	<packaging>pom</packaging>
 	<name>staf-parent</name>
 	<url>https://github.com/simpleworks-gmbh/staf</url>
@@ -196,6 +196,7 @@
 	<modules>
 		<module>commons</module>
 		<module>data</module>
+		<module>devicetesting-module</module>
 		<module>framework</module>
 		<module>junit4-module</module>
 		<module>jira-module</module>

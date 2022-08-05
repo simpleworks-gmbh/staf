@@ -45,14 +45,41 @@ public class TestCaseUtils {
 
 		final ArrayList<Method> result = new ArrayList<>();
 		Class clazz = forClass;
+
 		do {
-			final List<Method> methodsCurrentClass = Arrays.asList(clazz.getDeclaredMethods());
 			if (TestCaseUtils.logger.isDebugEnabled()) {
-				TestCaseUtils.logger.debug(String.format("Adding the following methods '%s'.", String.join(", ",
-						methodsCurrentClass.stream().map(method -> method.getName()).collect(Collectors.toList()))));
+				TestCaseUtils.logger.debug(String.format("collectMethods from class '%s'.", clazz.getSimpleName()));
 			}
 
-			result.addAll(methodsCurrentClass);
+			final List<Method> methodsCurrentClass = Arrays.asList(clazz.getDeclaredMethods());
+
+			// Take the methods at the deepest Level first and disregard the methods in the
+			// superclasses
+			final ArrayList<Method> methodsToConsider = new ArrayList<>();
+			for (final Method m : methodsCurrentClass) {
+				boolean methodAlreadyOverriden = false;
+				for (final Method n : result) {
+					if (m.getName().equals(n.getName()) && m.isAnnotationPresent(Step.class)
+							&& n.isAnnotationPresent(Step.class)
+							&& (m.getAnnotation(Step.class).order() == n.getAnnotation(Step.class).order())
+							&& (m.getAnnotation(Step.class).description()
+									.equals(n.getAnnotation(Step.class).description()))) {
+						methodAlreadyOverriden = true;
+						break;
+					}
+				}
+
+				if (!methodAlreadyOverriden) {
+					methodsToConsider.add(m);
+				}
+			}
+
+			if (TestCaseUtils.logger.isDebugEnabled()) {
+				TestCaseUtils.logger.debug(String.format("Adding the following methods '%s'.", String.join(", ",
+						methodsToConsider.stream().map(method -> method.getName()).collect(Collectors.toList()))));
+			}
+
+			result.addAll(methodsToConsider);
 			clazz = clazz.getSuperclass();
 		} while ((clazz != null));
 

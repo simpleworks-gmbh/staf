@@ -5,10 +5,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Assert;
+
 import com.atlassian.jira.rest.client.api.IssueRestClient;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.Version;
@@ -16,8 +18,10 @@ import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
 import com.atlassian.util.concurrent.Promise;
 import com.jayway.jsonpath.JsonPath;
+
 import de.simpleworks.staf.commons.exceptions.SystemException;
 import de.simpleworks.staf.commons.utils.Convert;
+import de.simpleworks.staf.commons.utils.UtilsCollection;
 import de.simpleworks.staf.commons.utils.UtilsIO;
 import de.simpleworks.staf.module.jira.util.JiraProperties;
 import de.simpleworks.staf.plugin.maven.testflo.commons.pojo.FixVersion;
@@ -29,7 +33,7 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 public class TestFloFixVersion {
-	
+
 	private static final Logger logger = LogManager.getLogger(TestFloFixVersion.class);
 	private final OkHttpClient httpClient;
 	private final IssueRestClient jira;
@@ -119,6 +123,7 @@ public class TestFloFixVersion {
 			if (issue == null) {
 				throw new RuntimeException("issue can't be null.");
 			}
+
 			final URL url = new URL(String.format("%s/rest/api/latest/project/%s/version?maxResults=1000000&startAt=0",
 					jiraURL, issue.getProject().getKey()));
 			if (TestFloFixVersion.logger.isDebugEnabled()) {
@@ -127,6 +132,7 @@ public class TestFloFixVersion {
 			final Request request = new Request.Builder().url(url).build();
 			final Call call = this.httpClient.newCall(request);
 			final Response response = call.execute();
+
 			Assert.assertTrue(
 					String.format("Status Code 200 was expected, but was '%s'.", Integer.toString(response.code())),
 					(200 == response.code()));
@@ -137,10 +143,16 @@ public class TestFloFixVersion {
 			}
 			final JSONArray jsonArray = (JSONArray) JsonPath.read(json,
 					String.format("$.values[?(@.name == '%s')]", fixVersion));
+
 			final FixVersion[] fixVersions = (new ObjectMapper()).readValue(jsonArray.toJSONString(),
 					FixVersion[].class);
-			Assert.assertTrue(String.format("there is more than one fix version '%s'.", fixVersion),
+
+			Assert.assertTrue(
+					String.format("expcted is one fix version, but there are '%s' ones ['%s'].",
+							Integer.toString(fixVersions.length), String.join(", ", UtilsCollection.toList(fixVersions)
+									.stream().map(fix -> fix.toString()).collect(Collectors.toList()))),
 					(fixVersions.length == 1));
+
 			result = fixVersions[0];
 		} catch (Exception ex) {
 			final String msg = "can't fetch Fix Version.";

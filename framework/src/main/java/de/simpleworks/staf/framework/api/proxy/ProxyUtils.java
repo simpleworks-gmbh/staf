@@ -1,5 +1,6 @@
 package de.simpleworks.staf.framework.api.proxy;
 
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -7,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.simpleworks.staf.commons.utils.Convert;
+import de.simpleworks.staf.commons.utils.UtilsNetwork;
 import de.simpleworks.staf.data.exception.InvalidDataConstellationExcpetion;
 import de.simpleworks.staf.framework.api.proxy.properties.ProxyServerProperties;
 import de.simpleworks.staf.framework.elements.api.RewriteUrlObject;
@@ -52,6 +54,15 @@ public class ProxyUtils {
 					String.format("port can't be more than 65535 but was %d.", Integer.valueOf(result)));
 		}
 
+		while (isPortAlreadyUsed(result)) {
+			result += 1;
+
+			if (result > 65535) {
+				throw new RuntimeException(
+						String.format("port can't be more than 65535 but was %d.", Integer.valueOf(result)));
+			}
+
+		}
 		return result;
 	}
 
@@ -105,7 +116,11 @@ public class ProxyUtils {
 			result.enableHarCaptureTypes(enable);
 
 			result.setTrustAllServers(true);
+			
+			
+			
 			result.start(proxyPort);
+
 		} catch (final Exception ex) {
 			// FIXME throw an exception
 			ProxyUtils.logger.error("can't set up proxy.", ex);
@@ -133,4 +148,21 @@ public class ProxyUtils {
 
 		return result;
 	}
+
+	private static boolean isPortAlreadyUsed(int port) {
+
+		boolean result = false;
+
+		try {
+			final URI uri = new URI(String.format("PROTOCOL://0.0.0.0:%s", Integer.toString(port)));
+
+			result = !UtilsNetwork.isServerAvailable(uri);
+		} catch (Exception ex) {
+			ProxyUtils.logger.error(String.format("can't validate host '%s'.",
+					String.format("0.0.0.0:%s", Integer.toString(port)), ex)); 
+		}
+
+		return result;
+	}
+
 }

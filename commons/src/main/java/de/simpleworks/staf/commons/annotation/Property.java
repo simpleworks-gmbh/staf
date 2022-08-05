@@ -11,11 +11,11 @@ public @interface Property {
 	String value();
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.FIELD)
-	@interface NotNull {
-		// nothing to define.
-	}
-
+ 	@Target(ElementType.FIELD)
+ 	@interface NotNull {
+ 		// nothing to define.
+ 	}
+	
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
 	@interface Default {

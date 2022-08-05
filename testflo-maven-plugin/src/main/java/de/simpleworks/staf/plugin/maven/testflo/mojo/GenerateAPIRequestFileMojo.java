@@ -46,6 +46,7 @@ public class GenerateAPIRequestFileMojo extends TestfloMojo {
 
 	@Parameter(property = "file", required = true)
 	private String file;
+
 	private File requestFile;
 
 	@Inject

@@ -335,4 +335,25 @@ public class TestFloTms {
 			}
 		}
 	}
+	
+	public void resetTeststep(final Issue issue) {
+		
+		if (issue == null) {
+			throw new IllegalArgumentException("issue can't be null.");
+		}
+		
+		//FIXME: determine amount of steps
+		boolean flag = true;
+		int itr = 0;
+		do {
+			try {
+				updateTestStepStatus(issue, new Integer(itr), TestStepStatus.To_do);
+			} catch (SystemException ex) { 
+				// ignore error
+				 flag = false;
+			}
+			itr +=1;
+		}
+		while(flag);
+	}
 }

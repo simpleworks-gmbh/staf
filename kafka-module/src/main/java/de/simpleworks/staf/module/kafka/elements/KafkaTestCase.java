@@ -18,6 +18,7 @@ import de.simpleworks.staf.commons.exceptions.SystemException;
 import de.simpleworks.staf.commons.report.artefact.CsvFile;
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.UtilsCollection;
+import de.simpleworks.staf.commons.utils.UtilsNetwork;
 import de.simpleworks.staf.framework.api.httpclient.TeststepProvider;
 import de.simpleworks.staf.framework.elements.api.RewriteUrlObject;
 import de.simpleworks.staf.framework.elements.commons.TemplateTestCase;
@@ -38,16 +39,15 @@ import de.simpleworks.staf.module.kafka.api.mapper.MapperKafkaTeststep;
 import de.simpleworks.staf.module.kafka.api.properties.KafkaProperties;
 import de.simpleworks.staf.module.kafka.consts.KafkaConsts;
 import de.simpleworks.staf.module.kafka.elements.api.KafkaTestResult;
-import de.simpleworks.staf.module.kafka.util.KAFKAMessageAssertionValidator;
-import de.simpleworks.staf.module.kafka.util.UtilsNetwork;
+import de.simpleworks.staf.module.kafka.util.KAFKAMessageAssertionValidator; 
 import net.lightbody.bmp.BrowserMobProxyServer;
 
 public class KafkaTestCase extends TemplateTestCase<IKafkaTeststep, KafkaConsumeResponse> {
 
 	private static final Logger logger = LogManager.getLogger(KafkaTestCase.class);
-	private static final String ENVIRONMENT_VARIABLES_NAME = "KafkaTestCase";
+	public static final String ENVIRONMENT_VARIABLES_NAME = "KafkaTestCase";
 	private static final KafkaProperties kafkaProperties = KafkaProperties.getInstance();
-
+ 
 	private String currentstepname;
 
 	private IKafkaRequest kafkaRequest;
@@ -93,18 +93,19 @@ public class KafkaTestCase extends TemplateTestCase<IKafkaTeststep, KafkaConsume
 		if (step == null) {
 			throw new IllegalArgumentException("step can't be null.");
 		}
-		if (!step.validate()) {
-			throw new IllegalArgumentException(String.format("Step '%s' is invalid.", step));
-		}
+		
 		if (values == null) {
 			throw new IllegalArgumentException("value can't be null.");
 		}
+		
 		if (values.keySet().isEmpty()) {
 			throw new IllegalArgumentException("extractedValues can't be empty.");
 		}
+		
 		if (KafkaTestCase.logger.isDebugEnabled()) {
 			KafkaTestCase.logger.debug("update values.");
 		}
+		
 		final IKafkaTeststep result = step;
 
 		try {
@@ -238,24 +239,29 @@ public class KafkaTestCase extends TemplateTestCase<IKafkaTeststep, KafkaConsume
 
 		if (provider == null) {
 			throw new IllegalArgumentException("provider can't be null.");
-		}
+		} 
 
 		IKafkaTeststep kafkaTeststep = provider.get();
 		if (kafkaTeststep == null) {
 			return;
 		}
-		if (!kafkaTeststep.validate()) {
-			throw new IllegalArgumentException(String.format("Step '%s' is invalid.", kafkaTeststep));
-		}
+		
 		if (getExtractedValues() == null) {
 			throw new IllegalStateException("extractedValues can't be null.");
 		}
-		if (KafkaTestCase.logger.isDebugEnabled()) {
-			KafkaTestCase.logger.debug(String.format("next apiteststep '%s'.", kafkaTeststep));
-		}
+		
 		if (!getExtractedValues().keySet().isEmpty()) {
 			kafkaTeststep = updateTeststep(kafkaTeststep, getExtractedValues());
 		}
+		
+		if (!kafkaTeststep.validate()) {
+			throw new IllegalArgumentException(String.format("Step '%s' is invalid.", kafkaTeststep));
+		}
+		
+		if (KafkaTestCase.logger.isDebugEnabled()) {
+			KafkaTestCase.logger.debug(String.format("next apiteststep '%s'.", kafkaTeststep));
+		}
+		
 
 		currentstepname = kafkaTeststep.getName();
 		kafkaRequest = kafkaTeststep.getRequest();
@@ -291,7 +297,7 @@ public class KafkaTestCase extends TemplateTestCase<IKafkaTeststep, KafkaConsume
 		for (final String bootstrapServer : bootstrapServerLists) {
 			final URI uri = new URI(bootstrapServer);
 
-			if (!UtilsNetwork.isServerAvailable(uri)) {
+			if (UtilsNetwork.isServerAvailable(uri)) {
 				throw new SystemException(String.format("Server at '%s' is not available.", uri));
 			}
 		}
