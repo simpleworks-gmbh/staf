@@ -33,7 +33,7 @@ public abstract class TemplateTestCase<Teststep extends ITeststep, Response> ext
 
 	private final String environmentName;
 	private final TeststepProvider<Teststep> provider;
-
+ 
 	protected TemplateTestCase(final String resource, final String environmentName, Mapper<Teststep> mapper,
 			final Module... modules) throws SystemException {
 		super(modules);
@@ -51,9 +51,9 @@ public abstract class TemplateTestCase<Teststep extends ITeststep, Response> ext
 		}
 
 		try {
-
+ 
 			this.environmentName = environmentName;
-
+ 
 			initEnvironmentVariables();
 
 			if (TemplateTestCase.logger.isDebugEnabled()) {

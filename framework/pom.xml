@@ -1,20 +1,17 @@
 <?xml version="1.0"?>
-<project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>de.simpleworks.staf</groupId>
 		<artifactId>staf-parent</artifactId>
-		<version>0.130</version>
+		<version>0.130.1</version>
 	</parent>
- 
+
 	<artifactId>framework</artifactId>
 	<name>framework</name>
-  
+
 	<properties>
-		<project.version>0.130</project.version>
+		<project.version>0.130.1</project.version>
 		<version.com.squareup.okhttp3>3.3.1</version.com.squareup.okhttp3>
 		<version.net.sourceforge.htmlcleaner.htmlcleaner>2.24</version.net.sourceforge.htmlcleaner.htmlcleaner>
 		<version.net.lightbody.bmp.browsermob-core>2.1.5</version.net.lightbody.bmp.browsermob-core>
@@ -51,6 +48,12 @@
 			<groupId>org.skyscreamer</groupId>
 			<artifactId>jsonassert</artifactId>
 			<version>${version.org.skyscreamer.jsonassert}</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.javassist/javassist -->
+		<dependency>
+			<groupId>org.javassist</groupId>
+			<artifactId>javassist</artifactId>
+			<version>3.28.0-GA</version>
 		</dependency>
 		<!--START STAF Dependencies -->
 		<dependency>

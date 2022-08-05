@@ -423,9 +423,24 @@ public final class UtilsIO {
 			try {
 				final URL url = new URL(resource);
 				input = url.openStream();
+				return new BufferedInputStream(input, UtilsIO.STREAM_BUFFER_SIZE);
+			} catch (final IOException ex) {
+				UtilsIO.logger.error("can't get InputStream for '%s', no protocol was passed.", resource);
+			}
+
+			try {
+
+				if (UtilsIO.logger.isDebugEnabled()) {
+					UtilsIO.logger.debug("will try to get InputStream via absolute path '%s'.", resource);
+				}
+
+				File initialFile = new File(resource);
+				input = new FileInputStream(initialFile);
+				return new BufferedInputStream(input, UtilsIO.STREAM_BUFFER_SIZE);
+
 			} catch (final IOException ex) {
 				final String message = String.format("can't get InputStream for '%s'.", resource);
-				UtilsIO.logger.error(message, ex);
+				UtilsIO.logger.error(message);
 				throw new SystemException(message);
 			}
 		}

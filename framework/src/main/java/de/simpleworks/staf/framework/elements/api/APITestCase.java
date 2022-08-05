@@ -54,10 +54,10 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 
 	private Assertion[] currentAssertions;
 	private final HttpClient client = new HttpClient();
-
+ 
 	protected APITestCase(final String resource, final Module... modules) throws SystemException {
 		super(resource, ENVIRONMENT_VARIABLES_NAME, new MapperAPITeststep(), modules);
-		extractedResponseEntities = new HashMap<>();
+		extractedResponseEntities = new HashMap<>(); 
 	}
 
 	private static final Map<String, String> checkHeader(final HttpResponse response, final Assertion assertion) {
@@ -117,7 +117,7 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 	 * @param HttpResponse expectedResponse
 	 * @param String       content (from a received response)
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes", "deprecation" })
 	private Object[] fetchResponseEntity(final HttpResponse expectedResponse, final String content) {
 
 		if (expectedResponse == null) {
@@ -300,7 +300,7 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 			if (timeout > -1) {
 				Thread.sleep(timeout * 1000);
 			}
-
+ 
 		} catch (Exception ex) {
 
 			if (ex instanceof NumberFormatException) {
@@ -325,7 +325,7 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 
 	protected final APITestResult doRequest() {
 		return checkRequest(currentHttpRequest, currentExpetcedHttpResponse, UtilsCollection.toList(currentAssertions));
-	}
+	} 
 
 	@Override
 	protected APITeststep updateTeststep(final APITeststep step, final Map<String, Map<String, String>> values)

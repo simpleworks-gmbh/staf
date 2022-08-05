@@ -320,14 +320,14 @@ public abstract class TestCase {
 					TestCase.logger.debug(String.format("Execute step '%s'.", step.description()));
 				}
 				testcase.executeTestStep();
-
+ 
 				@SuppressWarnings("rawtypes")
 				final Artefact current = testcase.createArtefact();
 				// transmit artefact
 				this.setArtefact(current);
 
 			}
-		} catch (final Throwable th) {
+		} catch (final Throwable th) { 
 
 			TestCase.logger.error(String.format("Testcase '%s' has failed.", this.getTestCaseName()), th);
 

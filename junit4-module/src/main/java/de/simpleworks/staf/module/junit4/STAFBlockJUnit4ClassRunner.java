@@ -37,7 +37,7 @@ public class STAFBlockJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 		if (!Scanner.doesClassExtendSpecificClass(clazz, TestCase.class)) {
 			throw new InitializationError(String.format("clazz needs to extends '%s'.", TestCase.class.getName()));
 		}
-
+ 
 		this.testClass = (Class<? extends TestCase>) clazz;
 	}
 

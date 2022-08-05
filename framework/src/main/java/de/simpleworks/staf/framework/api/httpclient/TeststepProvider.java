@@ -14,8 +14,7 @@ import de.simpleworks.staf.commons.utils.comparer.TeststepComparator;
 public class TeststepProvider<Teststep extends ITeststep> {
 	private static final Logger logger = LogManager.getLogger(TeststepProvider.class);
 
-	private final List<Teststep> teststeps;
-	//private final List<Step> steps;
+	private final List<Teststep> teststeps; 
 
 	public TeststepProvider(final List<Teststep> teststeps, final List<Step> steps) throws InstantiationException {
 		if (Convert.isEmpty(teststeps)) {
@@ -26,8 +25,7 @@ public class TeststepProvider<Teststep extends ITeststep> {
 			throw new IllegalArgumentException("steps can't be null or empty.");
 		}
 
-		this.teststeps = teststeps;
-		//this.steps = steps;
+		this.teststeps = teststeps; 
 		TeststepProvider.init(teststeps, steps);
 	}
 
@@ -55,7 +53,7 @@ public class TeststepProvider<Teststep extends ITeststep> {
 		for (int i = 0; i < steps.size(); i++) {
 			final Step step = steps.get(i);
 			final Teststep teststep = teststeps.get(i);
-
+ 
 			if (step.order() != teststep.getOrder()) {
 				final String msg = String.format(
 						"The amount of 'Step'-annotated method '%s' does not match the order of the API Test Step '%s'.",

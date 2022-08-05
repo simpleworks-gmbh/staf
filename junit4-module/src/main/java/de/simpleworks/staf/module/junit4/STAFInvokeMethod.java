@@ -1,11 +1,13 @@
 package de.simpleworks.staf.module.junit4;
 
 import java.lang.reflect.Method;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Assume;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
+
 import de.simpleworks.staf.commons.annotation.Step;
 import de.simpleworks.staf.commons.exceptions.SystemException;
 import de.simpleworks.staf.commons.report.StepReport;
@@ -13,6 +15,7 @@ import de.simpleworks.staf.commons.report.artefact.Artefact;
 import de.simpleworks.staf.commons.utils.Scanner;
 import de.simpleworks.staf.framework.elements.commons.TemplateTestCase;
 import de.simpleworks.staf.framework.elements.commons.TestCase;
+import de.simpleworks.staf.framework.elements.composited.CompositedTestCase;
 
 public class STAFInvokeMethod extends Statement {
 	private static final Logger logger = LogManager.getLogger(STAFInvokeMethod.class);
@@ -51,9 +54,15 @@ public class STAFInvokeMethod extends Statement {
 
 	private static FrameworkMethod substituteTestMethod(final FrameworkMethod frameworkmethod, Object testcase)
 			throws SystemException {
+
 		if (!(testcase instanceof TemplateTestCase)) {
-			return frameworkmethod;
+			if (!(testcase instanceof CompositedTestCase)) {
+				return frameworkmethod;
+			}
 		}
+
+		
+
 		Method apiTestStepMethod = null;
 		// look for any "overriden" executeTestStep method
 		apiTestStepMethod = Scanner.getMethod(testcase.getClass(), TEST_STEP_METHOD_NAME);
