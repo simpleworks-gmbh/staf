@@ -6,5 +6,8 @@ public class Consts {
 	public static final String JIRA_REST_TIMEOUT = "testflo.jira_rest_timeout";
 	public static final String JIRA_REST_SKIP_TIMEOUT = "testflo.jira_rest_skip_timeout";
 	
-	public static final String BASIC_AUTHENTICATED_CLIENT = "testflo.authentication";
+	public static final String TESTFLO_AUTHENTICATION = "testflo.authentication";
+	
+	public static final String BASIC_AUTHENTICATED_CLIENT = "Basic Authenticated Client";
+	public static final String PAT_AUTHENTICATED_CLIENT = "PAT Authenticated Client";
 }

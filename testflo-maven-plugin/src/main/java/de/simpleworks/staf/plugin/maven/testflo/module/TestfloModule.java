@@ -151,6 +151,23 @@ public class TestfloModule extends AbstractModule {
 		return result;
 	}
 
+	private OkHttpClient getBearerTokenHttpClient() throws SystemException {
+
+		Builder builder = getBuilder(this.testFlo.getTimeout());
+
+		if (Convert.isEmpty(jira.getAccessToken())) {
+			throw new SystemException("jira access token can't be null or empty string.");
+		}
+
+		final OkHttpClient result = builder.addInterceptor(chain -> {
+			final Request request = chain.request();
+			final Request authenticatedRequest = request.newBuilder().header("Bearer", jira.getAccessToken()).build();
+			return chain.proceed(authenticatedRequest);
+		}).build();
+
+		return result;
+	}
+
 	@Override
 	protected void configure() {
 		try {
@@ -158,8 +175,29 @@ public class TestfloModule extends AbstractModule {
 			bindURL(Consts.JIRA_REST_API, testFlo.getApi());
 			bindURL(Consts.JIRA_REST_TMS, testFlo.getTms());
 
-			bind(OkHttpClient.class).annotatedWith(Names.named(Consts.BASIC_AUTHENTICATED_CLIENT))
-					.toInstance(getBasicAuthHttpClient());
+			final String authenticationMethod = System.getProperty(Consts.TESTFLO_AUTHENTICATION,
+					Consts.BASIC_AUTHENTICATED_CLIENT);
+
+			if (TestfloModule.logger.isDebugEnabled()) {
+				TestfloModule.logger.debug(String.format("use Authentication Method '%s'.", authenticationMethod));
+			}
+
+			switch (authenticationMethod) {
+
+			case Consts.BASIC_AUTHENTICATED_CLIENT:
+				bind(OkHttpClient.class).toInstance(getBasicAuthHttpClient());
+				break;
+
+			case Consts.PAT_AUTHENTICATED_CLIENT:
+				bind(OkHttpClient.class).toInstance(getBearerTokenHttpClient());
+				break;
+
+			default:
+				throw new IllegalArgumentException(
+						String.format("authentication method '%s' is not implemented yet.", authenticationMethod));
+
+			}
+
 		} catch (final Exception ex) {
 			final String msg = "can't configure -> stop work.";
 			TestfloModule.logger.error(msg, ex);

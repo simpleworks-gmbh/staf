@@ -35,8 +35,7 @@ public class FetchTestPlanMojo extends TestfloMojo {
 	@Inject
 	private IssueRestClient clientJira;
 
-	@Inject
-	@Named(Consts.BASIC_AUTHENTICATED_CLIENT)
+	@Inject 
 	private OkHttpClient clientHttp;
 
 	@Parameter(property = "id", required = true)

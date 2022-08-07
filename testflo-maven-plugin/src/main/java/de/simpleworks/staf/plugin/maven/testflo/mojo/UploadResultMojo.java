@@ -41,8 +41,7 @@ public class UploadResultMojo extends TestfloMojo {
 	@Inject
 	private IssueRestClient clientJira;
 
-	@Inject
-	@Named(Consts.BASIC_AUTHENTICATED_CLIENT)
+	@Inject 
 	private OkHttpClient clientHttp;
 
 	@Parameter(property = "result", required = true)
