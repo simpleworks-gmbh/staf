@@ -262,14 +262,14 @@ public class CompositedTestCase extends TestCase {
 			apiTestCase.executeTestStep();
 			String currentstepname = currentCompositedteststep.getName();
 			Map<String, String> map = apiTestCase.getExtractedValues().get(currentstepname);
-			addExtractedValues(DbTestCase.ENVIRONMENT_VARIABLES_NAME, map);
+			addExtractedValues(ENVIRONMENT_VARIABLES_NAME, map);
 		}
 
 		if (currentCompositedteststep.getDbteststep() != null) {
 			dbTestCase.executeTestStep();
 			String currentstepname = currentCompositedteststep.getName();
 			Map<String, String> map = dbTestCase.getExtractedValues().get(currentstepname);
-			addExtractedValues(APITestCase.ENVIRONMENT_VARIABLES_NAME, map);
+			addExtractedValues(ENVIRONMENT_VARIABLES_NAME, map);
 		}
 	}
 
