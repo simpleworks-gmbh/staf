@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -29,7 +30,6 @@ import de.simpleworks.staf.commons.report.artefact.Artefact;
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.Scanner;
 import de.simpleworks.staf.commons.utils.UtilsCollection;
-import de.simpleworks.staf.commons.utils.UtilsDate;
 import de.simpleworks.staf.commons.utils.UtilsEnum;
 import de.simpleworks.staf.commons.utils.UtilsIO;
 import de.simpleworks.staf.framework.api.httpclient.TeststepProvider;
@@ -131,8 +131,8 @@ public class CompositedTestCase extends TestCase {
 	private APITestCase initAPITestCase(APICompositedTestCase apiCompositedTestcase, List<APITeststep> apiteststeps)
 			throws Exception {
 
-		File tempFile = UtilsIO.createTempFile(String.format("%s-%s-%s.json", APITestCase.class.toString(),
-				UtilsDate.getCurrentTime(), getTestCaseName()));
+		File tempFile = UtilsIO.createTempFile(String.format("%s-%s.json", APITestCase.class.getName(),
+				(UUID.randomUUID()).toString()));
 
 		if (tempFile == null) {
 			final String msg = "can't create temp file.";
@@ -167,9 +167,9 @@ public class CompositedTestCase extends TestCase {
 	private DbTestCase initDBTestCase(DBCompositedTestCase dbCompositedTestcase, List<DbTeststep> dbteststeps)
 			throws Exception {
 
-		File tempFile = UtilsIO.createTempFile(String.format("%s-%s-%s.json", DbTestCase.class.toString(),
-				UtilsDate.getCurrentTime(), getTestCaseName()));
-
+		File tempFile = UtilsIO.createTempFile(String.format("%s-%s.json", DbTestCase.class.getName(),
+				(UUID.randomUUID()).toString()));
+		
 		if (tempFile == null) {
 			final String msg = "can't create temp file.";
 			CompositedTestCase.logger.error(msg);
