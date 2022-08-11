@@ -127,7 +127,7 @@ public class TestplanValidator {
 
 		if (result.size() != testplan.getTestCases().size()) {
 			throw new SystemException(String.format("only '%s' from '%s' are valid [%s].",
-					Integer.toString(testplan.getTestCases().size()), Integer.toString(testplan.getTestCases().size()),
+					Integer.toString(result.size()), Integer.toString(testplan.getTestCases().size()),
 					String.join(",", result.stream().map(res -> res.getName()).collect(Collectors.toList()))));
 		}
 
