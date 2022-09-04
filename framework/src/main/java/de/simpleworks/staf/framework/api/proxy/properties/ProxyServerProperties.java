@@ -37,6 +37,17 @@ public class ProxyServerProperties extends PropertiesReader {
 	@Default(Convert.EMPTY_STRING)
 	@Property(FrameworkConsts.PROXY_HEADERS)
 	private String proxyHeaders;
+ 
+	@Property(FrameworkConsts.PROXY_NEOLOAD_ENABLED)
+	private boolean neoloadProxyEnabled;
+
+	@Default("127.0.0.1")
+	@Property(FrameworkConsts.PROXY_NEOLOAD_HOST)
+	private String proxyNLHost;
+
+	@Default("8090")
+	@Property(FrameworkConsts.PROXY_NEOLOAD_PORT)
+	private String proxyNLPort;
 
 	public boolean isProxyEnabled() {
 		return proxyEnabled;
@@ -48,6 +59,18 @@ public class ProxyServerProperties extends PropertiesReader {
 
 	public int getAPIProxyPort() {
 		return Integer.parseInt(proxyAPIPort);
+	}
+
+	public boolean isNeoloadProxyEnabled() {
+		return neoloadProxyEnabled;
+	}
+
+	public String getProxyNLHost() {
+		return proxyNLHost;
+	}
+
+	public int getProxyNLPort() {
+		return Integer.parseInt(proxyNLPort);
 	}
 
 	public Map<String, String> getHeaders() {
@@ -107,4 +130,5 @@ public class ProxyServerProperties extends PropertiesReader {
 
 		return ProxyServerProperties.instance;
 	}
+
 }

@@ -1,18 +1,26 @@
 package de.simpleworks.staf.module.junit4;
 
 import java.lang.reflect.Method;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Assume;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
+
+import com.google.common.base.Optional;
+import com.neotys.rest.design.client.DesignAPIClient;
+import com.neotys.rest.design.model.SetContainerParams;
+
 import de.simpleworks.staf.commons.annotation.Step;
 import de.simpleworks.staf.commons.exceptions.SystemException;
 import de.simpleworks.staf.commons.report.StepReport;
 import de.simpleworks.staf.commons.report.artefact.Artefact;
 import de.simpleworks.staf.commons.utils.Scanner;
+import de.simpleworks.staf.framework.api.proxy.properties.ProxyServerProperties;
 import de.simpleworks.staf.framework.elements.commons.TemplateTestCase;
 import de.simpleworks.staf.framework.elements.commons.TestCase;
+import de.simpleworks.staf.framework.util.neotys.DesignAPIClientFactory;
 
 public class STAFInvokeMethod extends Statement {
 	private static final Logger logger = LogManager.getLogger(STAFInvokeMethod.class);
@@ -20,6 +28,9 @@ public class STAFInvokeMethod extends Statement {
 	private final FrameworkMethod testMethod;
 	private final Object target;
 	private final static String TEST_STEP_METHOD_NAME = "executeTestStep";
+	private final static ProxyServerProperties properties = ProxyServerProperties.getInstance();
+
+	private static Optional<DesignAPIClient> designAPIClient = null;
 
 	public STAFInvokeMethod(final FrameworkMethod testMethod, final Object target) {
 		if (!(target instanceof TestCase)) {
@@ -46,6 +57,10 @@ public class STAFInvokeMethod extends Statement {
 				STAFInvokeMethod.logger.error(msg, ex);
 				throw new RuntimeException(msg);
 			}
+		}
+
+		if (properties.isNeoloadProxyEnabled()) {
+			STAFInvokeMethod.designAPIClient = DesignAPIClientFactory.createDesignAPIClient();
 		}
 	}
 
@@ -81,11 +96,19 @@ public class STAFInvokeMethod extends Statement {
 		}
 		long testStepStartTime = -1;
 		long testStepStopTime = -1;
+
 		try {
 			testStepStartTime = System.nanoTime();
 			tc.markStepExecution(step.description());
+
+			if (designAPIClient != null) {
+				DesignAPIClient nlClient = designAPIClient.get();
+				nlClient.setContainer(new SetContainerParams(step.description()));
+			}
+
 			// notify, before execution!!!!
 			testMethod.invokeExplosively(target);
+
 			testStepStopTime = System.nanoTime();
 		} catch (final Throwable th) {
 			try {
@@ -97,6 +120,7 @@ public class STAFInvokeMethod extends Statement {
 				}
 				tc.stop(new StepReport(step.description(), step.order(), new Exception(th), testStepStartTime,
 						testStepStopTime, artefact));
+
 				tc.setFailed(true);
 				tc.writeDownResults();
 				tc.shutdown();

@@ -102,6 +102,7 @@ public class ResponseEntity implements IPojo {
 		return result;
 	}
 
+	
 	@Override
 	@SuppressWarnings("deprecation")
 	public boolean validate() {
@@ -127,7 +128,7 @@ public class ResponseEntity implements IPojo {
 		try {
 			mapperClass = Class.forName(mapperClassname);
 		} catch (ClassNotFoundException e) {
-			ResponseEntity.logger.error(String.format("can't find class '%s'.", mapperClassname));
+			ResponseEntity.logger.error("can't find class '%s'.");
 			result = false;
 		}
 

@@ -10,7 +10,10 @@ import de.simpleworks.staf.framework.consts.TestcaseKindValue;
 
 public enum TestcaseKindEnum implements IEnum {
 	GUI_TESTCASE("GUI_TESTCASE", TestcaseKindValue.GUI_TESTCASE),
-	API_TESTCASE("API_TESTCASE", TestcaseKindValue.API_TESTCASE);
+	API_TESTCASE("API_TESTCASE", TestcaseKindValue.API_TESTCASE),
+
+	GUI_TESTCASE_NL_RECORDING("GUI_TESTCASE_NL_RECORDING", TestcaseKindValue.GUI_TESTCASE_NL_RECORDING),
+	API_TESTCASE_NL_RECORDING("API_TESTCASE_NL_RECORDING", TestcaseKindValue.API_TESTCASE_NL_RECORDING);
 
 	private final String name;
 	private final String value;

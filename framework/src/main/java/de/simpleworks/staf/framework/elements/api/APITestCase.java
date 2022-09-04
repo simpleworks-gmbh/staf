@@ -1,6 +1,7 @@
 package de.simpleworks.staf.framework.elements.api;
 
 import java.io.File;
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,7 +12,9 @@ import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.google.common.base.Optional;
 import com.google.inject.Module;
+import com.neotys.selenium.proxies.DesignManager;
 
 import de.simpleworks.staf.commons.api.APITeststep;
 import de.simpleworks.staf.commons.api.Assertion;
@@ -30,6 +33,8 @@ import de.simpleworks.staf.commons.utils.UtilsIO;
 import de.simpleworks.staf.framework.api.httpclient.HttpClient;
 import de.simpleworks.staf.framework.api.httpclient.TeststepProvider;
 import de.simpleworks.staf.framework.api.httpclient.properties.HttpClientProperties;
+import de.simpleworks.staf.framework.api.proxy.DummyParamBuilderProvider;
+import de.simpleworks.staf.framework.api.proxy.properties.NeoloadRecordingProperties;
 import de.simpleworks.staf.framework.elements.commons.TemplateTestCase;
 import de.simpleworks.staf.framework.util.AssertionUtils;
 import de.simpleworks.staf.framework.util.HttpResponseUtils;
@@ -54,6 +59,8 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 
 	private Assertion[] currentAssertions;
 	private final HttpClient client = new HttpClient();
+
+	private DesignManager designManager;
 
 	protected APITestCase(final String resource, final Module... modules) throws SystemException {
 		super(resource, ENVIRONMENT_VARIABLES_NAME, new MapperAPITeststep(), modules);
@@ -80,6 +87,7 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 		return new File_ComparerAssertionValidator().validateAssertion(response, assertion);
 	}
 
+	@Override
 	protected Map<String, String> runAssertion(final HttpResponse response, final Assertion assertion)
 			throws SystemException {
 
@@ -436,17 +444,48 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 			APITestCase.logger.error(msg);
 			throw new Exception(msg);
 		}
-		final BrowserMobProxyServer proxy = client.getBrowserMobProxyServer();
-		if ((proxy != null) && !proxy.isStarted()) {
-			final String msg = String.format("Proxy at '%s:%d', can't be started.",
-					proxy.getServerBindAddress().getHostName(), Integer.valueOf(proxy.getPort()));
-			APITestCase.logger.error(msg);
-			throw new Exception(msg);
-		}
+
 		if (getExtractedValues() == null) {
 			final String msg = "extractedValues can't be null.";
 			APITestCase.logger.error(msg);
 			throw new Exception(msg);
+		}
+
+		final BrowserMobProxyServer browserMobProxyServer = client.getBrowserMobProxyServer();
+		if ((browserMobProxyServer != null) && !browserMobProxyServer.isStarted()) {
+			final String msg = String.format("Proxy at '%s:%d', can't be started.",
+					browserMobProxyServer.getServerBindAddress().getHostName(),
+					Integer.valueOf(browserMobProxyServer.getPort()));
+			APITestCase.logger.error(msg);
+			throw new Exception(msg);
+		}
+
+		final Proxy nlProxy = client.getProxy();
+
+		if ((nlProxy != null)) {
+			if (designManager == null) {
+				final NeoloadRecordingProperties neoloadRecordingProperties = NeoloadRecordingProperties.getInstance();
+
+				final String projectPath = neoloadRecordingProperties.getNeoloadProjectPath();
+
+				if (Convert.isEmpty(projectPath)) {
+					APITestCase.logger.error("projectPath can't be null or empty string.");
+				}
+
+				final String userPath = neoloadRecordingProperties.getNeoloadUserPath();
+
+				if (Convert.isEmpty(userPath)) {
+					APITestCase.logger.error("userPath can't be null or empty string.");
+				}
+
+				if (APITestCase.logger.isInfoEnabled()) {
+					APITestCase.logger.info(
+							String.format("use 'Project Path' : '%s', 'User Path' : '%s'", projectPath, userPath));
+				}
+
+				designManager = new DesignManager(userPath, Optional.of(projectPath), new DummyParamBuilderProvider());
+				designManager.start();
+			}
 		}
 	}
 
@@ -455,13 +494,25 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 		final BrowserMobProxyServer proxy = client.getBrowserMobProxyServer();
 		if ((proxy != null) && !proxy.isStopped()) {
 			proxy.stop();
+
 			if (!proxy.isStopped()) {
 				final String msg = String.format("Proxy at '%s:%d', can't be stopped.",
 						proxy.getServerBindAddress().getHostName(), Integer.valueOf(proxy.getPort()));
 				APITestCase.logger.error(msg);
 				throw new Exception(msg);
 			}
+
 		}
+
+		final Proxy nlProxy = client.getProxy();
+
+		if ((nlProxy != null)) {
+			if (designManager != null) {
+				designManager.stop();
+				designManager = null;
+			}
+		}
+
 	}
 
 	@Override

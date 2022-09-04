@@ -7,19 +7,30 @@
 	<parent>
 		<groupId>de.simpleworks.staf</groupId>
 		<artifactId>staf-parent</artifactId>
-		<version>0.120</version>
+		<version>0.120.1</version>
 	</parent>
- 
+
 	<artifactId>framework</artifactId>
 	<name>framework</name>
-  
+
 	<properties>
-		<project.version>0.120</project.version>
+		<project.version>0.110</project.version>
+		<version.gson>2.8.2</version.gson>
 		<version.com.squareup.okhttp3>3.3.1</version.com.squareup.okhttp3>
 		<version.net.sourceforge.htmlcleaner.htmlcleaner>2.24</version.net.sourceforge.htmlcleaner.htmlcleaner>
 		<version.net.lightbody.bmp.browsermob-core>2.1.5</version.net.lightbody.bmp.browsermob-core>
+		<version.neoload>2.1.4</version.neoload>
 		<version.org.skyscreamer.jsonassert>1.5.0</version.org.skyscreamer.jsonassert>
 	</properties>
+
+
+	<repositories>
+		<repository>
+			<id>neotys repo</id>
+			<name>neotys</name>
+			<url>https://maven.neotys.com/content/repositories/releases/</url>
+		</repository> 
+	</repositories>
 
 	<dependencies>
 		<dependency>
@@ -51,6 +62,16 @@
 			<groupId>org.skyscreamer</groupId>
 			<artifactId>jsonassert</artifactId>
 			<version>${version.org.skyscreamer.jsonassert}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>${version.gson}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.neotys.selenium</groupId>
+			<artifactId>neotys-selenium-proxy</artifactId>
+			<version>${version.neoload}</version>
 		</dependency>
 		<!--START STAF Dependencies -->
 		<dependency>

@@ -1,13 +1,24 @@
 package de.simpleworks.staf.framework.api.proxy;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.Proxy.Type;
+import java.net.Socket;
 import java.util.HashSet;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.google.common.base.Optional;
+import com.neotys.selenium.proxies.DesignManager;
+
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.data.exception.InvalidDataConstellationExcpetion;
+import de.simpleworks.staf.framework.api.proxy.properties.NeoloadRecordingProperties;
 import de.simpleworks.staf.framework.api.proxy.properties.ProxyServerProperties;
 import de.simpleworks.staf.framework.elements.api.RewriteUrlObject;
 import de.simpleworks.staf.framework.enums.TestcaseKindEnum;
@@ -36,6 +47,14 @@ public class ProxyUtils {
 
 		case GUI_TESTCASE:
 			result = props.getGUIProxyPort();
+			break;
+
+		case API_TESTCASE_NL_RECORDING:
+			result = props.getProxyNLPort();
+			break;
+
+		case GUI_TESTCASE_NL_RECORDING:
+			result = props.getProxyNLPort();
 			break;
 
 		default:
@@ -86,12 +105,19 @@ public class ProxyUtils {
 	}
 
 	/**
-	 * @brief method to set up proxy instance
+	 * @brief method to set up (BrowserMob) proxy instance
 	 * @return already running proxy, null if it can't start (on the given port)
 	 *         NOTE: if a proxy is already running, you will still get null.
 	 */
-	public static BrowserMobProxyServer createProxyServer(final ProxyServerProperties props,
+	public static BrowserMobProxyServer createBrowserMobProxyServer(final ProxyServerProperties props,
 			TestcaseKindEnum testcasekind) {
+
+		if (!(testcasekind == TestcaseKindEnum.API_TESTCASE || testcasekind == TestcaseKindEnum.GUI_TESTCASE)) {
+			ProxyUtils.logger.error(String.format("TestcaseKindEnum '%s' should not use a (BrowserMob) proxy instance.",
+					testcasekind.getValue()));
+			return null;
+		}
+
 		final int proxyPort = ProxyUtils.getProxyPort(props, testcasekind);
 
 		BrowserMobProxyServer result = new BrowserMobProxyServer();
@@ -115,6 +141,49 @@ public class ProxyUtils {
 		return result;
 	}
 
+	public static Proxy createProxyServer(final ProxyServerProperties props, TestcaseKindEnum testcasekind) {
+
+		if (!(testcasekind == TestcaseKindEnum.API_TESTCASE_NL_RECORDING)) {
+			ProxyUtils.logger.error(String.format("TestcaseKindEnum '%s' should use a (BrowserMob) proxy instance.",
+					testcasekind.getValue()));
+			return null;
+		}
+
+		final int proxyPort = ProxyUtils.getProxyPort(props, testcasekind);
+		final String proxyHost = props.getProxyNLHost();
+
+		if (Convert.isEmpty(proxyHost)) {
+			ProxyUtils.logger.error("proxyHost can't be null or empty string.");
+			return null;
+		}
+
+		final NeoloadRecordingProperties neoloadRecordingProperties = NeoloadRecordingProperties.getInstance();
+
+		final String projectPath = neoloadRecordingProperties.getNeoloadProjectPath();
+
+		final String userPath = neoloadRecordingProperties.getNeoloadUserPath();
+
+		DesignManager designManager = new DesignManager(userPath, Optional.of(projectPath),
+				new DummyParamBuilderProvider());
+		designManager.start();
+
+		try (Socket clientSocket = new Socket(proxyHost, proxyPort);) {
+			try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);) {
+				try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));) {
+
+				}
+			}
+
+		} catch (Exception ex) {
+			ProxyUtils.logger.error(String.format("can't connect to proxy at %s:%s.", proxyHost, proxyPort), ex);
+			return null;
+		}
+
+		final Proxy result = new Proxy(Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
+
+		return result;
+	}
+
 	public static BrowserMobProxyServer setUpHeader(final BrowserMobProxyServer proxy,
 			final Map<String, String> headers) {
 		if (proxy == null) {
@@ -133,4 +202,5 @@ public class ProxyUtils {
 
 		return result;
 	}
+
 }

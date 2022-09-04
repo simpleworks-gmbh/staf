@@ -44,7 +44,7 @@ public abstract class GUITestCase extends TestCase {
 	}
 
 	private void configureProxy() {
-		final BrowserMobProxyServer proxy = drivermanagerimpl.getProxy();
+		final BrowserMobProxyServer proxy = drivermanagerimpl.getBrowserMobProxyServer();
 		if (proxy == null) {
 			if (GUITestCase.logger.isDebugEnabled()) {
 				GUITestCase.logger.debug("steps will not be marked, because the proxy is null.");
@@ -73,7 +73,7 @@ public abstract class GUITestCase extends TestCase {
 
 	@Override
 	public BrowserMobProxyServer getProxy() {
-		return drivermanagerimpl.getProxy();
+		return drivermanagerimpl.getBrowserMobProxyServer();
 	}
 
 	@Override

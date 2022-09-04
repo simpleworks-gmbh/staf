@@ -14,9 +14,15 @@ public class FrameworkConsts {
 	public static final String IGNORE_CERTIFICATE = "httpclient.ignore_certificate";
 
 	public static final String PROXY_ENABLED = "proxy.enabled";
-
 	public static final String PROXY_GUI_PORT = "proxy.gui.port";
 	public static final String PROXY_API_PORT = "proxy.api.port";
+
+	public static final String NEOLOAD_PROJECT_PATH = "neoload.project.path";
+	public static final String NEOLOAD_USER_PATH = "neoload.user.path";
+
+	public static final String PROXY_NEOLOAD_ENABLED = "proxy.neoload.enabled";
+	public static final String PROXY_NEOLOAD_PORT = "proxy.neoload.port";
+	public static final String PROXY_NEOLOAD_HOST = "proxy.neoload.host";
 
 	public static final String PROXY_HEADERS = "proxy.headers";
 
@@ -30,7 +36,6 @@ public class FrameworkConsts {
 
 	public static final String DATABASE_CONNECTION_POOL_CONFIG_FILE = "database.connection_pool.config_file";
 
-	
 	public static final String FUNCTION_TEMPLATE_REGULAR_EXPRESSION = "function.template.regex";
 	public static final String VALUE_SUBSTITUTION_REGULAR_EXPRESSION = "value.substitution.regex";
 	public static final String FUNCTION_SUBSTITUTION_REGULAR_EXPRESSION = "function.substitution.regex";

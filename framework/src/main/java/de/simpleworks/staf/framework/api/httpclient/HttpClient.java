@@ -3,14 +3,17 @@ package de.simpleworks.staf.framework.api.httpclient;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import de.simpleworks.staf.commons.api.FormParameter;
 import de.simpleworks.staf.commons.api.Header;
 import de.simpleworks.staf.commons.api.HttpRequest;
@@ -44,15 +47,21 @@ public class HttpClient implements IHttpClient {
 	private final OkHttpClientRecipe okhttpclientRecipe;
 	private final OkHttpClient client;
 	private final BrowserMobProxyServer browsermobProxy;
+	private final Proxy proxy;
 
 	public HttpClient() throws SystemException {
 		okhttpclientRecipe = OkHttpBuilder.buildOkHttpClientRecipe();
 		client = okhttpclientRecipe.getClient();
 		browsermobProxy = okhttpclientRecipe.getBrowsermobProxy();
+		proxy = okhttpclientRecipe.getProxy();
 	}
 
 	public BrowserMobProxyServer getBrowserMobProxyServer() {
 		return browsermobProxy;
+	}
+
+	public Proxy getProxy() {
+		return proxy;
 	}
 
 	/**

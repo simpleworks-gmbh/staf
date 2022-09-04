@@ -4,7 +4,6 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.net.Proxy.Type;
 import java.security.cert.CertificateException;
 import java.util.concurrent.TimeUnit;
 
@@ -36,11 +35,54 @@ public class OkHttpClientRecipe {
 
 	private OkHttpClient client;
 
-	private final BrowserMobProxyServer browsermobProxy;
+	private BrowserMobProxyServer browsermobProxy;
+	private Proxy proxy;
 
 	public OkHttpClientRecipe(final boolean ignoreCertificate, final CookiePolicy cookiePolicy,
 			final Level loggingLevel, final BrowserMobProxyServer browsermobProxy, final boolean retryConnection,
 			final int timeout) throws SystemException {
+
+		this(ignoreCertificate, cookiePolicy, loggingLevel, retryConnection, timeout);
+
+		if (browsermobProxy == null) {
+			throw new IllegalArgumentException("browsermobProxy can't be null.");
+		}
+
+		this.browsermobProxy = browsermobProxy;
+
+		final InetSocketAddress address = new InetSocketAddress(browsermobProxy.getServerBindAddress(),
+				browsermobProxy.getPort());
+
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("use browsermobProxy at: %s.", address));
+		}
+
+		buildOkHttpClient();
+	}
+
+	public OkHttpClientRecipe(final boolean ignoreCertificate, final CookiePolicy cookiePolicy,
+			final Level loggingLevel, final Proxy proxy, final boolean retryConnection, final int timeout)
+			throws SystemException {
+
+		this(ignoreCertificate, cookiePolicy, loggingLevel, retryConnection, timeout);
+
+		if (proxy == null) {
+			throw new IllegalArgumentException("proxy can't be null.");
+		}
+
+		this.proxy = proxy;
+
+		InetSocketAddress address = (InetSocketAddress) this.proxy.address();
+
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("use proxy at: %s.", address));
+		}
+
+		buildOkHttpClient();
+	}
+
+	public OkHttpClientRecipe(final boolean ignoreCertificate, final CookiePolicy cookiePolicy,
+			final Level loggingLevel, final boolean retryConnection, final int timeout) throws SystemException {
 		if (cookiePolicy == null) {
 			throw new IllegalArgumentException("cookiePolicy can't be null.");
 		}
@@ -55,12 +97,15 @@ public class OkHttpClientRecipe {
 		this.retryConnection = retryConnection;
 		this.timeout = timeout;
 
-		this.browsermobProxy = browsermobProxy;
 		buildOkHttpClient();
 	}
 
 	public BrowserMobProxyServer getBrowsermobProxy() {
 		return browsermobProxy;
+	}
+
+	public Proxy getProxy() {
+		return proxy;
 	}
 
 	public OkHttpClient getClient() {
@@ -84,21 +129,14 @@ public class OkHttpClientRecipe {
 			logger.debug(String.format("interceptor: '%s', cookieJar: '%s'.", interceptor, cookieJar));
 		}
 
-		if (browsermobProxy == null) {
+		if (this.proxy == null) {
 			client = builder.addNetworkInterceptor(interceptor).cookieJar(cookieJar).build();
 		} else {
-			final InetSocketAddress address = new InetSocketAddress(browsermobProxy.getServerBindAddress(),
-					browsermobProxy.getPort());
-			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("address: '%s'.", address));
-			}
-
-			final Proxy proxy = new Proxy(Type.HTTP, address);
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("proxy: '%s'.", proxy));
 			}
-			client = builder.addNetworkInterceptor(interceptor).cookieJar(cookieJar).proxy(proxy).build();
 
+			client = builder.addNetworkInterceptor(interceptor).cookieJar(cookieJar).proxy(proxy).build();
 		}
 
 		if (logger.isDebugEnabled()) {
