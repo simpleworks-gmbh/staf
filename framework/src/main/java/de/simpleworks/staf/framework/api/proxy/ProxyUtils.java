@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.Proxy.Type;
 import java.net.Socket;
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ import com.google.common.base.Optional;
 import com.neotys.selenium.proxies.DesignManager;
 
 import de.simpleworks.staf.commons.utils.Convert;
+import de.simpleworks.staf.commons.utils.UtilsNetwork;
 import de.simpleworks.staf.data.exception.InvalidDataConstellationExcpetion;
 import de.simpleworks.staf.framework.api.proxy.properties.NeoloadRecordingProperties;
 import de.simpleworks.staf.framework.api.proxy.properties.ProxyServerProperties;
@@ -71,6 +73,15 @@ public class ProxyUtils {
 					String.format("port can't be more than 65535 but was %d.", Integer.valueOf(result)));
 		}
 
+		while (isPortAlreadyUsed(result)) {
+			result += 1;
+
+			if (result > 65535) {
+				throw new RuntimeException(
+						String.format("port can't be more than 65535 but was %d.", Integer.valueOf(result)));
+			}
+
+		}
 		return result;
 	}
 
@@ -202,5 +213,22 @@ public class ProxyUtils {
 
 		return result;
 	}
+
+	private static boolean isPortAlreadyUsed(int port) {
+
+		boolean result = false;
+
+		try {
+			final URI uri = new URI(String.format("PROTOCOL://0.0.0.0:%s", Integer.toString(port)));
+
+			result = !UtilsNetwork.isServerAvailable(uri);
+		} catch (Exception ex) {
+			ProxyUtils.logger.error(String.format("can't validate host '%s'.",
+					String.format("0.0.0.0:%s", Integer.toString(port)), ex)); 
+		}
+
+		return result;
+	}
+
 
 }

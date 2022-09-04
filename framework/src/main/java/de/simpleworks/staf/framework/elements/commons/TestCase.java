@@ -295,11 +295,19 @@ public abstract class TestCase {
 		if (testcase == null) {
 			throw new IllegalArgumentException("testcase can't be null.");
 		}
-		testcase.bootstrap();
+
+		if (testcase.isFailed()) {
+			throw new RuntimeException(String.format("testcase '%s' has already failed..", testcase.getTestCaseName()));
+		}
+
+		if (!testcase.start()) {
+			testcase.bootstrap();
+		}
+
 		try {
 			for (Method stepmethod : TestCaseUtils.fetchStepMethods(testcase.getClass())) {
 				if (stepmethod == null) {
-					TestCase.logger.error("Method '%s' can't be null.");
+					TestCase.logger.error("stepmethod can't be null.");
 					break;
 				}
 				final Step step = stepmethod.getAnnotation(Step.class);
@@ -312,16 +320,34 @@ public abstract class TestCase {
 					TestCase.logger.debug(String.format("Execute step '%s'.", step.description()));
 				}
 				testcase.executeTestStep();
+
+				@SuppressWarnings("rawtypes")
+				final Artefact current = testcase.createArtefact();
+				// transmit artefact
+				this.setArtefact(current);
+
 			}
-		} catch (final Throwable ex) {
+		} catch (final Throwable th) {
+
+			TestCase.logger.error(String.format("Testcase '%s' has failed.", this.getTestCaseName()), th);
+
 			@SuppressWarnings("rawtypes")
 			final Artefact current = testcase.createArtefact();
+
 			// transmit artefact
 			this.setArtefact(current);
-			throw ex;
-		} finally {
+
+			// shutdown testcase after an error happened
+			testcase.shutdown();
+
+			throw th;
+		}
+
+		if (testcase.start()) {
 			testcase.shutdown();
 		}
+
 		return testcase.getExtractedValues();
 	}
+
 }

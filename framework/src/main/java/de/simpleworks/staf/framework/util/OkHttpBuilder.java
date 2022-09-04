@@ -13,6 +13,9 @@ import de.simpleworks.staf.framework.consts.FrameworkConsts;
 import de.simpleworks.staf.framework.enums.TestcaseKindEnum;
 import net.lightbody.bmp.BrowserMobProxyServer;
 
+/**
+ * @info support only nl proxy
+ * */
 public class OkHttpBuilder {
 
 	private static final Logger logger = LogManager.getLogger(OkHttpBuilder.class);
