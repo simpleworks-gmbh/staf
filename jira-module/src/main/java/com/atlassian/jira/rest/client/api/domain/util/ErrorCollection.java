@@ -31,6 +31,10 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+/*
+ * Modifications copyright (C) 2021 Simpleworks GmbH
+ */
+
 /**
  * Error container returned in bulk operations
  *

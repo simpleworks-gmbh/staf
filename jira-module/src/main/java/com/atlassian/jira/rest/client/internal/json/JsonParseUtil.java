@@ -46,6 +46,10 @@ import com.atlassian.jira.rest.client.api.domain.BasicUser;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 
+/*
+ * Modifications copyright (C) 2021 Simpleworks GmbH
+ */
+
 public class JsonParseUtil {
 	private static final Logger logger = LogManager.getLogger(JsonParseUtil.class);
 

@@ -35,6 +35,10 @@ import com.atlassian.sal.api.ApplicationProperties;
 import com.atlassian.sal.api.UrlMode;
 import com.atlassian.sal.api.executor.ThreadLocalContextManager;
 
+/*
+ * Modifications copyright (C) 2021 Simpleworks GmbH
+ */
+
 /**
  * Factory for asynchronous http clients.
  *

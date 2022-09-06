@@ -36,6 +36,10 @@ Xray Settings
 - xray.authenticate_url: https://xray.cloud.xpand-it.com/api/v1/authenticate
 - xray.graphql_api_url: https://xray.cloud.xpand-it.com/api/v2/graphql
 
+Optional Information
+- com.atlassian.httpclient.options.connectionTimeout = `connectionTimeout in seconds, Default is 5`
+- com.atlassian.httpclient.options.socketTimeout = `socketTimeout in seconds, Default is 20`
+- com.atlassian.httpclient.options.requestTimeout = `requestTimeout in seconds, Default is 30`
 
 Execute
 ```bash
