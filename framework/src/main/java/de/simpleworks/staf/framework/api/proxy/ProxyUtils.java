@@ -117,11 +117,18 @@ public class ProxyUtils {
 
 			result.setTrustAllServers(true);
 			
-			
+			if (ProxyUtils.logger.isDebugEnabled()) {
+				ProxyUtils.logger.debug(String.format("attempt to start proxy at 0.0.0.0:%s.", proxyPort));
+			}
 			
 			result.start(proxyPort);
-
+			
+			if (ProxyUtils.logger.isDebugEnabled()) {
+				ProxyUtils.logger.debug(String.format("proxy started at 0.0.0.0:%s.", proxyPort));
+			}
+			
 		} catch (final Exception ex) {
+			ex.printStackTrace();
 			// FIXME throw an exception
 			ProxyUtils.logger.error("can't set up proxy.", ex);
 			result = null;
