@@ -74,6 +74,7 @@ public class STAFSurefirePlugin extends SurefirePlugin {
 		return testplans;
 	}
 
+	@SuppressWarnings("unchecked")
 	private static TestcaseFinder createTestcaseFinder(final MavenProject project) throws SystemException {
 		final TestcaseFinder result = new TestcaseFinder();
 
@@ -119,7 +120,7 @@ public class STAFSurefirePlugin extends SurefirePlugin {
 		}
 
 		if (Convert.isEmpty(testCaseClasses)) {
-			STAFSurefirePlugin.logger.info("no testcases were defined, will execute tests, from the command line.");
+			STAFSurefirePlugin.logger.info("no matching testcases were defined.");
 			return;
 		}
 

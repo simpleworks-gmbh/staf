@@ -31,11 +31,15 @@ public class TestplanValidator {
 		this.finder = finder;
 	}
 
-	private static void verify(final TestCase testcase, final Class<?> clazz) throws SystemException {
+	private static boolean verify(final TestCase testcase, final Class<?> clazz) throws SystemException {
+
 		if (!Scanner.doesClassExtendSpecificClass(clazz,
 				de.simpleworks.staf.framework.elements.commons.TestCase.class)) {
-			throw new SystemException(String.format("wrong implementation: test case '%s' does not extend '%s'.",
+
+			TestplanValidator.logger.error(String.format("wrong implementation: test case '%s' does not extend '%s'.",
 					clazz.getName(), de.simpleworks.staf.framework.elements.commons.TestCase.class.getName()));
+
+			return false;
 		}
 
 		final List<TestStep> caseSteps = testcase.getTestSteps();
@@ -45,28 +49,52 @@ public class TestplanValidator {
 		Collections.sort(classSteps, (o1, o2) -> o1.order() - o2.order());
 
 		if (caseSteps.size() != classSteps.size()) {
-			throw new SystemException(String.format(
+
+			TestplanValidator.logger.error(
 					"test case definition '%s' and implementation class '%s' have not equal count of steps: definition %d vs implementation %d.",
 					testcase.getId(), clazz.getName(), Integer.valueOf(caseSteps.size()),
-					Integer.valueOf(classSteps.size())));
+					Integer.valueOf(classSteps.size()));
+
+			return false;
 		}
 
 		int i = 0;
+		boolean result = true;
+		List<String> errorMessages = new ArrayList<String>();
+
 		for (final TestStep caseStep : caseSteps) {
 			final Step classStep = classSteps.get(i++);
 			if (caseStep.getOrder() != classStep.order()) {
-				throw new SystemException(String.format(
+				result = false;
+				final String errorMessage = String.format(
 						"test case definition '%s' and implementation class '%s' have steps with different order: definition %d vs implementation %d.",
 						testcase.getId(), clazz.getName(), Integer.valueOf(caseStep.getOrder()),
-						Integer.valueOf(classStep.order())));
+						Integer.valueOf(classStep.order()));
+
+				if (!errorMessages.add(errorMessage)) {
+					TestplanValidator.logger.error(String.format("can't add error message '%s'.", errorMessage));
+				}
+
 			}
 
 			if (!caseStep.getSummary().equals(classStep.description())) {
-				throw new SystemException(String.format(
+				result = false;
+				final String errorMessage = String.format(
 						"test case definition '%s' and implementation class '%s' have steps with different description: definition '%s' vs implementation '%s'.",
-						testcase.getId(), clazz.getName(), caseStep.getSummary(), classStep.description()));
+						testcase.getId(), clazz.getName(), caseStep.getSummary(), classStep.description());
+
+				if (!errorMessages.add(errorMessage)) {
+					TestplanValidator.logger.error(String.format("can't add error message '%s'.", errorMessage));
+				}
 			}
 		}
+
+		if (!result) {
+			final String errorSummary = String.join("\r\n", errorMessages);
+			TestplanValidator.logger.error(errorSummary);
+		}
+
+		return result;
 	}
 
 	public List<Class<?>> validate(final TestPlan testplan) throws SystemException {
@@ -87,12 +115,20 @@ public class TestplanValidator {
 
 			final Class<?> clazz = finder.get(templateId);
 			if (clazz == null) {
-				throw new SystemException(String.format("can't find implementation for test case: '%s'.", templateId));
+				TestplanValidator.logger
+						.error(String.format("can't find implementation for test case: '%s'.", templateId));
+				continue;
 			}
 
-			TestplanValidator.verify(testcase, clazz);
+			if (TestplanValidator.verify(testcase, clazz)) {
+				result.add(clazz);
+			}
+		}
 
-			result.add(clazz);
+		if (result.size() != testplan.getTestCases().size()) {
+			throw new SystemException(String.format("only '%s' from '%s' are valid [%s].",
+					Integer.toString(result.size()), Integer.toString(testplan.getTestCases().size()),
+					String.join(",", result.stream().map(res -> res.getName()).collect(Collectors.toList()))));
 		}
 
 		return result;
