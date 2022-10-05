@@ -1,8 +1,10 @@
 package de.simpleworks.staf.framework.util.assertion;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -234,6 +236,7 @@ public class JSONPATHAssertionValidator extends AssertionUtils<HttpResponse> {
 			break;
 		case ANY_ORDER:
 			try {
+				
 				JSONAssert.assertEquals(assertionValue, content, JSONCompareMode.LENIENT);
 			} catch (final JSONException ex) {
 				final String msg = String.format(
@@ -243,6 +246,21 @@ public class JSONPATHAssertionValidator extends AssertionUtils<HttpResponse> {
 				throw new RuntimeException(msg);
 			}
 			break;
+			
+		case PART_OF:
+			
+			final List<String> elements = Arrays.asList(assertionValue.split("#"));
+			
+			if(elements.indexOf(content) < 0) {
+				final String msg = String.format(
+						"The assertion \"%s\" was not met. Expected value '%s', is not part of ['%s'].", assertionId,
+						assertionValue, content);
+				JSONPATHAssertionValidator.logger.error(msg);
+				throw new RuntimeException(msg);
+			}
+			
+			break;
+			
 		default:
 			throw new IllegalArgumentException(
 					String.format("The allowedValueEnum '%s' is not implemented yet.", allowedValueEnum.getValue()));
