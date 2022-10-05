@@ -42,6 +42,10 @@ public class TestCaseProperties extends PropertiesReader {
 	@Default("FUNCTION#(.+)#FUNCTION")
 	@Property(FrameworkConsts.FUNCTION_TEMPLATE_REGULAR_EXPRESSION)
 	private String functionTemplateRegularExpression;
+	
+	@Default("de.simpleworks.staf.framework.reporter.json.JsonReporter")
+	@Property(FrameworkConsts.REPORTER_MANAGER_CLASS)
+	private String reporterManagerClass;
 
 	public String getTestCaseHeaderName() {
 		return testCaseHeaderName;
@@ -71,6 +75,10 @@ public class TestCaseProperties extends PropertiesReader {
 		return functionTemplateRegularExpression;
 	}
 
+	public String getReporterManagerClass() {
+		return reporterManagerClass;
+	}
+	
 	@Override
 	protected Class<?> getClazz() {
 		return TestCaseProperties.class;
