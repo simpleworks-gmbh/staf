@@ -148,9 +148,9 @@ public class TestplanValidator {
 				TestplanValidator.logger.info(String.format("the testcases '%s' are invalid.", invalidTestcases));
 			}
 
-			throw new SystemException(String.format("only '%s' from '%s' are valid [%s].",
+			throw new SystemException(String.format("only '%s' from '%s' are valid [%s] %s.",
 					Integer.toString(result.size()), Integer.toString(testplan.getTestCases().size()),
-					String.join(",", result.stream().map(res -> res.getName()).collect(Collectors.toList()))));
+					String.join(",", result.stream().map(res -> res.getName()).collect(Collectors.toList())), errorSummary )   );
 		}
 
 		return result;
