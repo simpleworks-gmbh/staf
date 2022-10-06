@@ -19,6 +19,7 @@ import de.simpleworks.staf.commons.exceptions.SystemException;
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.Scanner;
 import de.simpleworks.staf.framework.util.TestCaseUtils;
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class TestplanValidator {
 	static final Logger logger = LogManager.getLogger(TestplanValidator.class);
@@ -150,7 +151,7 @@ public class TestplanValidator {
 
 			throw new SystemException(String.format("only '%s' from '%s' are valid [%s] %s.",
 					Integer.toString(result.size()), Integer.toString(testplan.getTestCases().size()),
-					String.join(",", result.stream().map(res -> res.getName()).collect(Collectors.toList())), errorSummary )   );
+					String.join(",", result.stream().map(res -> res.getName()).collect(Collectors.toList())), Arrays.asList(errorSummary) )   );
 		}
 
 		return result;

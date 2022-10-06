@@ -296,12 +296,12 @@ public class HttpRequest implements IPojo {
 		}
 
 		if (method == HttpMethodEnum.POST || method == HttpMethodEnum.PUT) {
-			if (!Convert.isEmpty(rawFileParameter.getFile())) {
+			/*if (!Convert.isEmpty(rawFileParameter.getFile())) {
 				if (!rawFileParameter.validate()) {
 					HttpRequest.logger.error(String.format("rawFileParameter '%s' is invalid.", rawFileParameter));
 					result = false;
 				}
-			}
+			}*/
 		}
 
 		if (!Convert.isEmpty(headers)) {
