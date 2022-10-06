@@ -44,10 +44,6 @@ public class TestplanValidator {
 			return false;
 		}
 		
-		if(!Convert.isEmpty(errorSummary)) {
-			throw new IllegalArgumentException("errorSummary can't be null or empty.");
-		}
-		
 		
 		final List<TestStep> caseSteps = testcase.getTestSteps();
 		final List<Method> allMethods = TestCaseUtils.collectMethods(clazz);
