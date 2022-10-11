@@ -54,18 +54,20 @@ public class TestplanValidator {
 
 		if (caseSteps.size() != classSteps.size()) {
 
-			TestplanValidator.logger.error(
-					"test case definition '%s' and implementation class '%s' have not equal count of steps: definition %d vs implementation %d.",
+			final String errorMessage = String.format("test case definition '%s' and implementation class '%s' have not equal count of steps: definition %d vs implementation %d.",
 					testcase.getId(), clazz.getName(), Integer.valueOf(caseSteps.size()),
-					Integer.valueOf(classSteps.size()));
+					Integer.valueOf(classSteps.size()), errorSummary);
 
-			return false;
+			final String currentErrorSummary = errorSummary[0];
+			errorSummary[0] = String.format("%s\r\n%s", currentErrorSummary, errorMessage);
+			
+			return false;			
 		}
+		
 
 		int i = 0;
 		boolean result = true;
-		//List<String> errorMessages = new ArrayList<String>();
-
+		
 		for (final TestStep caseStep : caseSteps) {
 			final Step classStep = classSteps.get(i++);
 			if (caseStep.getOrder() != classStep.order()) {
