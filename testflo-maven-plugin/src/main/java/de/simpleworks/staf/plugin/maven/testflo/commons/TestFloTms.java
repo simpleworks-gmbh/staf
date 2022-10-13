@@ -33,6 +33,11 @@ public class TestFloTms {
 
 	private static final Logger logger = LogManager.getLogger(TestFloTms.class);
 
+	// Error code that indicates, to many requests in short time frame
+	// https://confluence.atlassian.com/adminjiraserver/adjusting-your-code-for-rate-limiting-987143384.html
+	private static final int RATE_LIMIT_EXCEEDED_STATUS_CODE = 429;
+	private static final String RETRY_HEADER = "retry-after";
+
 	private static final String JSON_MOVE_TO_NEXT_ITERATION = "{\"nextIterationStrategy\": \"all-test-cases\"}";
 	private static final String MARKUP_THUMBNAIL = "!%s|thumbnail!";
 
@@ -125,20 +130,41 @@ public class TestFloTms {
 		}
 
 		final Call call = client.newCall(request);
-		try (final Response response = call.execute();) {
-			if (TestFloTms.logger.isDebugEnabled()) {
-				TestFloTms.logger.debug(String.format("got response code: %d.", Integer.valueOf(response.code())));
-			}
+		
+		try (Response response = call.execute()) {
+			if (RATE_LIMIT_EXCEEDED_STATUS_CODE == response.code()) {
 
+				final String retryAfter = response.header(RETRY_HEADER, "0");
+				final int nextRetryAttempt = Integer.parseInt(retryAfter) * 1002;
+
+				if (nextRetryAttempt > 0) {
+
+					if (TestFloTms.logger.isDebugEnabled()) {
+						TestFloTms.logger.debug(String.format(
+								"need to wait \"%s\" seconds for the next attempt to access TestFLO.", retryAfter));
+					}
+
+					try {
+						Thread.sleep(nextRetryAttempt);
+						return this.tmsSend(method, builder, requestBody);
+					} catch (final Exception ex) {
+						TestFloTms.logger.error(String.format(
+								"can't wait \"%s\" seconds, will try another attempt to access TestFLO.", retryAfter), ex);
+					}
+				}
+			}
+			
 			if (response.code() != 200) {
 				TestFloTms.logger.error(String.format("request: '%s'.", request));
 				TestFloTms.logger.error(String.format("response body: '%s'.", TestFloTms.getresponseBody(response)));
 				throw new SystemException(String.format("unexpected http status code %d (expected: 200).",
 						Integer.valueOf(response.code())));
 			}
-
+			
+			
 			return TestFloTms.getresponseBody(response);
-		} catch (final IOException ex) {
+		}
+		catch (final IOException ex) {
 			final String msg = String.format("can't execute request: '%s'.", request);
 
 			if (!skipTimeOut) {
@@ -335,25 +361,24 @@ public class TestFloTms {
 			}
 		}
 	}
-	
+
 	public void resetTeststep(final Issue issue) {
-		
+
 		if (issue == null) {
 			throw new IllegalArgumentException("issue can't be null.");
 		}
-		
-		//FIXME: determine amount of steps
+
+		// FIXME: determine amount of steps
 		boolean flag = true;
 		int itr = 0;
 		do {
 			try {
 				updateTestStepStatus(issue, new Integer(itr), TestStepStatus.To_do);
-			} catch (SystemException ex) { 
+			} catch (SystemException ex) {
 				// ignore error
-				 flag = false;
+				flag = false;
 			}
-			itr +=1;
-		}
-		while(flag);
+			itr += 1;
+		} while (flag);
 	}
 }
