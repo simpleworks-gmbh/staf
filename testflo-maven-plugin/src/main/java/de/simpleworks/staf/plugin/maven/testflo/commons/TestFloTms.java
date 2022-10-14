@@ -37,6 +37,9 @@ public class TestFloTms {
 	// https://confluence.atlassian.com/adminjiraserver/adjusting-your-code-for-rate-limiting-987143384.html
 	private static final int RATE_LIMIT_EXCEEDED_STATUS_CODE = 429;
 	private static final String RETRY_HEADER = "retry-after";
+	private static final String X_RATE_LIMIT_INTERVAL_SECONDS_HEADER = "x-ratelimit-interval-seconds";
+	private static final String X_RATE_LIMIT_FILLRATE_HEADER =  "x-ratelimit-fillrate";
+	
 
 	private static final String JSON_MOVE_TO_NEXT_ITERATION = "{\"nextIterationStrategy\": \"all-test-cases\"}";
 	private static final String MARKUP_THUMBNAIL = "!%s|thumbnail!";
@@ -134,16 +137,40 @@ public class TestFloTms {
 		try (Response response = call.execute()) {
 			if (RATE_LIMIT_EXCEEDED_STATUS_CODE == response.code()) {
 
-				final String retryAfter = response.header(RETRY_HEADER, "0");
-				final int nextRetryAttempt = Integer.parseInt(retryAfter) * 1002;
-
-				if (nextRetryAttempt > 0) {
-
+				if (TestFloTms.logger.isDebugEnabled()) {
+					TestFloTms.logger.debug(String.format("will check for the '%s'-Header to gather more information.", RETRY_HEADER));
+				}
+				
+				String retryAfter = response.header(RETRY_HEADER, "0");
+				int nextRetryAttempt = Integer.parseInt(retryAfter) * 1002;
+				
+				if (nextRetryAttempt == 0) {
+					
 					if (TestFloTms.logger.isDebugEnabled()) {
-						TestFloTms.logger.debug(String.format(
-								"need to wait \"%s\" seconds for the next attempt to access TestFLO.", retryAfter));
+						TestFloTms.logger.debug(String.format("will check for the '%s'-Header to gather more information.", X_RATE_LIMIT_INTERVAL_SECONDS_HEADER));
 					}
-
+					
+					retryAfter = response.header(X_RATE_LIMIT_INTERVAL_SECONDS_HEADER, "0");
+					nextRetryAttempt = Integer.parseInt(retryAfter) * 1002;
+					
+				}
+				
+				if (nextRetryAttempt == 0) {
+					if (TestFloTms.logger.isDebugEnabled()) {
+						TestFloTms.logger.debug(String.format("will check for the '%s'-Header to gather more information.", X_RATE_LIMIT_FILLRATE_HEADER));
+					}
+				
+					retryAfter = response.header(X_RATE_LIMIT_FILLRATE_HEADER, "0");
+					nextRetryAttempt = Integer.parseInt(retryAfter) * 1002;
+				}
+			
+				
+				if (TestFloTms.logger.isDebugEnabled()) {
+					TestFloTms.logger.debug(String.format(
+							"need to wait \"%s\" seconds for the next attempt to access TestFLO.", retryAfter));
+				}
+				
+				if (nextRetryAttempt > 0) {
 					try {
 						Thread.sleep(nextRetryAttempt);
 						return this.tmsSend(method, builder, requestBody);
@@ -151,7 +178,25 @@ public class TestFloTms {
 						TestFloTms.logger.error(String.format(
 								"can't wait \"%s\" seconds, will try another attempt to access TestFLO.", retryAfter), ex);
 					}
+				}else {
+					
+					try {
+						
+						if (TestFloTms.logger.isDebugEnabled()) {
+							TestFloTms.logger.debug(String.format(
+									"need to wait \"%s\" seconds for the next attempt to access TestFLO.", 1));
+						}
+						
+						nextRetryAttempt = 1 * 1002;
+						
+						Thread.sleep(nextRetryAttempt);
+						return this.tmsSend(method, builder, requestBody);
+					} catch (final Exception ex) {
+						TestFloTms.logger.error(String.format(
+								"can't wait \"%s\" seconds, will try another attempt to access TestFLO.", retryAfter), ex);
+					}
 				}
+				
 			}
 			
 			if (response.code() != 200) {
