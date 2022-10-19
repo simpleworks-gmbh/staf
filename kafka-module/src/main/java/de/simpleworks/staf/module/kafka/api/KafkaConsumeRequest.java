@@ -61,8 +61,8 @@ public class KafkaConsumeRequest implements IKafkaRequest<KafkaConsumeRequest> {
 
 	@Override
 	public boolean validate() {
-		if (KafkaConsumeRequest.logger.isDebugEnabled()) {
-			KafkaConsumeRequest.logger.debug("validate KafkaProduceRequest...");
+		if (KafkaConsumeRequest.logger.isTraceEnabled()) {
+			KafkaConsumeRequest.logger.trace("validate KafkaProduceRequest...");
 		}
 
 		boolean result = true;

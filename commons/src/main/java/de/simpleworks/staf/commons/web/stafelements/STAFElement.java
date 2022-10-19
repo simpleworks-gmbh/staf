@@ -300,8 +300,8 @@ public class STAFElement {
 	public int getTimeout() {
 		final int result = guiproperties.getTimeout();
 
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("using timeout %d.", Integer.valueOf(result)));
+		if (logger.isTraceEnabled()) {
+			logger.trace(String.format("using timeout %d.", Integer.valueOf(result)));
 		}
 
 		return result;

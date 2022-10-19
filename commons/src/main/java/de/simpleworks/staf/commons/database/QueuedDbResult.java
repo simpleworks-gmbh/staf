@@ -23,8 +23,8 @@ public class QueuedDbResult implements IDbResult<DbResultRow> {
 	@Override
 	public boolean validate() {
 
-		if (QueuedDbResult.logger.isDebugEnabled()) {
-			QueuedDbResult.logger.debug("validate UpdateDbResult...");
+		if (QueuedDbResult.logger.isTraceEnabled()) {
+			QueuedDbResult.logger.trace("validate UpdateDbResult...");
 		}
 
 		return true;
