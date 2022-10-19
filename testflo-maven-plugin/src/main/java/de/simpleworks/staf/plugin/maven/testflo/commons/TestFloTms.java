@@ -10,9 +10,6 @@ import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 
 import com.atlassian.jira.rest.client.api.domain.Issue;
-
-import de.simpleworks.staf.commons.consts.ContentTypeValue;
-import de.simpleworks.staf.commons.enums.ArtefactEnum;
 import de.simpleworks.staf.commons.exceptions.SystemException;
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.HttpMethod;
@@ -21,8 +18,6 @@ import de.simpleworks.staf.plugin.maven.testflo.utils.TestFLOProperties;
 import okhttp3.Call;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.MultipartBody.Part;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -42,7 +37,6 @@ public class TestFloTms {
 	
 
 	private static final String JSON_MOVE_TO_NEXT_ITERATION = "{\"nextIterationStrategy\": \"all-test-cases\"}";
-	private static final String MARKUP_THUMBNAIL = "!%s|thumbnail!";
 
 	private final OkHttpClient client;
 	private final URL urlTms;
@@ -275,80 +269,6 @@ public class TestFloTms {
 		tmsPut(builder, json);
 	}
 
-	private void appendThumbnail(final Issue issue, final Integer row, final File attachment) throws SystemException {
-		if (attachment == null) {
-			throw new IllegalArgumentException("attachment can't be null.");
-		}
-
-		final int column = TestFloUtils.getActualResultIndex(issue);
-		final String thumbnail = String.format(TestFloTms.MARKUP_THUMBNAIL, attachment.getName());
-		final String json = TestFloTmsUtils.getTestStepCell(issue.getId(), row, Integer.valueOf(column), thumbnail);
-		if (TestFloTms.logger.isDebugEnabled()) {
-			TestFloTms.logger
-					.debug(String.format("test case: %d: update test step %d with '%s'.", issue.getId(), row, json));
-		}
-
-		final HttpUrl.Builder builder = createBuilder().addPathSegment("steps").addPathSegment("cell");
-
-		tmsPut(builder, json);
-
-	}
-
-	private void updateTestStepAttachment(final Issue issue, final Integer row, final File attachment,
-			final ArtefactEnum attachmentType) throws SystemException {
-		if (row == null) {
-			throw new IllegalArgumentException("row can't be null.");
-		}
-
-		if (attachment == null) {
-			throw new IllegalArgumentException("attachment can't be null.");
-		}
-
-		if (attachmentType == null) {
-			throw new IllegalArgumentException("attachmentType can't be null.");
-		}
-
-		if (TestFloTms.logger.isDebugEnabled()) {
-			TestFloTms.logger
-					.debug(String.format("update attachment for issue: '%s' and row: %d.", issue.getKey(), row));
-		}
-
-		final HttpUrl.Builder builder = createBuilder().addPathSegment("steps").addPathSegment("attachment")
-				.addEncodedQueryParameter("issueId", issue.getId().toString())
-				.addEncodedQueryParameter("rowIndex", row.toString());
-
-		final boolean thumbnail;
-		final MediaType mediaType;
-		switch (attachmentType) {
-		case SCREENSHOT:
-			mediaType = MediaType.parse(ContentTypeValue.PNG);
-			thumbnail = true;
-			break;
-
-		case HARFILE:
-			mediaType = MediaType.parse(ContentTypeValue.MULTIPART_FORM_DATA);
-			thumbnail = false;
-			break;
-
-		case CSVFILE:
-			mediaType = MediaType.parse(ContentTypeValue.CSV);
-			thumbnail = false;
-			break;
-
-		default:
-			throw new SystemException(String.format("artefactType '%s' is not implemented yet.", attachmentType));
-		}
-
-		final MultipartBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
-				.addPart(Part.createFormData("file", attachment.getName(), RequestBody.create(mediaType, attachment)))
-				.build();
-		tmsSend(HttpMethod.POST, builder, body);
-
-		if (thumbnail) {
-			appendThumbnail(issue, row, attachment);
-		}
-	}
-
 	private void updateTestStepComment(final Issue issue, final Integer row, final String comment)
 			throws SystemException {
 		if (row == null) {
@@ -384,20 +304,20 @@ public class TestFloTms {
 
 		final Integer row = stepResult.getRow();
 		updateTestStepStatus(issue, row, stepResult.getStatus());
-
-		if (stepResult.getAttachment() != null) {
-			try {
-				updateTestStepAttachment(issue, row, stepResult.getAttachment(), stepResult.getAttachmentType());
-			} catch (final SystemException ex) {
-				TestFloTms.logger
-						.error(String.format("can't upload attachment for issue '%s' and row %d -> continue work.",
-								issue.getKey(), row), ex);
-			}
-		}
-
+		
 		if (!Convert.isEmpty(stepResult.getComment())) {
+			
+			String comment = stepResult.getComment();
+			
+			if (stepResult.getAttachment() != null) {
+				final File artefact =  stepResult.getAttachment();
+				final String artefactName = artefact.getName();
+				
+				comment = String.format("%s - artefact '%s' contains more information", comment, artefactName);
+			}
+					
 			try {
-				updateTestStepComment(issue, row, stepResult.getComment());
+				updateTestStepComment(issue, row, comment);
 			} catch (final SystemException ex) {
 				TestFloTms.logger.error(
 						String.format("can't update comment for issue '%s' and row %d: comment: '%s' -> continue work.",
@@ -407,23 +327,25 @@ public class TestFloTms {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	public void resetTeststep(final Issue issue) {
-
+		
 		if (issue == null) {
 			throw new IllegalArgumentException("issue can't be null.");
 		}
-
-		// FIXME: determine amount of steps
+		
+		//FIXME: determine amount of steps
 		boolean flag = true;
 		int itr = 0;
 		do {
 			try {
 				updateTestStepStatus(issue, new Integer(itr), TestStepStatus.To_do);
-			} catch (SystemException ex) {
+			} catch (SystemException ex) { 
 				// ignore error
-				flag = false;
+				 flag = false;
 			}
-			itr += 1;
-		} while (flag);
+			itr +=1;
+		}
+		while(flag);
 	}
 }
