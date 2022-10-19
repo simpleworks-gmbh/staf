@@ -1,5 +1,9 @@
 package de.simpleworks.staf.plugin.maven.testflo.commons;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -316,6 +320,7 @@ public class TestFlo {
 		final List<StepResult> stepResults = TestFloUtils.prepareStepResult(testCase, report);
 		final Issue issue = updateStepResults(testCase, stepResults);
 		updateTestCaseStatus(issue, report.getResult());
+		addArtefacts(issue, stepResults);
 	}
 
 	public void addFixVersions(final List<String> fixVersions, TestPlan testPlan) {
@@ -405,5 +410,52 @@ public class TestFlo {
 				TestFlo.logger.error(msg, ex);
 			}
 		}
+	}
+	
+	
+	public void addArtefacts(final Issue issue, final List<StepResult> stepResults) {
+		
+		if (issue == null) {
+			throw new IllegalArgumentException("issue can't be null.");
+		}
+		
+		if (Convert.isEmpty(stepResults)) {
+			if (TestFlo.logger.isDebugEnabled()) {
+				TestFlo.logger.debug("stepResults can't be null or empty, will not add any artefacts.");
+			}
+			
+			return;
+		}
+		
+		
+		for(StepResult stepResult : stepResults) {
+			
+			File attachement = stepResult.getAttachment();
+			
+			if(attachement == null){
+				TestFlo.logger.error("attachement can't be null.");
+				continue;
+			}			
+			
+			if(!attachement.exists()){
+				TestFlo.logger.error(String.format("attachement at '%s' does not exist.", attachement.getAbsolutePath()));
+				continue;
+			}			
+						
+			try(final FileInputStream inputStream = new FileInputStream(attachement)){
+				try(final InputStream targetStream =  new DataInputStream(inputStream)){
+						
+					jira.addAttachment(issue.getAttachmentsUri(), targetStream, attachement.getName());
+				}
+				catch(Exception ex){
+					final String msg = String.format("can't add attachement '%s' to issue '%s'.", attachement.getName(), Long.toString(issue.getId()));
+					TestFlo.logger.error(msg, ex);
+				}
+			}
+			catch(Exception ex) {
+				final String msg = String.format("can't read attachement '%s'.", attachement.getName());
+				TestFlo.logger.error(msg, ex);
+			}	
+		}	
 	}
 }

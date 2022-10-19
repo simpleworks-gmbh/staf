@@ -314,8 +314,6 @@ public class TestFloUtils {
 
 			if (testStep.getOrder() != (row + 1)) {
 
-				System.out.println("");
-
 //				throw new SystemException(
 //						String.format("test case '%s', report '%s' have different order (test case: %d, report: %d).",
 //								testCase.getId(), report.getId(), Integer.valueOf(testStep.getOrder()),
