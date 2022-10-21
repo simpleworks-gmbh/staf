@@ -24,6 +24,7 @@ import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.UtilsCollection;
 import de.simpleworks.staf.commons.utils.UtilsIO;
 import de.simpleworks.staf.module.jira.util.JiraProperties;
+import de.simpleworks.staf.module.jira.util.JiraRateLimitingEffect;
 import de.simpleworks.staf.plugin.maven.testflo.commons.pojo.FixVersion;
 import net.minidev.json.JSONArray;
 import okhttp3.Call;
@@ -64,7 +65,7 @@ public class TestFloFixVersion {
 		}
 		try {
 			final Promise<Issue> promise = jira.getIssue(id);
-			final Issue issue = promise.claim();
+			final Issue issue = promise.fail(new JiraRateLimitingEffect()).claim();
 			if (issue == null) {
 				throw new RuntimeException("issue can't be null.");
 			}
@@ -82,7 +83,7 @@ public class TestFloFixVersion {
 				throw new IllegalArgumentException("newIssue can't be null or empty string.");
 			}
 			final Promise<Void> update = jira.updateIssue(id, newIssue);
-			update.claim();
+			update.fail(new JiraRateLimitingEffect()).claim();
 		} catch (Exception ex) {
 			if (TestFloFixVersion.logger.isDebugEnabled()) {
 				TestFloFixVersion.logger.debug(
@@ -119,7 +120,7 @@ public class TestFloFixVersion {
 		FixVersion result;
 		try {
 			final Promise<Issue> promise = jira.getIssue(id);
-			final Issue issue = promise.claim();
+			final Issue issue = promise.fail(new JiraRateLimitingEffect()).claim();
 			if (issue == null) {
 				throw new RuntimeException("issue can't be null.");
 			}

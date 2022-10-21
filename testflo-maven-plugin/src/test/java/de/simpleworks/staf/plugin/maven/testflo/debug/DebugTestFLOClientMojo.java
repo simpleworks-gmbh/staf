@@ -23,6 +23,7 @@ import com.google.inject.name.Named;
 
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.module.jira.module.JiraModule;
+import de.simpleworks.staf.module.jira.util.JiraRateLimitingEffect;
 import de.simpleworks.staf.plugin.maven.testflo.commons.TestFlo;
 import de.simpleworks.staf.plugin.maven.testflo.consts.Consts;
 import de.simpleworks.staf.plugin.maven.testflo.mojo.TestfloMojo;
@@ -87,7 +88,7 @@ public class DebugTestFLOClientMojo extends TestfloMojo {
 	}
 
 	public void dumpIssue() {
-		final Issue issue = client.getIssue(testPlanId).claim();
+		final Issue issue = client.getIssue(testPlanId).fail(new JiraRateLimitingEffect()).claim();
 		DebugTestFLOClientMojo.logger.debug(String.format("key: '%s', issue: id: %d.", issue.getKey(), issue.getId()));
 
 		final IssueType type = issue.getIssueType();
@@ -113,7 +114,7 @@ public class DebugTestFLOClientMojo extends TestfloMojo {
 
 		{
 			DebugTestFLOClientMojo.logger.debug("transition:");
-			final Iterable<Transition> transitions = client.getTransitions(issue).claim();
+			final Iterable<Transition> transitions = client.getTransitions(issue).fail(new JiraRateLimitingEffect()).claim();
 			for (final Transition transition : transitions) {
 				DebugTestFLOClientMojo.logger.debug(String.format("transition: name: '%s', id: %d.",
 						transition.getName(), Integer.valueOf(transition.getId())));
@@ -121,7 +122,7 @@ public class DebugTestFLOClientMojo extends TestfloMojo {
 		}
 
 		for (final Subtask subtask : issue.getSubtasks()) {
-			final Issue i = client.getIssue(subtask.getIssueKey()).claim();
+			final Issue i = client.getIssue(subtask.getIssueKey()).fail(new JiraRateLimitingEffect()).claim();
 
 			final IssueField steps = i.getFieldByName("Steps");
 			DebugTestFLOClientMojo.logger.debug(String.format("steps: '%s'.", steps.getValue()));
@@ -129,7 +130,7 @@ public class DebugTestFLOClientMojo extends TestfloMojo {
 			final IssueField template = i.getFieldByName("TC Template");
 			DebugTestFLOClientMojo.logger.debug(String.format("template: '%s'.", template.getValue()));
 
-			final Iterable<Transition> transitions = client.getTransitions(i).claim();
+			final Iterable<Transition> transitions = client.getTransitions(i).fail(new JiraRateLimitingEffect()).claim();
 			for (final Transition transition : transitions) {
 				DebugTestFLOClientMojo.logger.debug(String.format("subtask: '%s', transition: name: '%s', id: %d.",
 						subtask.getIssueKey(), transition.getName(), Integer.valueOf(transition.getId())));
