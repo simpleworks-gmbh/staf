@@ -61,12 +61,6 @@ public class UtilsArtefact {
 			result = UtilsArtefact.createFile(step, ".csv");
 			CsvFileExtractor.createCsvFile(result, (String) step.getArtefact().getArtefact());
 			break;
-
-		case CSVFILE:
-			result = UtilsArtefact.createFile(step, ".csv");
-			ArtefactFileExtractor.createHarFile(result, (String) step.getArtefact().getArtefact());
-			break;
-			
 		default:
 			UtilsArtefact.logger
 					.error(String.format("artefact type '%s' is not implemented yet.", artefact.getType().getValue()));
