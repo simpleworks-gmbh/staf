@@ -56,6 +56,11 @@ public class UtilsArtefact {
 			result = UtilsArtefact.createFile(step, ".har");
 			HarFileExtractor.createHarFile(result, (String) step.getArtefact().getArtefact());
 			break;
+			
+		case CSVFILE:
+			result = UtilsArtefact.createFile(step, ".csv");
+			CsvFileExtractor.createCsvFile(result, (String) step.getArtefact().getArtefact());
+			break;
 
 		default:
 			UtilsArtefact.logger
