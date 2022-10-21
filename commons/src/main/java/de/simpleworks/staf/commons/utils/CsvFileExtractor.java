@@ -11,19 +11,27 @@ public class CsvFileExtractor {
 	
 	private final static Logger logger = LogManager.getLogger(CsvFileExtractor.class);
 
+	private final static String NO_RESULT_ROW_WAS_FETCHED = "No result row was fecthed.";
+	
 	public static boolean createCsvFile(final File file, final String content) {
 		if (file == null) {
 			throw new IllegalArgumentException("file can't be null.");
 		}
- 
-		boolean result = false;
+  
 		try {
-			UtilsIO.putAllContentToFile(file, content);
-			result = true;
+			
+			if(Convert.isEmpty(content)) {
+				UtilsIO.putAllContentToFile(file, NO_RESULT_ROW_WAS_FETCHED);
+				return true;
+			}
+			
+			UtilsIO.putAllContentToFile(file, content);	
+		
+			return true;
 		} catch (final SystemException ex) {
 			CsvFileExtractor.logger.error("can't fetch ArtefactFile.", ex);
 		}
 
-		return result;
+		return false;
 	}
 }
