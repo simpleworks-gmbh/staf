@@ -30,7 +30,7 @@ import de.simpleworks.staf.commons.elements.TestPlan;
 import de.simpleworks.staf.commons.elements.TestStep;
 import de.simpleworks.staf.commons.mapper.elements.MapperTestplan;
 import de.simpleworks.staf.commons.utils.Convert;
-import de.simpleworks.staf.module.jira.util.JiraRateLimitingEffect;
+import de.simpleworks.staf.module.jira.util.JiraFailCallback;
 import de.simpleworks.staf.plugin.maven.xray.commons.Xray;
 import de.simpleworks.staf.plugin.maven.xray.consts.XrayConsts;
 import de.simpleworks.staf.plugin.maven.xray.elements.Test;
@@ -187,7 +187,7 @@ public class FetchTestPlanMojo extends XrayMojo {
 
 			try {
 				final Promise<Issue> promise = clientJira.getIssue(issueId);
-				final Issue issue = promise.fail(new JiraRateLimitingEffect()).claim();
+				final Issue issue = promise.fail(new JiraFailCallback()).claim();
 
 				final String key = issue.getKey();
 
@@ -301,7 +301,7 @@ public class FetchTestPlanMojo extends XrayMojo {
 	private Long getId(final String key) {
 		try {
 			final Promise<Issue> promise = clientJira.getIssue(key);
-			final Issue issue = promise.fail(new JiraRateLimitingEffect()).claim();
+			final Issue issue = promise.fail(new JiraFailCallback()).claim();
 
 			return issue.getId();
 		} catch (final Exception ex) {

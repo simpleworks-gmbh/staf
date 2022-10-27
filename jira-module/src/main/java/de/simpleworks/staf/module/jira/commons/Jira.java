@@ -33,7 +33,7 @@ import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.module.jira.elements.SubTask;
 import de.simpleworks.staf.module.jira.elements.Task;
 import de.simpleworks.staf.module.jira.util.JiraProperties;
-import de.simpleworks.staf.module.jira.util.JiraRateLimitingEffect;
+import de.simpleworks.staf.module.jira.util.JiraFailCallback;
 import de.simpleworks.staf.module.jira.util.enums.Status;
 import de.simpleworks.staf.module.jira.util.linkedissues.LinkedIssueType;
 
@@ -120,7 +120,7 @@ public class Jira {
 			}
 
 			final Promise<BasicIssue> promise = issueClient.createIssue(newIssue);
-			basicIssue = promise.fail(new JiraRateLimitingEffect()).claim();
+			basicIssue = promise.fail(new JiraFailCallback()).claim();
 		} catch (final Exception ex) {
 			final String message = "can't create issue.";
 			Jira.logger.error(message, ex);
@@ -165,7 +165,7 @@ public class Jira {
 
 			final Promise<Void> promise = issueClient
 					.linkIssue(new LinkIssuesInput(parentIssueKey, task.getKey(), link.getName()));
-			promise.fail(new JiraRateLimitingEffect()).claim();
+			promise.fail(new JiraFailCallback()).claim();
 		} catch (final Exception ex) {
 			final String message = "can't link issue.";
 			Jira.logger.error(message, ex);
@@ -206,7 +206,7 @@ public class Jira {
 			}
 
 			final Promise<BasicIssue> promise = issueClient.createIssue(newIssue);
-			basicIssue = promise.fail(new JiraRateLimitingEffect()).claim();
+			basicIssue = promise.fail(new JiraFailCallback()).claim();
 		} catch (final Exception ex) {
 			final String message = "can't create sub task.";
 			Jira.logger.error(message, ex);
@@ -244,7 +244,7 @@ public class Jira {
 			}
 
 			final Promise<Void> promise = issueClient.updateIssue(task.getKey(), newIssue);
-			promise.fail(new JiraRateLimitingEffect()).claim();
+			promise.fail(new JiraFailCallback()).claim();
 		} catch (final Exception ex) {
 			final String message = "can't update issue.";
 			Jira.logger.error(message, ex);
@@ -264,7 +264,7 @@ public class Jira {
 			final IssueRestClient issueClient = getIssueRestClient();
 
 			final Promise<Issue> promise = issueClient.getIssue(issueKey);
-			issue = promise.fail(new JiraRateLimitingEffect()).claim();
+			issue = promise.fail(new JiraFailCallback()).claim();
 		} catch (final Exception ex) {
 			final String message = "can't get issue.";
 			Jira.logger.error(message, ex);
@@ -291,7 +291,7 @@ public class Jira {
 			final IssueRestClient issueClient = getIssueRestClient();
 
 			final Promise<Issue> promise = issueClient.getIssue(issueKey);
-			final Issue issue = promise.fail(new JiraRateLimitingEffect()).claim();
+			final Issue issue = promise.fail(new JiraFailCallback()).claim();
 
 			issueClient.addComment(issue.getCommentsUri(), Comment.valueOf(commentBody));
 		} catch (final Exception ex) {
@@ -319,14 +319,14 @@ public class Jira {
 			final IssueRestClient issueClient = getIssueRestClient();
 
 			final Promise<Issue> promise = issueClient.getIssue(task.getKey());
-			final Issue issue = promise.fail(new JiraRateLimitingEffect()).claim();
+			final Issue issue = promise.fail(new JiraFailCallback()).claim();
 
 			if (Jira.logger.isDebugEnabled()) {
 				Jira.logger.debug(String.format("using AttachmentsUri %s .", issue.getAttachmentsUri()));
 			}
 
 			final Promise<Void> upload = issueClient.addAttachments(issue.getAttachmentsUri(), attachement);
-			upload.fail(new JiraRateLimitingEffect()).claim();
+			upload.fail(new JiraFailCallback()).claim();
 
 		} catch (final Exception ex) {
 			final String message = String.format("can't add attachment from file: '%s'.", attachement);
@@ -351,7 +351,7 @@ public class Jira {
 
 			final Promise<Issue> promise = issueClient.getIssue(task.getKey());
 
-			final Issue issue = promise.fail(new JiraRateLimitingEffect()).claim();
+			final Issue issue = promise.fail(new JiraFailCallback()).claim();
 
 			if (Jira.logger.isDebugEnabled()) {
 				Jira.logger.debug(String.format("using AttachmentsUri %s .", issue.getAttachmentsUri()));
@@ -359,7 +359,7 @@ public class Jira {
 
 			final Promise<Void> changeStatus = issueClient.transition(issue,
 					new TransitionInput(Integer.parseInt(status.getValue())));
-			changeStatus.fail(new JiraRateLimitingEffect()).claim();
+			changeStatus.fail(new JiraFailCallback()).claim();
 
 		} catch (final Exception ex) {
 			final String message = "can't change status.";
@@ -379,7 +379,7 @@ public class Jira {
 			final IssueRestClient issueClient = getIssueRestClient();
 
 			final Promise<Issue> promise = issueClient.getIssue(task.getKey());
-			final Issue issue = promise.fail(new JiraRateLimitingEffect()).claim();
+			final Issue issue = promise.fail(new JiraFailCallback()).claim();
 			issue.getAttachments().forEach(attachement -> attachements.add(attachement));
 		} catch (final Exception ex) {
 			final String message = "can't fetch attachements.";
@@ -412,7 +412,7 @@ public class Jira {
 
 			for (final Attachment attachement : attachements) {
 				final Promise<Issue> promise = issueClient.getIssue(subTaskKey);
-				final Issue newIssue = promise.fail(new JiraRateLimitingEffect()).claim();
+				final Issue newIssue = promise.fail(new JiraFailCallback()).claim();
 
 				final AsynchronousIssueRestClient asynchronousIssueRestClient = (AsynchronousIssueRestClient) issueClient;
 				final Promise<InputStream> attachment = asynchronousIssueRestClient
@@ -421,7 +421,7 @@ public class Jira {
 				try (final InputStream inputStream = attachment.get();) {
 					final Promise<Void> upload = issueClient.addAttachments(newIssue.getAttachmentsUri(),
 							new AttachmentInput(attachement.getFilename(), inputStream));
-					upload.fail(new JiraRateLimitingEffect()).claim();
+					upload.fail(new JiraFailCallback()).claim();
 				}
 			}
 		} catch (final Exception ex) {

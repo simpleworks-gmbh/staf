@@ -25,7 +25,7 @@ import de.simpleworks.staf.commons.mapper.api.MapperAPITeststep;
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.UtilsIO;
 import de.simpleworks.staf.commons.utils.UtilsTestcase;
-import de.simpleworks.staf.module.jira.util.JiraRateLimitingEffect;
+import de.simpleworks.staf.module.jira.util.JiraFailCallback;
 import de.simpleworks.staf.plugin.maven.xray.commons.Xray;
 import de.simpleworks.staf.plugin.maven.xray.consts.XrayConsts;
 
@@ -117,7 +117,7 @@ public class GenerateAPIRequestFileMojo extends XrayMojo {
 	private Long getId(final String key) {
 		try {
 			final Promise<Issue> promise = clientJira.getIssue(key);
-			final Issue issue = promise.fail(new JiraRateLimitingEffect()).claim();
+			final Issue issue = promise.fail(new JiraFailCallback()).claim();
 
 			return issue.getId();
 		} catch (final Exception ex) {
