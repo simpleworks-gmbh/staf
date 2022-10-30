@@ -312,9 +312,7 @@ public class TestFloUtils {
 				throw new SystemException(String.format("can't find test step for report step: '%s'.", key));
 			}
 
-			if (testStep.getOrder() != (row + 1)) {
-
-				System.out.println("");
+			if (testStep.getOrder() != (row + 1)) { 
 
 //				throw new SystemException(
 //						String.format("test case '%s', report '%s' have different order (test case: %d, report: %d).",

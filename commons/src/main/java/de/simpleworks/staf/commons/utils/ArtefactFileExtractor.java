@@ -7,8 +7,9 @@ import org.apache.logging.log4j.Logger;
 
 import de.simpleworks.staf.commons.exceptions.SystemException;
 
-public class HarFileExtractor {
-	private final static Logger logger = LogManager.getLogger(HarFileExtractor.class);
+public class ArtefactFileExtractor {
+	
+	private final static Logger logger = LogManager.getLogger(ArtefactFileExtractor.class);
 
 	public static boolean createHarFile(final File file, final String content) {
 		if (file == null) {
@@ -24,7 +25,7 @@ public class HarFileExtractor {
 			UtilsIO.putAllContentToFile(file, content);
 			result = true;
 		} catch (final SystemException ex) {
-			HarFileExtractor.logger.error("can't fetch HarFile.", ex);
+			ArtefactFileExtractor.logger.error("can't fetch ArtefactFile.", ex);
 		}
 
 		return result;
