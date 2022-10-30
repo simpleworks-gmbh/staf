@@ -11,12 +11,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.simpleworks.staf.commons.annotation.Step;
+import de.simpleworks.staf.commons.annotation.Testcase;
 import de.simpleworks.staf.commons.elements.TestCase;
 import de.simpleworks.staf.commons.elements.TestPlan;
 import de.simpleworks.staf.commons.elements.TestStep;
 import de.simpleworks.staf.commons.exceptions.SystemException;
+import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.Scanner;
 import de.simpleworks.staf.framework.util.TestCaseUtils;
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class TestplanValidator {
 	static final Logger logger = LogManager.getLogger(TestplanValidator.class);
@@ -31,13 +34,18 @@ public class TestplanValidator {
 		this.finder = finder;
 	}
 
-	private static void verify(final TestCase testcase, final Class<?> clazz) throws SystemException {
+	private static boolean verify(final TestCase testcase, final Class<?> clazz, final String[] errorSummary) throws SystemException {
+
 		if (!Scanner.doesClassExtendSpecificClass(clazz,
 				de.simpleworks.staf.framework.elements.commons.TestCase.class)) {
-			throw new SystemException(String.format("wrong implementation: test case '%s' does not extend '%s'.",
-					clazz.getName(), de.simpleworks.staf.framework.elements.commons.TestCase.class.getName()));
-		}
 
+			TestplanValidator.logger.error(String.format("wrong implementation: test case '%s' does not extend '%s'.",
+					clazz.getName(), de.simpleworks.staf.framework.elements.commons.TestCase.class.getName()));
+
+			return false;
+		}
+		
+		
 		final List<TestStep> caseSteps = testcase.getTestSteps();
 		final List<Method> allMethods = TestCaseUtils.collectMethods(clazz);
 		final List<Step> classSteps = allMethods.stream().map(method -> method.getAnnotation(Step.class))
@@ -45,28 +53,46 @@ public class TestplanValidator {
 		Collections.sort(classSteps, (o1, o2) -> o1.order() - o2.order());
 
 		if (caseSteps.size() != classSteps.size()) {
-			throw new SystemException(String.format(
-					"test case definition '%s' and implementation class '%s' have not equal count of steps: definition %d vs implementation %d.",
+
+			final String errorMessage = String.format("test case definition '%s' and implementation class '%s' have not equal count of steps: definition %d vs implementation %d.",
 					testcase.getId(), clazz.getName(), Integer.valueOf(caseSteps.size()),
-					Integer.valueOf(classSteps.size())));
+					Integer.valueOf(classSteps.size()), errorSummary);
+
+			final String currentErrorSummary = errorSummary[0];
+			errorSummary[0] = String.format("%s\r\n%s", currentErrorSummary, errorMessage);
+			
+			return false;			
 		}
+		
 
 		int i = 0;
+		boolean result = true;
+		
 		for (final TestStep caseStep : caseSteps) {
 			final Step classStep = classSteps.get(i++);
 			if (caseStep.getOrder() != classStep.order()) {
-				throw new SystemException(String.format(
+				result = false;
+				final String errorMessage = String.format(
 						"test case definition '%s' and implementation class '%s' have steps with different order: definition %d vs implementation %d.",
 						testcase.getId(), clazz.getName(), Integer.valueOf(caseStep.getOrder()),
-						Integer.valueOf(classStep.order())));
+						Integer.valueOf(classStep.order()));
+
+				final String currentErrorSummary = errorSummary[0];
+				errorSummary[0] = String.format("%s\r\n%s", currentErrorSummary, errorMessage);
 			}
 
 			if (!caseStep.getSummary().equals(classStep.description())) {
-				throw new SystemException(String.format(
+				result = false;
+				final String errorMessage = String.format(
 						"test case definition '%s' and implementation class '%s' have steps with different description: definition '%s' vs implementation '%s'.",
-						testcase.getId(), clazz.getName(), caseStep.getSummary(), classStep.description()));
+						testcase.getId(), clazz.getName(), caseStep.getSummary(), classStep.description());
+
+				final String currentErrorSummary = errorSummary[0];
+				errorSummary[0] = String.format("%s\r\n%s", currentErrorSummary, errorMessage);
 			}
 		}
+
+		return result;
 	}
 
 	public List<Class<?>> validate(final TestPlan testplan) throws SystemException {
@@ -79,6 +105,10 @@ public class TestplanValidator {
 		}
 
 		final List<Class<?>> result = new ArrayList<>();
+		
+		final String[] errorSummary = new String[1];
+		errorSummary[0] = Convert.EMPTY_STRING;
+		
 		for (final TestCase testcase : testplan.getTestCases()) {
 			final String templateId = testcase.getTemplateId();
 			if (TestplanValidator.logger.isDebugEnabled()) {
@@ -87,12 +117,43 @@ public class TestplanValidator {
 
 			final Class<?> clazz = finder.get(templateId);
 			if (clazz == null) {
-				throw new SystemException(String.format("can't find implementation for test case: '%s'.", templateId));
+				TestplanValidator.logger
+						.error(String.format("can't find implementation for test case: '%s'.", templateId));
+				continue;
 			}
 
-			TestplanValidator.verify(testcase, clazz);
+			if (TestplanValidator.verify(testcase, clazz, errorSummary)) {
+				result.add(clazz);
+			}
+		}
 
-			result.add(clazz);
+		if (result.size() != testplan.getTestCases().size()) {
+
+			final List<String> testcaseIds = result.stream().map(clazz -> (Testcase) clazz.getAnnotation(Testcase.class))
+					.map(testcase -> testcase.id()).collect(Collectors.toList());
+			
+			final String validTestcases = String.join("\r\n", testcaseIds);
+
+			if (TestplanValidator.logger.isInfoEnabled()) {
+				TestplanValidator.logger.info(String.format("the testcases '%s' are valid.", validTestcases));
+			}
+			
+			
+			final List<String> invalidTestcaseIds = 
+					testplan.getTestCases().stream().filter(testcase -> testcaseIds.indexOf(testcase.getTemplateId()) < 0)
+					.map(testcase -> testcase.getTemplateId())
+					.collect(Collectors.toList());
+			
+
+			final String invalidTestcases = String.join("\r\n", invalidTestcaseIds);
+
+			if (TestplanValidator.logger.isInfoEnabled()) {
+				TestplanValidator.logger.info(String.format("the testcases '%s' are invalid.", invalidTestcases));
+			}
+
+			throw new SystemException(String.format("only '%s' from '%s' are valid [%s] %s.",
+					Integer.toString(result.size()), Integer.toString(testplan.getTestCases().size()),
+					String.join(",", result.stream().map(res -> res.getName()).collect(Collectors.toList())), Arrays.asList(errorSummary) )   );
 		}
 
 		return result;
