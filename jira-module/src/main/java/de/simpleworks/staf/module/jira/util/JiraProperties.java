@@ -10,7 +10,7 @@ import de.simpleworks.staf.commons.annotation.Property;
 import de.simpleworks.staf.commons.annotation.Property.Default;
 import de.simpleworks.staf.commons.exceptions.InvalidConfiguration;
 import de.simpleworks.staf.commons.utils.PropertiesReader;
-import de.simpleworks.staf.module.jira.util.consts.ClientConsts;
+import de.simpleworks.staf.module.jira.util.consts.ClientConsts; 
 
 public class JiraProperties extends PropertiesReader {
 	private static final Logger logger = LogManager.getLogger(JiraProperties.class);
@@ -19,7 +19,7 @@ public class JiraProperties extends PropertiesReader {
 
 	@Property(ClientConsts.URL)
 	private String url;
-
+ 
 	@Property(ClientConsts.USERNAME)
 	private String username;
 
@@ -30,6 +30,10 @@ public class JiraProperties extends PropertiesReader {
 	@Property(ClientConsts.SCREENSHOT_FORMAT)
 	private String screenshot;
 
+	@Default("5")
+	@Property(ClientConsts.JIRA_RATE_LIMIT)
+	private int rateLimit;
+	
 	@Default("0")
 	@Property(ClientConsts.ISSUE_TYPE)
 	private long issuetype;
@@ -59,6 +63,10 @@ public class JiraProperties extends PropertiesReader {
 
 	public String getScreenshotFormat() {
 		return screenshot;
+	}
+	
+	public int getRateLimit() {
+		return rateLimit;
 	}
 
 	public long getIssueType() {
