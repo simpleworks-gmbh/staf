@@ -2,10 +2,8 @@ package de.simpleworks.staf.plugin.maven.testflo.commons;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -297,37 +295,13 @@ public class TestFloUtils {
 							testCase.getId(), testCase.getTemplateId(), report.getId()));
 		}
 
-		Exception ex = new Exception();
-		
-		
-				
-		final Map<String, TestStep> map = new HashMap<>();
-		for (final TestStep testStep : testCase.getTestSteps()) {
-			map.put(testStep.getSummary(), testStep);
-		}
-
 		final List<StepResult> result = new ArrayList<>();
 
-		int row = 0;
-		for (final StepReport stepReport : report.getSteps()) {
-			final String key = stepReport.getDescription();
-			final TestStep testStep = map.get(key);
-			if (testStep == null) {
-				throw new SystemException(String.format("can't find test step for report step: '%s'.", key));
-			}
+		final List<StepReport> steps = report.getSteps();
 
-			if (testStep.getOrder() != (row + 1)) { 
+		for (int row = 0; row < steps.size(); row +=1) {
 
-//				throw new SystemException(
-//						String.format("test case '%s', report '%s' have different order (test case: %d, report: %d).",
-//								testCase.getId(), report.getId(), Integer.valueOf(testStep.getOrder()),
-//								Integer.valueOf(row + 1)));
-			}
-
-			else {
-				map.remove(key);
-			}
-
+			final StepReport stepReport = steps.get(row);
 			final String comment = TestFloUtils.getComment(stepReport);
 			final TestStepStatus status = TestStepStatus.get(stepReport.getResult());
 			final File attachment = UtilsArtefact.saveAttachment(stepReport);
@@ -336,14 +310,6 @@ public class TestFloUtils {
 			final ArtefactEnum attachmentType = artefact == null ? null : artefact.getType();
 
 			result.add(new StepResult(Integer.valueOf(row), status, comment, attachment, attachmentType));
-			row++;
-		}
-
-		if (!map.isEmpty()) {
-			if (TestFloUtils.logger.isDebugEnabled()) {
-				TestFloUtils.logger.debug(String.format("test case '%s', report '%s' have different steps.",
-						testCase.getId(), report.getId()));
-			}
 		}
 
 		return result;
