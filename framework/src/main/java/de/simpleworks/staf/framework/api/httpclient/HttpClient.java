@@ -16,6 +16,7 @@ import de.simpleworks.staf.commons.api.Header;
 import de.simpleworks.staf.commons.api.HttpRequest;
 import de.simpleworks.staf.commons.api.HttpResponse;
 import de.simpleworks.staf.commons.api.MultipartFormFileParameter;
+import de.simpleworks.staf.commons.api.RawFileParameter;
 import de.simpleworks.staf.commons.enums.ContentTypeEnum;
 import de.simpleworks.staf.commons.enums.HttpMethodEnum;
 import de.simpleworks.staf.commons.exceptions.SystemException;
@@ -197,12 +198,24 @@ public class HttpClient implements IHttpClient {
 			result = multipartBodyBuilder.build();
 			break;
 		default:
+			
 			if (HttpClient.logger.isDebugEnabled()) {
 				HttpClient.logger
 						.debug(String.format("Content Type '%s' is not implemented yet.", contenttype.getValue()));
-				HttpClient.logger.debug("The Content Type was not defined, will return an empty request body.");
 			}
-			result = RequestBody.create(null, Convert.EMPTY_STRING);
+			
+		
+			final RawFileParameter rawFileParameter = request.getRawFileParameter();
+
+			if(!Convert.isEmpty(rawFileParameter.getFile())) {
+				HttpClient.logger.debug(String.format("'RawFileParameter' was set, will use the file at '%s'.", rawFileParameter.getFile()));
+				result = RequestBody.create(MediaType.parse(contenttype.getValue()), new File(rawFileParameter.getFile()));
+			}
+			else {
+				HttpClient.logger.debug("The Content Type was not defined, will return an empty request body.");
+				result = RequestBody.create(null, Convert.EMPTY_STRING);
+			}
+
 		}
 		return result;
 	}
