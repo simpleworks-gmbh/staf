@@ -30,8 +30,8 @@ public class KafkaConsumeResponse implements IKafkaResponse<KafkaConsumeResponse
 	@Override
 	public boolean validate() {
 
-		if (KafkaConsumeResponse.logger.isDebugEnabled()) {
-			KafkaConsumeResponse.logger.debug("validate KafkaConsumeResponse...");
+		if (KafkaConsumeResponse.logger.isTraceEnabled()) {
+			KafkaConsumeResponse.logger.trace("validate KafkaConsumeResponse...");
 		}
 
 		boolean result = true;

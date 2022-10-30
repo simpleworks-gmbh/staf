@@ -53,16 +53,15 @@ public class KafkaTeststep implements IKafkaTeststep<KafkaProduceRequest> {
 
 	@Override
 	public boolean validate() {
-		if (KafkaTeststep.logger.isDebugEnabled()) {
-			KafkaTeststep.logger.debug("validate KafkaTeststep...");
+		if (KafkaTeststep.logger.isTraceEnabled()) {
+			KafkaTeststep.logger.trace("validate KafkaTeststep...");
 		}
 
 		boolean result = true;
 
 		if (Convert.isEmpty(name)) {
-			if (KafkaTeststep.logger.isDebugEnabled()) {
-				KafkaTeststep.logger.debug("name can't be null or empty string.");
-			}
+				KafkaTeststep.logger.error("name can't be null or empty string.");
+			
 			result = false;
 		}
 

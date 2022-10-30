@@ -28,8 +28,8 @@ public class DbConnection implements IPojo {
 	@Override
 	public boolean validate() {
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("validate DbConnection...");
+		if (logger.isTraceEnabled()) {
+			logger.trace("validate DbConnection...");
 		}
 
 		if (Convert.isEmpty(id)) {

@@ -31,8 +31,8 @@ public class Section extends Data {
 	@Override
 	public void validate() throws InvalidDataConstellationExcpetion {
 
-		if (Section.logger.isDebugEnabled()) {
-			Section.logger.debug("validate instance of class Section..");
+		if (Section.logger.isTraceEnabled()) {
+			Section.logger.trace("validate instance of class Section..");
 		}
 
 		if (Convert.isEmpty(activityTitle)) {
