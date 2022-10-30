@@ -147,9 +147,9 @@ public class FieldUpdater {
 
 		final String valuePattern = testCaseProperties.getValueSubstitutionRegularExpression();
 
-		if (FieldUpdater.logger.isDebugEnabled()) {
+		if (FieldUpdater.logger.isTraceEnabled()) {
 			FieldUpdater.logger
-					.debug(String.format("use \"%s\" as regular expression for substitution.", valuePattern));
+					.trace(String.format("use \"%s\" as regular expression for substitution.", valuePattern));
 		}
 
 		final String literal = "#";
@@ -257,8 +257,8 @@ public class FieldUpdater {
 
 		final String valuePattern = testCaseProperties.getFunctionSubstitutionRegularExpression();
 
-		if (FieldUpdater.logger.isDebugEnabled()) {
-			FieldUpdater.logger.debug(String.format("use \"%s\" as regular expression for functions.", valuePattern));
+		if (FieldUpdater.logger.isTraceEnabled()) {
+			FieldUpdater.logger.trace(String.format("use \"%s\" as regular expression for functions.", valuePattern));
 		}
 		
 		
@@ -284,9 +284,9 @@ public class FieldUpdater {
 		final String fieldValue = tmpFieldValue;
 		final String template = testCaseProperties.getFunctionTemplateRegularExpression();
 
-		if (FieldUpdater.logger.isDebugEnabled()) {
+		if (FieldUpdater.logger.isTraceEnabled()) {
 			FieldUpdater.logger
-					.debug(String.format("use \"%s\" as regular expression for function templates.", template));
+					.trace(String.format("use \"%s\" as regular expression for function templates.", template));
 		}
 
 		final Pattern pattern = Pattern.compile(template);

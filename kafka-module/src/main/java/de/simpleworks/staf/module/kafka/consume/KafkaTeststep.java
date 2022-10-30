@@ -15,7 +15,6 @@ import de.simpleworks.staf.module.kafka.api.IKafkaTeststep;
 import de.simpleworks.staf.module.kafka.api.KafkaConsumeRequest;
 
 public class KafkaTeststep implements IKafkaTeststep<KafkaConsumeRequest> {
-
 	private static final Logger logger = LogManager.getLogger(KafkaTeststep.class);
 
 	private String name;

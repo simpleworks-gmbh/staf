@@ -390,8 +390,8 @@ public final class UtilsIO {
 			throw new IllegalArgumentException("file can't be null.");
 		}
 
-		if (UtilsIO.logger.isDebugEnabled()) {
-			UtilsIO.logger.debug(String.format("create InputStream for file: '%s'.", file));
+		if (UtilsIO.logger.isTraceEnabled()) {
+			UtilsIO.logger.trace(String.format("create InputStream for file: '%s'.", file));
 		}
 
 		try {
@@ -474,8 +474,8 @@ public final class UtilsIO {
 		final Properties result = new Properties();
 
 		try (InputStream stream = UtilsIO.createInputStream(file);) {
-			if (UtilsIO.logger.isDebugEnabled()) {
-				UtilsIO.logger.debug(String.format("read properties from file: '%s'.", file));
+			if (UtilsIO.logger.isTraceEnabled()) {
+				UtilsIO.logger.trace(String.format("read properties from file: '%s'.", file));
 			}
 
 			result.load(stream);
@@ -668,9 +668,9 @@ public final class UtilsIO {
 					if (result.indexOf(foundFile) < 0) {
 						result.add(foundFile);
 
-						if (UtilsIO.logger.isDebugEnabled()) {
+						if (UtilsIO.logger.isTraceEnabled()) {
 							UtilsIO.logger
-									.debug(String.format("add file '%s' [%s]", foundFile.getName(), String.join(",",
+									.trace(String.format("add file '%s' [%s]", foundFile.getName(), String.join(",",
 											result.stream().map(res -> res.getName()).collect(Collectors.toList()))));
 						}
 					}
