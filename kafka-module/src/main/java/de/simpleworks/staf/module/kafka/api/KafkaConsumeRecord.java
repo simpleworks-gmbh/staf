@@ -81,8 +81,8 @@ public class KafkaConsumeRecord implements IPojo {
 	@Override
 	public boolean validate() {
 
-		if (KafkaConsumeRecord.logger.isDebugEnabled()) {
-			KafkaConsumeRecord.logger.debug("validate KafkaConsumeRecord...");
+		if (KafkaConsumeRecord.logger.isTraceEnabled()) {
+			KafkaConsumeRecord.logger.trace("validate KafkaConsumeRecord...");
 		}
 
 		boolean result = true;

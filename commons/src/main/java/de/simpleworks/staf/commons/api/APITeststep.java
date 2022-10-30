@@ -71,8 +71,8 @@ public class APITeststep implements ITeststep {
 
 	@Override
 	public boolean validate() {
-		if (APITeststep.logger.isDebugEnabled()) {
-			APITeststep.logger.debug("validate APITeststep...");
+		if (APITeststep.logger.isTraceEnabled()) {
+			APITeststep.logger.trace("validate APITeststep...");
 		}
 
 		boolean result = true;

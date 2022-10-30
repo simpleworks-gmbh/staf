@@ -218,8 +218,8 @@ public class HttpRequest implements IPojo {
 
 	@Override
 	public boolean validate() {
-		if (HttpRequest.logger.isDebugEnabled()) {
-			HttpRequest.logger.debug("validate HttpRequest...");
+		if (HttpRequest.logger.isTraceEnabled()) {
+			HttpRequest.logger.trace("validate HttpRequest...");
 		}
 		boolean result = true;
 		if (method == null) {

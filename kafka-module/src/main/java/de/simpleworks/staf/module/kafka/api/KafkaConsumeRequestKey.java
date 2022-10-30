@@ -38,8 +38,8 @@ public class KafkaConsumeRequestKey implements IPojo {
 
 	@Override
 	public boolean validate() {
-		if (KafkaConsumeRequestKey.logger.isDebugEnabled()) {
-			KafkaConsumeRequestKey.logger.debug("validate KafkaConsumeRequestKey...");
+		if (KafkaConsumeRequestKey.logger.isTraceEnabled()) {
+			KafkaConsumeRequestKey.logger.trace("validate KafkaConsumeRequestKey...");
 		}
 
 		boolean result = true;
