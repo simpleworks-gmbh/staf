@@ -266,7 +266,7 @@ public class HttpClient implements IHttpClient {
 		final HttpResponse result = new HttpResponse();
 		final ContentTypeEnum contentTypeEnum = HttpClient.getContentType(body);
 		result.setContentType(contentTypeEnum);
-		if (contentTypeEnum == ContentTypeEnum.JSON) {
+		if (contentTypeEnum == ContentTypeEnum.JSON || contentTypeEnum == ContentTypeEnum.SPRINGBOOT_ACTUATOR_V2_JSON || contentTypeEnum == ContentTypeEnum.SPRINGBOOT_ACTUATOR_V3_JSON) {
 			final String json = UtilsIO.getAllContentFromBytesArray(bytes);
 			result.setJsonBody(json);
 			if (HttpClient.logger.isDebugEnabled()) {
