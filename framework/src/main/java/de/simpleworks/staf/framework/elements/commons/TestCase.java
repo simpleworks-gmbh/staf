@@ -173,6 +173,10 @@ public abstract class TestCase {
 		if (shutdownCounter <= 0) {
 			isRunning = false;
 		}
+		
+		// remove current artefact
+		this.setArtefact(null);
+		
 		return isRunning;
 	}
 
