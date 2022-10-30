@@ -192,6 +192,7 @@ Basic Information
 
 Jira Settings
 - jira.url: `Url of the used Jira Instance`
+- jira-client.rate_limit: `timeout in seconds, if jira rate limiting happens`
 
 TestFLO Settings
 - testflo.jira_rest_api: `Url of Jira REST API`

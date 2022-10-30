@@ -297,6 +297,10 @@ public class TestFloUtils {
 							testCase.getId(), testCase.getTemplateId(), report.getId()));
 		}
 
+		Exception ex = new Exception();
+		
+		
+				
 		final Map<String, TestStep> map = new HashMap<>();
 		for (final TestStep testStep : testCase.getTestSteps()) {
 			map.put(testStep.getSummary(), testStep);
