@@ -86,8 +86,8 @@ public abstract class PropertiesReader {
 				final String value = (String) result.get(key);
 
 				if (Convert.isEmpty(System.getProperty(key, null))) {
-					if (PropertiesReader.logger.isDebugEnabled()) {
-						PropertiesReader.logger.debug(String.format("Set Property '%s' with value '%s'.", key, value));
+					if (PropertiesReader.logger.isTraceEnabled()) {
+						PropertiesReader.logger.trace(String.format("Set Property '%s' with value '%s'.", key, value));
 					}
 
 					System.setProperty(key, value);
@@ -127,8 +127,8 @@ public abstract class PropertiesReader {
 						final Default defaultValue = field.getAnnotation(Default.class);
 						if (defaultValue != null) {
 							value = defaultValue.value();
-							if (PropertiesReader.logger.isDebugEnabled()) {
-								PropertiesReader.logger.debug(
+							if (PropertiesReader.logger.isTraceEnabled()) {
+								PropertiesReader.logger.trace(
 										String.format("Property '%s' is set to default value: '%s'.", key, value));
 							}
 						}

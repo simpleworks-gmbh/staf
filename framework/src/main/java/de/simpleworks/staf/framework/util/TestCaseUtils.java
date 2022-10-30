@@ -2,16 +2,14 @@ package de.simpleworks.staf.framework.util;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.Arrays; 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import de.simpleworks.staf.commons.annotation.Step;
-import de.simpleworks.staf.framework.elements.commons.TestCase;
+import de.simpleworks.staf.framework.elements.commons.ATestCaseImpl;
+import de.simpleworks.staf.commons.annotation.Step; 
 
 public class TestCaseUtils {
 	private static final Logger logger = LogManager.getLogger(TestCaseUtils.class);
@@ -24,7 +22,7 @@ public class TestCaseUtils {
 	 * @return sorted list of methods, annotated with
 	 *         de.simpleworks.commons.annotation.Step
 	 */
-	public static List<Method> fetchStepMethods(final Class<? extends TestCase> testClass) {
+	public static List<Method> fetchStepMethods(final Class<? extends ATestCaseImpl> testClass) {
 		if (testClass == null) {
 			throw new IllegalArgumentException("testClass can't be null.");
 		}
@@ -89,30 +87,5 @@ public class TestCaseUtils {
 		}
 
 		return result;
-	}
-}
-
-class MethodComparator implements Comparator<Method> {
-	@Override
-	public int compare(final Method method1, final Method method2) {
-		if (method1.getAnnotation(Step.class) == null) {
-			throw new RuntimeException(String.format("Method '%s' does not have the annotation '%s'.",
-					method1.getName(), Step.class.getName()));
-		}
-
-		if (method2.getAnnotation(Step.class) == null) {
-			throw new RuntimeException(String.format("Method '%s' does not have the annotation '%s'.",
-					method2.getName(), Step.class.getName()));
-		}
-
-		if (method1.getAnnotation(Step.class).order() > method2.getAnnotation(Step.class).order()) {
-			return 1;
-		} else if (method1.getAnnotation(Step.class).order() < method2.getAnnotation(Step.class).order()) {
-			return -1;
-		} else {
-			throw new RuntimeException(String.format(
-					"Method '%s' and Method '%s' share the same order '%s', which is not provided.", method1.getName(),
-					method2.getName(), Integer.toString(method1.getAnnotation(Step.class).order())));
-		}
 	}
 }
