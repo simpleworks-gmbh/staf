@@ -25,6 +25,7 @@ import de.simpleworks.staf.framework.elements.api.RewriteUrlObject;
 import de.simpleworks.staf.framework.elements.commons.properties.TestCaseProperties;
 import de.simpleworks.staf.framework.enums.CreateArtefactEnum;
 import de.simpleworks.staf.framework.reporter.json.JsonReporter;
+import de.simpleworks.staf.framework.reporter.manager.ReporterManager;
 import de.simpleworks.staf.framework.util.TestCaseUtils;
 import net.lightbody.bmp.BrowserMobProxyServer;
 
@@ -32,7 +33,7 @@ public abstract class TestCase {
 	private static final Logger logger = LoggerFactory.getLogger(TestCase.class);
 	private static final TestCaseProperties testcaseProperties = TestCaseProperties.getInstance();
 	private final Semaphore startLock = new Semaphore(1);
-	private final JsonReporter reporter = new JsonReporter();
+	private ReporterManager reporter = null;
 	private boolean isRunning = false;
 	private boolean isFailed = false;
 	private String nuance = Convert.EMPTY_STRING;
@@ -54,6 +55,30 @@ public abstract class TestCase {
 			TestCase.logger.error(msg);
 			throw new InstantiationError(msg);
 		}
+		
+
+		Object ob = null;
+
+		try{
+			Class clazz =  Class.forName(testcaseProperties.getReporterManagerClass());
+			ob = clazz.newInstance();
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+			final String msg = String.format("'%s' does not have the annotation '%s'.", this.getClass().getName(),
+					Testcase.class.getName());
+			TestCase.logger.error(msg);
+			throw new InstantiationError(msg);
+		}
+		
+		if(!(ob instanceof ReporterManager)) {
+			final String msg =String.format("object '%s' is no instance of '%s'.",ob.getClass(), ReporterManager.class);
+			TestCase.logger.error(msg);
+			throw new InstantiationError(msg);
+		}
+		
+		reporter = (ReporterManager) ob;
+		
 		try {
 			// load guice models
 			Guice.createInjector(modules).injectMembers(this);
@@ -200,7 +225,7 @@ public abstract class TestCase {
 			if (TestCase.logger.isDebugEnabled()) {
 				TestCase.logger.debug("report can't be null, no report will be written.");
 			}
-		} else {
+		} else { 	
 			reporter.saveReport(report);
 		}
 	}

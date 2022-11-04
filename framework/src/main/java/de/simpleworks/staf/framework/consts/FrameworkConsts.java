@@ -24,13 +24,13 @@ public class FrameworkConsts {
 	public static final String WEBDRIVER_HEADLESS = "webdriver.headless";
 	public static final String WEBDRIVER_MANAGER_CLASS = "webdriver.manager.class";
 
+	public static final String REPORTER_MANAGER_CLASS = "reporter.manager.class";
 	public static final String REPORTER_MANAGER_REPORT_DIRECTORY = "reporter.manager.report.directory";
 	public static final String REPORTER_MANAGER_REPORT_NAME = "reporter.manager.report.name";
 	public static final String REPORTER_MANAGER_OVERRIDE_REPORT = "reporter.manager.override.report";
 
 	public static final String DATABASE_CONNECTION_POOL_CONFIG_FILE = "database.connection_pool.config_file";
 
-	
 	public static final String FUNCTION_TEMPLATE_REGULAR_EXPRESSION = "function.template.regex";
 	public static final String VALUE_SUBSTITUTION_REGULAR_EXPRESSION = "value.substitution.regex";
 	public static final String FUNCTION_SUBSTITUTION_REGULAR_EXPRESSION = "function.substitution.regex";
