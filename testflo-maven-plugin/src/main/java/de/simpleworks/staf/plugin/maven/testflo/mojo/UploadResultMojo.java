@@ -38,7 +38,7 @@ import okhttp3.OkHttpClient;
 public class UploadResultMojo extends TestfloMojo {
 	private static final Logger logger = LogManager.getLogger(UploadResultMojo.class);
 
-	@Inject
+	@Inject 
 	private IssueRestClient clientJira;
 
 	@Inject
