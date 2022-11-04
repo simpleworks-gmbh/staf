@@ -36,6 +36,7 @@ import de.simpleworks.staf.commons.report.TestcaseReport;
 import de.simpleworks.staf.commons.report.artefact.HarFile;
 import de.simpleworks.staf.commons.report.artefact.Screenshot;
 import de.simpleworks.staf.commons.utils.Convert;
+import de.simpleworks.staf.module.jira.util.JiraFailCallback;
 import de.simpleworks.staf.plugin.maven.xray.commons.Xray;
 import de.simpleworks.staf.plugin.maven.xray.consts.XrayConsts;
 import de.simpleworks.staf.plugin.maven.xray.enums.StatusEnum;
@@ -330,7 +331,7 @@ public class UploadResultMojo extends XrayMojo {
 	private Long getId(final String key) {
 		try {
 			final Promise<Issue> promise = clientJira.getIssue(key);
-			final Issue issue = promise.claim();
+			final Issue issue = promise.fail(new JiraFailCallback()).claim();
 
 			return issue.getId();
 		} catch (final Exception ex) {

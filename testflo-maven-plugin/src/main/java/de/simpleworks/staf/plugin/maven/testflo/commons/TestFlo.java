@@ -26,12 +26,13 @@ import de.simpleworks.staf.commons.exceptions.SystemException;
 import de.simpleworks.staf.commons.report.TestcaseReport; 
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.module.jira.util.JiraProperties;
+import de.simpleworks.staf.module.jira.util.JiraFailCallback;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestCaseGeneral;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestCaseStatus;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestCaseTransition;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestPlanStatus;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestPlanTransition;
-import de.simpleworks.staf.plugin.maven.testflo.commons.pojo.FixVersion;
+import de.simpleworks.staf.plugin.maven.testflo.commons.pojo.FixVersion; 
 import de.simpleworks.staf.plugin.maven.testflo.utils.TestFLOProperties;
 import okhttp3.OkHttpClient;
 
@@ -71,7 +72,7 @@ public class TestFlo {
 	private void logTransitions(final Issue issue) {
 		TestFlo.logger.error(String.format("get transitions for issue with key: '%s'.", issue.getKey()));
 		try {
-			final Iterable<Transition> transitions = jira.getTransitions(issue).claim();
+			final Iterable<Transition> transitions = jira.getTransitions(issue).fail(new JiraFailCallback()).claim();
 			for (final Transition transition : transitions) {
 				TestFlo.logger.error(String.format("transition: name: '%s', id: %d.", transition.getName(),
 						Integer.valueOf(transition.getId())));
@@ -94,7 +95,7 @@ public class TestFlo {
 					Integer.valueOf(transtionId)));
 		}
 		try {
-			jira.transition(issue, new TransitionInput(transtionId)).claim();
+			jira.transition(issue, new TransitionInput(transtionId)).fail(new JiraFailCallback()).claim();
 		} catch (final Exception ex) {
 			final String message = String.format("issue '%s': can't process transition: '%d'.", issue.getKey(),
 					Integer.valueOf(transtionId));
@@ -116,7 +117,7 @@ public class TestFlo {
 		Assert.assertNotNull("testPlan can't be null.", testPlan);
 		Assert.assertNotNull("expectedStatus can't be null.", expectedStatus);
 		Assert.assertNotNull("transition can't be null.", transition);
-		final Issue issue = jira.getIssue(testPlan.getId()).claim();
+		final Issue issue = jira.getIssue(testPlan.getId()).fail(new JiraFailCallback()).claim();
 		Assert.assertNotNull(String.format("can't get issue for: '%s'.", testPlan.getId()), issue);
 		transition(issue, expectedStatus, transition);
 	}
@@ -133,7 +134,7 @@ public class TestFlo {
 		Assert.assertNotNull("subtask can't be null.", subtask);
 		Assert.assertNotNull("expectedStatus can't be null.", expectedStatus);
 		Assert.assertNotNull("transition can't be null.", transition);
-		final Issue issue = jira.getIssue(subtask.getIssueKey()).claim();
+		final Issue issue = jira.getIssue(subtask.getIssueKey()).fail(new JiraFailCallback()).claim();
 		Assert.assertNotNull(String.format("can't get issue for: '%s'.", subtask.getIssueKey()), issue);
 		transition(issue, expectedStatus.getTestFloName(), transition.getTestFloId());
 	}
@@ -142,7 +143,7 @@ public class TestFlo {
 		if (TestFlo.logger.isDebugEnabled()) {
 			TestFlo.logger.debug(String.format("read test case data for key: '%s'.", subtask.getIssueKey()));
 		}
-		final Issue result = jira.getIssue(subtask.getIssueKey()).claim();
+		final Issue result = jira.getIssue(subtask.getIssueKey()).fail(new JiraFailCallback()).claim();
 		Assert.assertNotNull(String.format("can't get issue for: '%s'.", subtask.getIssueKey()), result);
 		final TestCase testCase = new TestCase();
 		testCase.setId(result.getKey());
@@ -169,7 +170,7 @@ public class TestFlo {
 		if (TestFlo.logger.isInfoEnabled()) {
 			TestFlo.logger.info(String.format("create next iteration for test plan '%s'.", testPlanId));
 		}
-		final Issue issue = jira.getIssue(testPlanId).claim();
+		final Issue issue = jira.getIssue(testPlanId).fail(new JiraFailCallback()).claim();
 		Assert.assertNotNull(String.format("can't get issue for: '%s'.", testPlanId), issue);
 		TestFloUtils.checkTestPlanStatus(issue, TestPlanStatus.Open, null);
 		tms.moveTestPlanToNextIteration(issue);
@@ -187,7 +188,7 @@ public class TestFlo {
 		if (TestFlo.logger.isDebugEnabled()) {
 			TestFlo.logger.debug(String.format("get issue for testCaseId: '%s'.", testCaseId));
 		}
-		final Issue issue = jira.getIssue(testCaseId).claim();
+		final Issue issue = jira.getIssue(testCaseId).fail(new JiraFailCallback()).claim();
 		Assert.assertNotNull(String.format("can't get issue for: '%s'.", testCaseId), issue);
 		TestFloUtils.readSteps(issue, testcase);
 		return testcase;
@@ -205,7 +206,7 @@ public class TestFlo {
 		if (TestFlo.logger.isDebugEnabled()) {
 			TestFlo.logger.debug(String.format("get issue for testPlanId: '%s'.", testPlanId));
 		}
-		final Issue issue = jira.getIssue(testPlanId).claim();
+		final Issue issue = jira.getIssue(testPlanId).fail(new JiraFailCallback()).claim();
 		Assert.assertNotNull(String.format("can't get issue for: '%s'.", testPlanId), issue);
 		TestFloUtils.checkTestPlanStatus(issue, TestPlanStatus.Open, TestCaseStatus.Open);
 		for (final Subtask subtask : issue.getSubtasks()) {
@@ -222,7 +223,7 @@ public class TestFlo {
 		if (TestFlo.logger.isInfoEnabled()) {
 			TestFlo.logger.info(String.format("start test plan '%s'.", testPlan.getId()));
 		}
-		final Issue issue = jira.getIssue(testPlan.getId()).claim();
+		final Issue issue = jira.getIssue(testPlan.getId()).fail(new JiraFailCallback()).claim();
 		Assert.assertNotNull(String.format("can't get issue for: '%s'.", testPlan.getId()), issue);
 		TestFloUtils.checkTestPlanStatus(issue, TestPlanStatus.Open, TestCaseStatus.Open);
 		final StringBuilder builder = new StringBuilder();
@@ -253,7 +254,7 @@ public class TestFlo {
 			throw new IllegalArgumentException("testPlanId can't be null or empty string.");
 		}
 
-		final Issue issue = jira.getIssue(testPlanId).claim();
+		final Issue issue = jira.getIssue(testPlanId).fail(new JiraFailCallback()).claim();
 		Assert.assertNotNull(String.format("can't get issue for: '%s'.", testPlanId), issue);
 		try {
 			transition(issue, TestPlanStatus.Closed, TestPlanTransition.Close);
@@ -275,16 +276,16 @@ public class TestFlo {
 				// ignore error
 			}
 			
-			final Issue subtaskIssue = jira.getIssue(subtask.getIssueKey()).claim();
+			final Issue subtaskIssue = jira.getIssue(subtask.getIssueKey()).fail(new JiraFailCallback()).claim();
 			Assert.assertNotNull(String.format("can't get subtaskIssue for: '%s'.", subtask.getIssueKey()), subtaskIssue);
-			
+			 
 			tms.resetTeststep(subtaskIssue);	
 		}
 	}
 
 	private Issue updateStepResults(final TestCase testCase, final List<StepResult> stepResults)
 			throws SystemException {
-		final Issue issue = jira.getIssue(testCase.getId()).claim();
+		final Issue issue = jira.getIssue(testCase.getId()).fail(new JiraFailCallback()).claim();
 		Assert.assertNotNull(String.format("can't get issue for: '%s'.", testCase.getId()), issue);
 		for (final StepResult stepResult : stepResults) {
 			tms.updateTestStep(issue, stepResult);
