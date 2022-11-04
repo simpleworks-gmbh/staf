@@ -21,8 +21,8 @@ public class Fact extends Data {
 
 	@Override
 	public void validate() throws InvalidDataConstellationExcpetion {
-		if (Fact.logger.isDebugEnabled()) {
-			Fact.logger.debug("validate instance of class Fact..");
+		if (Fact.logger.isTraceEnabled()) {
+			Fact.logger.trace("validate instance of class Fact..");
 		}
 
 		if (Convert.isEmpty(name)) {

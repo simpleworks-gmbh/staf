@@ -65,31 +65,24 @@ public class DbTeststep implements ITeststep {
 
 	@Override
 	public boolean validate() {
-		if (DbTeststep.logger.isDebugEnabled()) {
-			DbTeststep.logger.debug("validate DbTeststep...");
+		if (DbTeststep.logger.isTraceEnabled()) {
+			DbTeststep.logger.trace("validate DbTeststep...");
 		}
 
 		boolean result = true;
 
 		if (Convert.isEmpty(name)) {
-			if (DbTeststep.logger.isDebugEnabled()) {
-				DbTeststep.logger.debug("name can't be null or empty string.");
-			}
+			DbTeststep.logger.error("name can't be null or empty string.");
 			result = false;
 		}
 
 		if (order < 1) {
-			if (DbTeststep.logger.isDebugEnabled()) {
-				DbTeststep.logger
-						.debug(String.format("order can't be less than 1, but was \"%s\".", Integer.toString(order)));
-			}
+			DbTeststep.logger.error(String.format("order can't be less than 1, but was \"%s\".", Integer.toString(order)));
 			result = false;
 		}
 
 		if (!statement.validate()) {
-			if (DbTeststep.logger.isDebugEnabled()) {
-				DbTeststep.logger.debug(String.format("statement \"%s\" is invalid.", statement));
-			}
+			DbTeststep.logger.error(String.format("statement \"%s\" is invalid.", statement));
 			result = false;
 		}
 

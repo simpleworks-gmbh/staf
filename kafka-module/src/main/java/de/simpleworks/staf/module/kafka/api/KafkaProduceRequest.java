@@ -60,8 +60,8 @@ public class KafkaProduceRequest implements IKafkaRequest<KafkaProduceRequest> {
 
 	@Override
 	public boolean validate() {
-		if (KafkaProduceRequest.logger.isDebugEnabled()) {
-			KafkaProduceRequest.logger.debug("validate KafkaProduceRequest...");
+		if (KafkaProduceRequest.logger.isTraceEnabled()) {
+			KafkaProduceRequest.logger.trace("validate KafkaProduceRequest...");
 		}
 
 		boolean result = true;

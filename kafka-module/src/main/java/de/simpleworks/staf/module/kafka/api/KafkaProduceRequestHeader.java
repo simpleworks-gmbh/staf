@@ -37,8 +37,8 @@ public class KafkaProduceRequestHeader implements IPojo {
 
 	@Override
 	public boolean validate() {
-		if (KafkaProduceRequestHeader.logger.isDebugEnabled()) {
-			KafkaProduceRequestHeader.logger.debug("validate KafkaProduceRequestHeader...");
+		if (KafkaProduceRequestHeader.logger.isTraceEnabled()) {
+			KafkaProduceRequestHeader.logger.trace("validate KafkaProduceRequestHeader...");
 		}
 
 		boolean result = true;

@@ -53,8 +53,8 @@ public class KafkaProduceRequestContent implements IPojo {
 
 	@Override
 	public boolean validate() {
-		if (KafkaProduceRequestContent.logger.isDebugEnabled()) {
-			KafkaProduceRequestContent.logger.debug("validate KafkaProduceRequestContent...");
+		if (KafkaProduceRequestContent.logger.isTraceEnabled()) {
+			KafkaProduceRequestContent.logger.trace("validate KafkaProduceRequestContent...");
 		}
 
 		boolean result = true;
