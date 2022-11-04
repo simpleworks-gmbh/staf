@@ -28,8 +28,7 @@ import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.UtilsCollection;
 import de.simpleworks.staf.commons.utils.UtilsIO;
 import de.simpleworks.staf.framework.api.httpclient.HttpClient;
-import de.simpleworks.staf.framework.api.httpclient.TeststepProvider;
-import de.simpleworks.staf.framework.api.httpclient.properties.HttpClientProperties;
+import de.simpleworks.staf.framework.api.httpclient.TeststepProvider; 
 import de.simpleworks.staf.framework.elements.commons.TemplateTestCase;
 import de.simpleworks.staf.framework.util.AssertionUtils;
 import de.simpleworks.staf.framework.util.HttpResponseUtils;
@@ -43,8 +42,7 @@ import net.lightbody.bmp.core.har.Har;
 
 public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResponse> {
 	private static final Logger logger = LogManager.getLogger(APITestCase.class);
-	public final static String ENVIRONMENT_VARIABLES_NAME = "APITestCase";
-	private static final HttpClientProperties httpClientProperties = HttpClientProperties.getInstance();
+	public final static String ENVIRONMENT_VARIABLES_NAME = "APITestCase"; 
  
 	private String currentstepname;
 	private HttpRequest currentHttpRequest;
@@ -117,7 +115,7 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 	 * @param HttpResponse expectedResponse
 	 * @param String       content (from a received response)
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes", "deprecation" })
 	private Object[] fetchResponseEntity(final HttpResponse expectedResponse, final String content) {
 
 		if (expectedResponse == null) {
@@ -291,29 +289,6 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 	protected HttpResponse doRequest(final HttpRequest request) throws SystemException {
 		if (request == null) {
 			throw new IllegalArgumentException("request can't be null.");
-		}
-
-		int timeout = httpClientProperties.getTimeout();
-
-		try {
-
-			if (timeout > -1) {
-				Thread.sleep(timeout * 1000);
-			}
-
-		} catch (Exception ex) {
-
-			if (ex instanceof NumberFormatException) {
-				APITestCase.logger.error(String.format("pacing \"%s\" can't be parsed to an integer.", timeout), ex);
-			}
-
-			else if (ex instanceof InterruptedException) {
-				APITestCase.logger.error(String.format("can't wait whole pacing \"%s\".", timeout), ex);
-			}
-
-			else {
-				APITestCase.logger.error("pacing can't be applied.", ex);
-			}
 		}
 
 		final BrowserMobProxyServer proxy = client.getBrowserMobProxyServer();
