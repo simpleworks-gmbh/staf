@@ -46,13 +46,13 @@ public class JiraFailCallback implements Effect<Throwable> {
 	        	
 	        	final int WAIT_IN_SECONDS = instance.getRateLimit() * 1000;
 	        	
-	        	if(logger.isTraceEnabled()) {
-	        		logger.trace("wait '%s' milliseconds for the next attempt to aceces jira.", Integer.toString(WAIT_IN_SECONDS), th);
+	        	if(logger.isDebugEnabled()) {
+	        		logger.debug("wait '%s' milliseconds for the next attempt to aceces jira.", Integer.toString(WAIT_IN_SECONDS), th);
 	        	}
 	        	
 	            Thread.sleep(WAIT_IN_SECONDS);
 	        } catch (Exception ex) {
-	        	logger.error(ex);
+	        	logger.error("can't wait on rate limit.", ex);
 	        }
 		}
 		else {
