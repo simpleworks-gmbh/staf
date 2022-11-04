@@ -15,6 +15,7 @@ import com.atlassian.util.concurrent.Promise;
 
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.UtilsCollection;
+import de.simpleworks.staf.module.jira.util.JiraFailCallback;
 
 public class TestFloLabel {
 
@@ -83,7 +84,7 @@ public class TestFloLabel {
 			}
 
 			final Promise<Void> promise = jira.updateIssue(issueKey, newIssue);
-			promise.claim();
+			promise.fail(new JiraFailCallback()).claim();
 
 		} catch (Exception ex) {
 			TestFloLabel.logger.error(String.format("can't add labels [\"%s\"].", String.join(",", issueLabels)), ex);

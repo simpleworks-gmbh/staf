@@ -12,6 +12,7 @@ import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.util.concurrent.Promise;
 
 import de.simpleworks.staf.commons.utils.Convert;
+import de.simpleworks.staf.module.jira.util.JiraFailCallback;
 import de.simpleworks.staf.plugin.maven.testflo.commons.enums.TestCaseGeneral;
 
 public class TestFloFields {
@@ -85,7 +86,7 @@ public class TestFloFields {
 		try {
 			Promise<Issue> promiseIssue = jira.getIssue(issueKey);
 
-			Issue jiraIssue = promiseIssue.claim();
+			Issue jiraIssue = promiseIssue.fail(new JiraFailCallback()).claim();
 			jiraTestcaseTemplateIssueKey = TestFloUtils.getField(jiraIssue, TestCaseGeneral.TEMPLATE.getTestFloName());
 
 		} catch (Exception ex) {
@@ -99,7 +100,7 @@ public class TestFloFields {
 		try {
 			Promise<Issue> promiseIssue = jira.getIssue(jiraTestcaseTemplateIssueKey);
 
-			Issue jiraIssue = promiseIssue.claim();
+			Issue jiraIssue = promiseIssue.fail(new JiraFailCallback()).claim();
 			jiraFields = fetchJiraFields(jiraIssue, customFields);
 		} catch (Exception ex) {
 			TestFloFields.logger.error(String.format("can't fetch issue from '%s'.", jiraTestcaseTemplateIssueKey), ex);
