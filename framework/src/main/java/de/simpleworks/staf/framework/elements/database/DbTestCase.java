@@ -392,8 +392,8 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 
 		final DbResultRow rows = debresult.getResult();
 		if ((rows.size() != expectedRowsAmount)) {
-			throw new SystemException(String.format("debresult only has '%s' rows, but expected are '%s'.",
-					Integer.toString(rows.size()), Integer.toString(expectedRowsAmount)));
+			throw new SystemException(String.format("debresult only has '%s' rows, but expected are '%s', used statement [%s].",
+					Integer.toString(rows.size()), Integer.toString(expectedRowsAmount), statement));
 		}
 	}
 

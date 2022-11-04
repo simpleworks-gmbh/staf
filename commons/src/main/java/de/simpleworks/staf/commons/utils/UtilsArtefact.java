@@ -54,7 +54,7 @@ public class UtilsArtefact {
 
 		case HARFILE:
 			result = UtilsArtefact.createFile(step, ".har");
-			HarFileExtractor.createHarFile(result, (String) step.getArtefact().getArtefact());
+			ArtefactFileExtractor.createHarFile(result, (String) step.getArtefact().getArtefact());
 			break;
 			
 		case CSVFILE:

@@ -7,8 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.simpleworks.staf.commons.exceptions.SystemException;
-import de.simpleworks.staf.commons.utils.Convert;
-import de.simpleworks.staf.framework.elements.commons.TestCase;
+import de.simpleworks.staf.commons.utils.Convert; 
+import de.simpleworks.staf.framework.elements.commons.ATestCaseImpl;
 
 public class STAFUtils {
 	private static final Logger logger = LoggerFactory.getLogger(STAFUtils.class);
@@ -26,7 +26,7 @@ public class STAFUtils {
 	 * @throws SystemException is thrown, if any method, does violate the
 	 *                         "STAF-compliance"
 	 */
-	public static List<Method> sortMethods(final Class<? extends TestCase> testClass) throws SystemException {
+	public static List<Method> sortMethods(final Class<? extends ATestCaseImpl> testClass) throws SystemException {
 		final List<Method> result = TestCaseUtils.fetchStepMethods(testClass);
 
 		if (Convert.isEmpty(result)) {

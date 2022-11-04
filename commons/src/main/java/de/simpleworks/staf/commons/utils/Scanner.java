@@ -160,8 +160,8 @@ public class Scanner {
 
 		for (Class<?> current = clazz; current != null; current = current.getSuperclass()) {
 			if (current.equals(extendedClass)) {
-				if (Scanner.logger.isDebugEnabled()) {
-					Scanner.logger.debug(String.format("Class: '%s' is extending '%s'.", Convert.getClassName(clazz),
+				if (Scanner.logger.isTraceEnabled()) {
+					Scanner.logger.trace(String.format("Class: '%s' is extending '%s'.", Convert.getClassName(clazz),
 							Convert.getClassName(current)));
 				}
 
