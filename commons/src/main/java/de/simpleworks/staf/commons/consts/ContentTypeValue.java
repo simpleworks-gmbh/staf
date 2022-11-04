@@ -24,12 +24,12 @@ public class ContentTypeValue {
 	public final static String PPT = "application/vnd.ms-powerpoint";
 	public final static String PPTX = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
 	public final static String POTX = "application/vnd.openxmlformats-officedocument.presentationml.template";
-	public final static String PPSX = "applicationvnd.openxmlformats-officedocument.presentationml.slideshow";
-	public final static String PPAM = "applicationvnd.ms-powerpoint.addin.macroEnabled.12";
-	public final static String PPTM = "applicationvnd.ms-powerpoint.presentation.macroEnabled.12";
-	public final static String POTM = "applicationvnd.ms-powerpoint.template.macroEnabled.12";
-	public final static String PPSM = "applicationvnd.ms-powerpoint.slideshow.macroEnabled.12";
-	public final static String MDB = "applicationvnd.ms-access";
+	public final static String PPSX = "application/vnd.openxmlformats-officedocument.presentationml.slideshow";
+	public final static String PPAM = "application/vnd.ms-powerpoint.addin.macroEnabled.12";
+	public final static String PPTM = "application/vnd.ms-powerpoint.presentation.macroEnabled.12";
+	public final static String POTM = "application/vnd.ms-powerpoint.template.macroEnabled.12";
+	public final static String PPSM = "application/vnd.ms-powerpoint.slideshow.macroEnabled.12";
+	public final static String MDB = "application/vnd.ms-access";
 	public final static String PNG = "image/png";
 	public final static String JPG = "image/jpg";
 	public final static String JPEG = "image/jpeg";
@@ -38,4 +38,6 @@ public class ContentTypeValue {
 	public static final String TEXT = "text/plain";
 	public static final String HTML = "text/html";
 	public static final String CSV = "text/csv";
+	public static final String SPRINGBOOT_ACTUATOR_V2_JSON = "application/vnd.spring-boot.actuator.v2+json";
+	public static final String SPRINGBOOT_ACTUATOR_V3_JSON = "application/vnd.spring-boot.actuator.v3+json";
 }
