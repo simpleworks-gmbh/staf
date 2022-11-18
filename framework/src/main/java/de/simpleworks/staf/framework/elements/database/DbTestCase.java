@@ -38,6 +38,7 @@ import de.simpleworks.staf.framework.elements.api.RewriteUrlObject;
 import de.simpleworks.staf.framework.elements.commons.TemplateTestCase;
 import de.simpleworks.staf.framework.util.AssertionUtils;
 import de.simpleworks.staf.framework.util.assertion.DbResultAssertionValidator;
+import de.simpleworks.staf.framework.util.assertion.DbViolatedAssertionException;
 import net.lightbody.bmp.BrowserMobProxyServer;
 
 public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
@@ -203,7 +204,7 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 			default:
 				throw new IllegalArgumentException(String.format("type '%s' is not implemented yet.", type.getValue()));
 			}
-
+ 
 			DbTestCase.validateExpectedRows(currentResult, statement);
 
 			if (!Convert.isEmpty(assertions)) {
@@ -214,10 +215,18 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 
 			result.setSuccessfull(true);
 		} catch (final Throwable th) {
-			final String msg = String.format("Statement '%s' failed.", statement);
+			final String msg = String.format("Statement '%s' has failed, due to '%s'.", statement, th.getMessage());
 			DbTestCase.logger.error(msg, th);
-			result.setErrormessage(th.getMessage());
+			
+			result.setErrormessage(msg);
 			result.setSuccessfull(false);
+			
+			if(th instanceof DbViolatedAssertionException) {
+				// add latest result row to the currentResult
+				final DbViolatedAssertionException violatedException = (DbViolatedAssertionException) th;
+				currentResult = violatedException.getResult();
+			}
+			
 		}
 
 		if (DbTestCase.logger.isDebugEnabled()) {
@@ -302,6 +311,7 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 		} catch (final Exception ex) {
 			final String msg = String.format("can't parse response from statement '%s'.", statement);
 			DbTestCase.logger.error(msg, ex);
+			
 			throw new SystemException(msg);
 		}
 	}
@@ -392,8 +402,8 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 
 		final DbResultRow rows = debresult.getResult();
 		if ((rows.size() != expectedRowsAmount)) {
-			throw new SystemException(String.format("debresult only has '%s' rows, but expected are '%s'.",
-					Integer.toString(rows.size()), Integer.toString(expectedRowsAmount)));
+			throw new SystemException(String.format("debresult only has '%s' rows, but expected are '%s', used statement [%s].",
+					Integer.toString(rows.size()), Integer.toString(expectedRowsAmount), statement));
 		}
 	}
 
