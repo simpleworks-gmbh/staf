@@ -14,7 +14,9 @@ import org.apache.logging.log4j.Logger;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 
+
 import de.simpleworks.staf.commons.annotation.Property;
+import de.simpleworks.staf.commons.annotation.Property.Default;
 import de.simpleworks.staf.commons.annotation.Step;
 import de.simpleworks.staf.commons.api.Assertion;
 import de.simpleworks.staf.commons.exceptions.SystemException;
@@ -184,6 +186,22 @@ public abstract class TemplateTestCase<Teststep extends ITeststep, Response> ext
 
 				String value = System.getProperty(propertyKey, Convert.EMPTY_STRING);
 
+				if (field.getAnnotation(Default.class) != null) {
+					
+					Default defaultProperty = field.getAnnotation(Default.class);
+					
+					try {
+						if (Convert.isEmpty(value)) {
+							final String defaultValue = defaultProperty.value();
+							value = defaultValue;
+						}
+					} catch (Exception ex) {
+						final String msg = "can't determine value.";
+						TemplateTestCase.logger.error(msg, ex);
+						throw new SystemException(msg);
+					}
+				}
+				
 				if (field.getAnnotation(Inject.class) != null) {
 					try {
 						if (Convert.isEmpty(value)) {
@@ -195,6 +213,7 @@ public abstract class TemplateTestCase<Teststep extends ITeststep, Response> ext
 						throw new SystemException(msg);
 					}
 				}
+						
 
 				final Class<?> type = field.getType();
 
