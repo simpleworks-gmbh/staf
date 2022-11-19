@@ -4,14 +4,14 @@
 	<parent>
 		<artifactId>staf-parent</artifactId>
 		<groupId>de.simpleworks.staf</groupId>
-		<version>0.130</version>
+		<version>0.130.24</version>
 	</parent>
 
 	<artifactId>devicetesting-module</artifactId>
 	<name>devicetesting-module</name>
 
 	<properties>
-		<project.version>0.130</project.version>
+		<project.version>0.130.24</project.version>
 		<version.java-client>8.1.0</version.java-client>
 	</properties>
 

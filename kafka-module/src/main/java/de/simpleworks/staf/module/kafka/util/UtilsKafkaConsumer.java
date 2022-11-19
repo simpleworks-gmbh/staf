@@ -125,8 +125,8 @@ public class UtilsKafkaConsumer {
 
 		final List<KafkaConsumeRecord> results = new ArrayList<>();
 
-		for (long currentOffset = startOffset; ((currentOffset >= (startOffset - maxOffset))
-				&& (results.size() <= maxMessages)); currentOffset -= 1) {
+		for (long currentOffset = startOffset; ((currentOffset >=  Math.max((startOffset - maxOffset), 0)) 
+                && (results.size() <= maxMessages)); currentOffset -= 1) {
 
 			List<KafkaConsumeRecord> consumedMessages = consumeMessages(new Consumer[] { consumer }, partition, tp, key,
 					currentOffset, maxMessages);
