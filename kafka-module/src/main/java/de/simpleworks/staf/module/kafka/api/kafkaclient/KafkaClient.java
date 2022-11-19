@@ -25,6 +25,7 @@ import de.simpleworks.staf.commons.utils.UtilsCollection;
 import de.simpleworks.staf.module.kafka.api.KafkaConsumeRecord;
 import de.simpleworks.staf.module.kafka.api.KafkaConsumeRequest;
 import de.simpleworks.staf.module.kafka.api.KafkaConsumeRequestKey;
+import de.simpleworks.staf.module.kafka.api.KafkaConsumeRequestTimestamp;
 import de.simpleworks.staf.module.kafka.api.KafkaConsumeResponse;
 import de.simpleworks.staf.module.kafka.api.KafkaProduceRequest;
 import de.simpleworks.staf.module.kafka.api.KafkaProduceRequestContent;
@@ -95,6 +96,7 @@ public class KafkaClient {
         final KafkaProducer result = new KafkaProducer<>(props);
         return result;
     }
+    
     public static KafkaConsumeResponse consumeMessage(final KafkaConsumeRequest request) throws SystemException {
         if (request == null) {
             throw new IllegalArgumentException("request can't be null.");
@@ -110,7 +112,9 @@ public class KafkaClient {
                 keyDeserializer, contentDeserializer);
         final String topic = request.getTopic();
         final String keyValue = key.getValue();
-        final KafkaConsumeResponse result = getMessages(consumer, topic, keyValue);
+        final KafkaConsumeRequestTimestamp consumedRequestTimestamp = request.getTimestamp();
+        
+        final KafkaConsumeResponse result = getMessages(consumer, consumedRequestTimestamp, topic, keyValue);
         
         return result;
     }
@@ -181,20 +185,29 @@ public class KafkaClient {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     /**
      * 
+     * @param consumedRequestTimestamp 
      * @brief gets messages from Kafka-Broker. The consumer instance will (likely) be closed afterwards.
      * @return respecting instance of KafkaConsumeResponse, null if an error occurs.
      */
-    private static KafkaConsumeResponse getMessages(Consumer consumer, String topic, String key) {
-        if (consumer == null) {
+    private static KafkaConsumeResponse getMessages(Consumer consumer, KafkaConsumeRequestTimestamp consumedRequestTimestamp, String topic, String key) {
+       
+    	if (consumer == null) {
             throw new IllegalArgumentException("consumer can't be null.");
         }
-        if (Convert.isEmpty(topic)) {
+    	
+    	if (consumedRequestTimestamp == null) {
+            throw new IllegalArgumentException("consumedRequestTimestamp can't be null.");
+        }
+        
+    	if (Convert.isEmpty(topic)) {
             throw new IllegalArgumentException("topic can't be null or empty string.");
         }
-        if (Convert.isEmpty(key)) {
+        
+    	if (Convert.isEmpty(key)) {
             throw new IllegalArgumentException("key can't be null or empty string.");
         }
-        List<PartitionInfo> partitions = new ArrayList<>();
+        
+    	List<PartitionInfo> partitions = new ArrayList<>();
         try {
             if (KafkaClient.logger.isInfoEnabled()) {
                 KafkaClient.logger.info(String.format("fetch partitions for '%s'.", topic));
@@ -257,22 +270,25 @@ public class KafkaClient {
                 final ConumeMessagesDirectionEnum direction = kafkaProperties.getConsumerConsumeMessagesDirection();
                 
                 switch (direction) {
+                
                 case ASCENDING:
-                    if (!fetchedRecords.addAll(UtilsKafkaConsumer.consumeMessagesAscendingOrder(consumer, partition, tp,
-                            key, startOffset, totalLengthofPartition))) {
+                    if (!fetchedRecords.addAll(UtilsKafkaConsumer.consumeMessagesAscendingOrder(consumer, consumedRequestTimestamp, 
+                    		partition, tp,  key, startOffset, totalLengthofPartition))) {
                         KafkaClient.logger.error(String.format(
                                 "can't add new records of partition '%s' from topic '%s' in asecneding order",
                                 Integer.toString(partition.partition()), tp.topic()));
                     }
                     break;
+                    
                 case DESCENDING:
-                    if (!fetchedRecords.addAll(UtilsKafkaConsumer.consumeMessagesDescendingOrder(consumer, partition,
-                            tp, key, totalLengthofPartition, startOffset))) {
+                    if (!fetchedRecords.addAll(UtilsKafkaConsumer.consumeMessagesDescendingOrder(consumer, consumedRequestTimestamp, 
+                    		partition, tp, key, totalLengthofPartition, startOffset))) {
                         KafkaClient.logger.error(String.format(
                                 "can't add new records of partition '%s' from topic '%s' in desecending order",
                                 Integer.toString(partition.partition()), tp.topic()));
                     }
                     break;
+                    
                 default:
                     throw new IllegalArgumentException(String.format("type '%s' is not implemented yet.", direction));
                 }
@@ -288,11 +304,13 @@ public class KafkaClient {
             KafkaClient.logger.error(msg, ex);
             return null;
         }
+        
         try {
             consumer.close();
         } catch (Exception ex) {
             KafkaClient.logger.error("can't close consumer.");
         }
+        
         final KafkaConsumeResponse result = new KafkaConsumeResponse();
         result.setRecords(UtilsCollection.toArray(KafkaConsumeRecord.class, fetchedRecords));
         return result;
