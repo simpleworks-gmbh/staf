@@ -38,6 +38,7 @@ import de.simpleworks.staf.framework.elements.api.RewriteUrlObject;
 import de.simpleworks.staf.framework.elements.commons.TemplateTestCase;
 import de.simpleworks.staf.framework.util.AssertionUtils;
 import de.simpleworks.staf.framework.util.assertion.DbResultAssertionValidator;
+import de.simpleworks.staf.framework.util.assertion.DbViolatedAssertionException;
 import net.lightbody.bmp.BrowserMobProxyServer;
 
 public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
@@ -216,8 +217,16 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 		} catch (final Throwable th) {
 			final String msg = String.format("Statement '%s' has failed, due to '%s'.", statement, th.getMessage());
 			DbTestCase.logger.error(msg, th);
+			
 			result.setErrormessage(msg);
 			result.setSuccessfull(false);
+			
+			if(th instanceof DbViolatedAssertionException) {
+				// add latest result row to the currentResult
+				final DbViolatedAssertionException violatedException = (DbViolatedAssertionException) th;
+				currentResult = violatedException.getResult();
+			}
+			
 		}
 
 		if (DbTestCase.logger.isDebugEnabled()) {
