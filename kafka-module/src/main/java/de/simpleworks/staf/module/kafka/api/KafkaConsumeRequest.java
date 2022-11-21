@@ -18,11 +18,11 @@ public class KafkaConsumeRequest implements IKafkaRequest<KafkaConsumeRequest> {
 	private String topic;
 	private KafkaConsumeRequestKey key;
 	private KafkaProduceRequestHeader[] headers;
+	private KafkaConsumeRequestTimestamp timestamp;
 	private DeserializerTypeEnum content;
 
 	public KafkaConsumeRequest() {
-		topic = Convert.EMPTY_STRING;
-		key = new KafkaConsumeRequestKey();
+		topic = Convert.EMPTY_STRING; 
 		headers = new KafkaProduceRequestHeader[0];
 		content = DeserializerTypeEnum.UNKNOWN;
 	}
@@ -51,6 +51,14 @@ public class KafkaConsumeRequest implements IKafkaRequest<KafkaConsumeRequest> {
 		this.headers = headers;
 	}
 
+	public KafkaConsumeRequestTimestamp getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(KafkaConsumeRequestTimestamp timestamp) {
+		this.timestamp = timestamp;
+	}
+	
 	public DeserializerTypeEnum getContent() {
 		return content;
 	}
@@ -61,8 +69,9 @@ public class KafkaConsumeRequest implements IKafkaRequest<KafkaConsumeRequest> {
 
 	@Override
 	public boolean validate() {
-		if (KafkaConsumeRequest.logger.isTraceEnabled()) {
-			KafkaConsumeRequest.logger.trace("validate KafkaProduceRequest...");
+		
+		if (KafkaConsumeRequest.logger.isDebugEnabled()) {
+			KafkaConsumeRequest.logger.debug("validate KafkaProduceRequest...");
 		}
 
 		boolean result = true;
@@ -71,17 +80,26 @@ public class KafkaConsumeRequest implements IKafkaRequest<KafkaConsumeRequest> {
 			KafkaConsumeRequest.logger.error("topic can't be null or empty string.");
 			result = false;
 		}
-
-		if (key == null) {
-			KafkaConsumeRequest.logger.error("key can't be null or empty string.");
+  
+		if (key == null && timestamp == null) {
+			KafkaConsumeRequest.logger.error("key as well as timestamp are null.");
 			result = false;
 		}
 
-		if (!key.validate()) {
-			KafkaConsumeRequest.logger.error(String.format("key '%s' is invalid.", key));
-			result = false;
+		if (key != null) {
+			if (!key.validate()) {
+				KafkaConsumeRequest.logger.error(String.format("key '%s' is invalid.", key));
+				result = false;
+			}
 		}
-
+		
+		if (timestamp != null) {
+			if (!timestamp.validate()) {
+				KafkaConsumeRequest.logger.error(String.format("timestamp '%s' is invalid.", timestamp));
+				result = false;
+			}
+		}
+		
 		final DeserializerTypeEnum deserializer = key.getDeserializer();
 
 		try {
@@ -135,11 +153,14 @@ public class KafkaConsumeRequest implements IKafkaRequest<KafkaConsumeRequest> {
 
 	@Override
 	public String toString() {
-		return String.format("[%s: %s, %s, %s, %s]", Convert.getClassName(KafkaProduceRequestKey.class),
-				UtilsFormat.format("topic", topic), UtilsFormat.format("key", key),
+		return String.format("[%s: %s, %s, %s, %s, %s]", 
+				Convert.getClassName(KafkaProduceRequestKey.class),
+				UtilsFormat.format("topic", topic),
+				UtilsFormat.format("key", key),
 				UtilsFormat.format("headers",
 						String.join(",",
 								Arrays.asList(headers).stream().map(a -> a.toString()).collect(Collectors.toList()))),
+				UtilsFormat.format("timestamp", timestamp),
 				UtilsFormat.format("content", content));
 	}
 

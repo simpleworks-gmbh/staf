@@ -1,9 +1,12 @@
 package de.simpleworks.staf.module.kafka.util;
 
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -16,9 +19,12 @@ import org.apache.logging.log4j.Logger;
 
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.UtilsCollection;
+import de.simpleworks.staf.commons.utils.UtilsDate;
 import de.simpleworks.staf.module.kafka.api.KafkaConsumeRecord;
+import de.simpleworks.staf.module.kafka.api.KafkaConsumeRequestTimestamp;
 import de.simpleworks.staf.module.kafka.api.KafkaProduceRequestHeader;
 import de.simpleworks.staf.module.kafka.api.properties.KafkaProperties;
+import de.simpleworks.staf.module.kafka.enums.TimestampAllowedValueEnum;
 
 public class UtilsKafkaConsumer {
 
@@ -27,11 +33,20 @@ public class UtilsKafkaConsumer {
 	private static final KafkaProperties kafkaProperties = KafkaProperties.getInstance();
 
 	public static List<KafkaConsumeRecord> consumeMessagesAscendingOrder(
-			@SuppressWarnings("rawtypes") Consumer consumer, PartitionInfo partition, TopicPartition tp, String key,
-			long startOffset, long endOffset) {
+			@SuppressWarnings("rawtypes") Consumer consumer, KafkaConsumeRequestTimestamp consumedRequestTimestamp,
+			PartitionInfo partition, TopicPartition tp, String key, long startOffset, long endOffset) {
 
 		if (consumer == null) {
 			throw new IllegalArgumentException("consumer can't be null.");
+		}
+
+		if (consumedRequestTimestamp == null) {
+			throw new IllegalArgumentException("consumedRequestTimestamp can't be null.");
+		}
+
+		if (!consumedRequestTimestamp.validate()) {
+			throw new IllegalArgumentException(
+					String.format("consumedRequestTimestamp is invalid '%s'.", consumedRequestTimestamp));
 		}
 
 		if (partition == null) {
@@ -71,7 +86,7 @@ public class UtilsKafkaConsumer {
 				&& (results.size() <= maxMessages)); currentOffset += 1) {
 
 			List<KafkaConsumeRecord> consumedMessages = consumeMessages(new Consumer[] { consumer }, partition, tp, key,
-					currentOffset, maxMessages);
+					consumedRequestTimestamp, currentOffset, maxMessages);
 
 			if (results.addAll(consumedMessages)) {
 				if (UtilsKafkaConsumer.logger.isDebugEnabled()) {
@@ -85,11 +100,20 @@ public class UtilsKafkaConsumer {
 	}
 
 	public static List<KafkaConsumeRecord> consumeMessagesDescendingOrder(
-			@SuppressWarnings("rawtypes") Consumer consumer, PartitionInfo partition, TopicPartition tp, String key,
-			long startOffset, long endOffset) {
+			@SuppressWarnings("rawtypes") Consumer consumer, KafkaConsumeRequestTimestamp consumedRequestTimestamp,
+			PartitionInfo partition, TopicPartition tp, String key, long startOffset, long endOffset) {
 
 		if (consumer == null) {
 			throw new IllegalArgumentException("consumer can't be null.");
+		}
+
+		if (consumedRequestTimestamp == null) {
+			throw new IllegalArgumentException("consumedRequestTimestamp can't be null.");
+		}
+
+		if (!consumedRequestTimestamp.validate()) {
+			throw new IllegalArgumentException(
+					String.format("consumedRequestTimestamp is invalid '%s'.", consumedRequestTimestamp));
 		}
 
 		if (partition == null) {
@@ -129,7 +153,7 @@ public class UtilsKafkaConsumer {
 				&& (results.size() <= maxMessages)); currentOffset -= 1) {
 
 			List<KafkaConsumeRecord> consumedMessages = consumeMessages(new Consumer[] { consumer }, partition, tp, key,
-					currentOffset, maxMessages);
+					consumedRequestTimestamp, currentOffset, maxMessages);
 
 			if (results.addAll(consumedMessages)) {
 				if (UtilsKafkaConsumer.logger.isDebugEnabled()) {
@@ -142,8 +166,64 @@ public class UtilsKafkaConsumer {
 		return results;
 	}
 
+	private static boolean shouldRecordBeRecorded(final ConsumerRecord<?, ?> record, final String key,
+			final KafkaConsumeRequestTimestamp recordTimestamp) {
+
+		boolean result = false;
+
+		if (!Convert.isEmpty(key)) {
+			result = key.equals(record.key());
+		}
+
+		if (recordTimestamp != null) {
+
+			try {
+
+				final String timeZoneValue = recordTimestamp.getTimezone();
+				final TimeZone timeZone = TimeZone.getTimeZone(timeZoneValue);
+
+				final Calendar expectedDateCalendar = Calendar.getInstance();
+				expectedDateCalendar.setTimeZone(timeZone);
+
+				final String format = recordTimestamp.getFormat();
+				expectedDateCalendar.setTime((new SimpleDateFormat()).parse(format));
+
+				final Calendar recordDateCalendar = Calendar.getInstance();
+				recordDateCalendar.setTimeZone(timeZone);
+				recordDateCalendar.setTimeInMillis(record.timestamp());
+
+				final TimestampAllowedValueEnum allowedValue = recordTimestamp.getAllowedValue();
+
+				switch (allowedValue) {
+
+				case EXACT_TIME:
+					result = UtilsDate.sameDate(expectedDateCalendar, recordDateCalendar);
+					break;
+
+				case BEFORE_TIME:
+					result = UtilsDate.before(expectedDateCalendar, recordDateCalendar);
+					break;
+
+				case AFTER_TIME:
+					result = UtilsDate.after(expectedDateCalendar, recordDateCalendar);
+					break;
+
+				default:
+					throw new IllegalArgumentException(
+							String.format("allowedValue '%s' is not implemented yet.", allowedValue.getValue()));
+				}
+			} catch (Exception ex) {
+				UtilsKafkaConsumer.logger.error("can't filter timestamp, will return false.", ex);
+				result = false;
+			}
+		}
+
+		return result;
+	}
+
 	private static List<KafkaConsumeRecord> consumeMessages(@SuppressWarnings("rawtypes") Consumer[] consumer,
-			PartitionInfo partition, TopicPartition tp, String key, long startOffset, int maxMessages) {
+			PartitionInfo partition, TopicPartition tp, String key, KafkaConsumeRequestTimestamp consumedTimestamp,
+			long startOffset, int maxMessages) {
 
 		final List<KafkaConsumeRecord> results = new ArrayList<>();
 
@@ -159,8 +239,10 @@ public class UtilsKafkaConsumer {
 
 		if (records.count() != 0) {
 			for (ConsumerRecord<?, ?> record : records) {
-				if (key.equals(record.key())) {
-					KafkaConsumeRecord rec = new KafkaConsumeRecord();
+
+				if (shouldRecordBeRecorded(record, key, consumedTimestamp)) {
+
+					final KafkaConsumeRecord rec = new KafkaConsumeRecord();
 
 					final List<KafkaProduceRequestHeader> kafkaRequestHeader = new ArrayList<>();
 
@@ -189,15 +271,10 @@ public class UtilsKafkaConsumer {
 						}
 					}
 
-					// FIXME: should be irrelevant, needs to be tested
-//						if (currentOffset < record.offset()) {
-//							currentOffset = record.offset() + increment;
-//						}
 				}
 			}
 		}
 
 		return results;
-
 	}
 }
