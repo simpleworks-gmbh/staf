@@ -14,8 +14,7 @@ import de.simpleworks.staf.commons.utils.comparer.TeststepComparator;
 public class TeststepProvider<Teststep extends ITeststep> {
 	private static final Logger logger = LogManager.getLogger(TeststepProvider.class);
 
-	private final List<Teststep> teststeps;
-	//private final List<Step> steps;
+	private final List<Teststep> teststeps; 
 
 	public TeststepProvider(final List<Teststep> teststeps, final List<Step> steps) throws InstantiationException {
 		if (Convert.isEmpty(teststeps)) {
@@ -26,8 +25,7 @@ public class TeststepProvider<Teststep extends ITeststep> {
 			throw new IllegalArgumentException("steps can't be null or empty.");
 		}
 
-		this.teststeps = teststeps;
-		//this.steps = steps;
+		this.teststeps = teststeps; 
 		TeststepProvider.init(teststeps, steps);
 	}
 
@@ -73,6 +71,10 @@ public class TeststepProvider<Teststep extends ITeststep> {
 		}
 	}
 
+	public List<Teststep> getTeststeps() {
+		return teststeps;
+	}
+	
 	public Teststep get() {
 		if (Convert.isEmpty(teststeps)) {
 			return null;

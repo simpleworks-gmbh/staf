@@ -89,13 +89,11 @@ public class DbConnectionPool {
 		for (final DbConnection dbconnection : dbconnections) {
 
 			final String id = dbconnection.getId();
-			final Connection connection = DbConnectionPool.setUpConnection(dbconnection);
 
-			if (pool.containsKey(id)) {
-				throw new Exception(String.format("database connection \"%s\" is already configured.", id));
+			if (!pool.containsKey(id)) {
+				final Connection connection = DbConnectionPool.setUpConnection(dbconnection);
+				pool.put(id, connection);
 			}
-
-			pool.put(id, connection);
 		}
 	}
 

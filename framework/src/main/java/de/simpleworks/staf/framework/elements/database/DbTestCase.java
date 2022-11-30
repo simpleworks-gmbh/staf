@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.logging.log4j.LogManager;
@@ -45,7 +46,7 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 
 	private static final Logger logger = LogManager.getLogger(DbTestCase.class);
 	public final static String ENVIRONMENT_VARIABLES_NAME = "DbTestCase";
-	private final DbConnectionManagerImpl databaseconnectionimpl;
+	private  DbConnectionManagerImpl databaseconnectionimpl;
 
 	private String currentstepname;
 	private Statement currentStatement;
@@ -54,10 +55,16 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 
 	protected DbTestCase(final String resource, final Module... modules) throws SystemException {
 		super(resource, DbTestCase.ENVIRONMENT_VARIABLES_NAME, new MapperDbTeststep(), modules);
+		 
+		final TeststepProvider<DbTeststep> provider = getProvider();
 
+		if (provider == null) {
+			throw new SystemException("provider can't be null.");
+		}
 		try {
-			databaseconnectionimpl = new DbConnectionManagerImpl();
-		} catch (final InstantiationException ex) {
+			databaseconnectionimpl = new DbConnectionManagerImpl(provider.getTeststeps().stream().map(step -> step.getStatement())
+					.map(statement -> statement.getConnectionId()).collect(Collectors.toList()));	
+		} catch (final Exception ex) {
 			DbTestCase.logger.error(ex);
 			throw new SystemException("can't set up database connection manager.");
 		}
