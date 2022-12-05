@@ -20,7 +20,7 @@ public abstract class WebDriverManagerImpl implements WebDriverManager {
 	private static final ProxyServerProperties proxyServerProperties = ProxyServerProperties.getInstance();
 
 	private boolean running;
-	private BrowserMobProxyServer proxy;
+	protected BrowserMobProxyServer proxy;
 	protected WebDriver driver;
 
 	protected abstract WebDriver createDriver();
