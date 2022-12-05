@@ -31,6 +31,7 @@ import de.simpleworks.staf.framework.api.httpclient.HttpClient;
 import de.simpleworks.staf.framework.api.httpclient.TeststepProvider; 
 import de.simpleworks.staf.framework.elements.commons.TemplateTestCase;
 import de.simpleworks.staf.framework.util.AssertionUtils;
+import de.simpleworks.staf.framework.util.HttpClientFactory;
 import de.simpleworks.staf.framework.util.HttpResponseUtils;
 import de.simpleworks.staf.framework.util.assertion.File_ComparerAssertionValidator;
 import de.simpleworks.staf.framework.util.assertion.HeaderAssertionValidator;
@@ -47,15 +48,14 @@ public abstract class APITestCase extends TemplateTestCase<APITeststep, HttpResp
 	private String currentstepname;
 	private HttpRequest currentHttpRequest;
 	private HttpResponse currentExpetcedHttpResponse;
-
-	private final Map<String, ResponseEntity> extractedResponseEntities;
-
-	private Assertion[] currentAssertions;
-	private final HttpClient client = new HttpClient();
+	private Assertion[] currentAssertions; 
+	
+	private final Map<String, ResponseEntity> extractedResponseEntities = new HashMap<>();
+	private final HttpClient client;
 
 	protected APITestCase(final String resource, final Module... modules) throws SystemException {
 		super(resource, ENVIRONMENT_VARIABLES_NAME, new MapperAPITeststep(), modules);
-		extractedResponseEntities = new HashMap<>();
+		this.client = HttpClientFactory.createHttpClient();  
 	}
 
 	private static final Map<String, String> checkHeader(final HttpResponse response, final Assertion assertion) {
