@@ -40,17 +40,20 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 public class HttpClient implements IHttpClient {
-	private static final Logger logger = LogManager.getLogger(HttpClient.class);
-	private final OkHttpClientRecipe okhttpclientRecipe;
+	private static final Logger logger = LogManager.getLogger(HttpClient.class); 
 	private final OkHttpClient client;
 	private final BrowserMobProxyServer browsermobProxy;
 
 	public HttpClient() throws SystemException {
-		okhttpclientRecipe = OkHttpBuilder.buildOkHttpClientRecipe();
-		client = okhttpclientRecipe.getClient();
-		browsermobProxy = okhttpclientRecipe.getBrowsermobProxy();
+		this(OkHttpBuilder.buildOkHttpClientRecipe());
 	}
 
+	protected HttpClient(final OkHttpClientRecipe okhttpclientRecipe) throws SystemException {
+		this.client = okhttpclientRecipe.getClient();
+		this.browsermobProxy = okhttpclientRecipe.getBrowsermobProxy();
+	}
+	
+	
 	public BrowserMobProxyServer getBrowserMobProxyServer() {
 		return browsermobProxy;
 	}
