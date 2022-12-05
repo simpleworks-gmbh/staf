@@ -6,7 +6,7 @@
 	<description>Simpleworks Test Automation Framework</description>
 	<groupId>de.simpleworks.staf</groupId>
 	<artifactId>staf-parent</artifactId>
-	<version>0.140-12</version>
+	<version>0.130.29</version>
 	<packaging>pom</packaging>
 	<name>staf-parent</name>
 	<url>https://github.com/simpleworks-gmbh/staf</url>

@@ -186,7 +186,7 @@ public class UtilsKafkaConsumer {
 				expectedDateCalendar.setTimeZone(timeZone);
 
 				final String format = recordTimestamp.getFormat();
-				expectedDateCalendar.setTime((new SimpleDateFormat()).parse(format));
+				expectedDateCalendar.setTime((new SimpleDateFormat(format)).parse(recordTimestamp.getValue()));
 
 				final Calendar recordDateCalendar = Calendar.getInstance();
 				recordDateCalendar.setTimeZone(timeZone);
