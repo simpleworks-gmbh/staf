@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>de.simpleworks.staf</groupId>
 		<artifactId>staf-parent</artifactId> 
-		<version>0.130.27</version>
+		<version>0.130.26</version>
 	</parent>	
  
 	<artifactId>commons</artifactId>
