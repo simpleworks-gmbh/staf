@@ -47,11 +47,16 @@ public class HttpClient implements IHttpClient {
 	private final BrowserMobProxyServer browsermobProxy;
 
 	public HttpClient() throws SystemException {
-		okhttpclientRecipe = OkHttpBuilder.buildOkHttpClientRecipe();
-		client = okhttpclientRecipe.getClient();
-		browsermobProxy = okhttpclientRecipe.getBrowsermobProxy();
+		this(OkHttpBuilder.buildOkHttpClientRecipe());
 	}
 
+	protected HttpClient(final OkHttpClientRecipe okhttpclientRecipe) throws SystemException {
+		this.okhttpclientRecipe = OkHttpBuilder.buildOkHttpClientRecipe();
+		this.client = this.okhttpclientRecipe.getClient();
+		this.browsermobProxy = this.okhttpclientRecipe.getBrowsermobProxy();
+	}
+	
+	
 	public BrowserMobProxyServer getBrowserMobProxyServer() {
 		return browsermobProxy;
 	}
