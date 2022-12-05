@@ -316,7 +316,7 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 				final ResultSet rs = selectStatement.executeQuery();) {
 			return DbTestCase.readData(rs);
 		} catch (final Exception ex) {
-			final String msg = String.format("can't parse response from statement '%s'.", statement);
+			final String msg = String.format("can't parse response from statement '%s', due to '%s'.", statement, ex.getMessage());
 			DbTestCase.logger.error(msg, ex);
 			
 			throw new SystemException(msg);
@@ -345,7 +345,7 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 			}
 			return result;
 		} catch (final Exception ex) {
-			final String msg = String.format("can't parse response from statement '%s'.", statement);
+			final String msg = String.format("can't parse response from statement '%s' due to '%s'.", statement, ex.getMessage());
 			DbTestCase.logger.error(msg, ex);
 			throw new SystemException(msg);
 		}
