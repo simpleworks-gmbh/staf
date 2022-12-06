@@ -7,11 +7,11 @@
 	<parent>
 		<groupId>de.simpleworks.staf</groupId>
 		<artifactId>staf-parent</artifactId> 
-		<version>0.130.28</version>
+		<version>fix-android</version>
 	</parent>	
  
 	<properties>
-		<project.version>0.130.28</project.version>
+		<project.version>fix-android</project.version>
 	</properties>
  
 	<artifactId>data</artifactId>
