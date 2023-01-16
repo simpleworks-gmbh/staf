@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Date;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -286,7 +288,11 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 				} else if (Timestamp.class.equals(ob.getClass())) {
 					final Timestamp timestamp = rs.getObject(column, Timestamp.class);
 					value = timestamp.toString();
-				} else {
+				} else if (Date.class.equals(ob.getClass())) {
+					final Date  date = rs.getObject(column, Date.class);
+					value = date.toString();
+				} 
+				else {
 					throw new IllegalArgumentException(
 							String.format("Cannot handle type: '%s', value '%s'.", ob.getClass(), value));
 				}
