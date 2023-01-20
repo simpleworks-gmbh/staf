@@ -40,13 +40,11 @@ public class UtilsKafkaConsumer {
 			throw new IllegalArgumentException("consumer can't be null.");
 		}
 
-		if (consumedRequestTimestamp == null) {
-			throw new IllegalArgumentException("consumedRequestTimestamp can't be null.");
-		}
-
-		if (!consumedRequestTimestamp.validate()) {
-			throw new IllegalArgumentException(
-					String.format("consumedRequestTimestamp is invalid '%s'.", consumedRequestTimestamp));
+		if (consumedRequestTimestamp != null) {
+			if (!consumedRequestTimestamp.validate()) {
+				throw new IllegalArgumentException(
+						String.format("consumedRequestTimestamp is invalid '%s'.", consumedRequestTimestamp));
+			}
 		}
 
 		if (partition == null) {
@@ -107,13 +105,11 @@ public class UtilsKafkaConsumer {
 			throw new IllegalArgumentException("consumer can't be null.");
 		}
 
-		if (consumedRequestTimestamp == null) {
-			throw new IllegalArgumentException("consumedRequestTimestamp can't be null.");
-		}
-
-		if (!consumedRequestTimestamp.validate()) {
-			throw new IllegalArgumentException(
-					String.format("consumedRequestTimestamp is invalid '%s'.", consumedRequestTimestamp));
+		if (consumedRequestTimestamp != null) {
+			if (!consumedRequestTimestamp.validate()) {
+				throw new IllegalArgumentException(
+						String.format("consumedRequestTimestamp is invalid '%s'.", consumedRequestTimestamp));
+			}
 		}
 
 		if (partition == null) {
@@ -186,7 +182,7 @@ public class UtilsKafkaConsumer {
 				expectedDateCalendar.setTimeZone(timeZone);
 
 				final String format = recordTimestamp.getFormat();
-				expectedDateCalendar.setTime((new SimpleDateFormat()).parse(format));
+				expectedDateCalendar.setTime((new SimpleDateFormat(format)).parse(recordTimestamp.getValue()));
 
 				final Calendar recordDateCalendar = Calendar.getInstance();
 				recordDateCalendar.setTimeZone(timeZone);
