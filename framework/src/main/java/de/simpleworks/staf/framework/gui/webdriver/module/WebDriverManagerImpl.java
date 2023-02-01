@@ -110,7 +110,7 @@ public abstract class WebDriverManagerImpl implements WebDriverManager {
 	}
 
 	@Override
-	public final WebDriver get() {
+	public WebDriver get() {
 		if (driver == null) {
 			try {
 				startDriver();
@@ -160,7 +160,7 @@ public abstract class WebDriverManagerImpl implements WebDriverManager {
 		return WebDriverManagerImpl.proxyServerProperties.isProxyEnabled();
 	}
 
-	public final boolean isRunning() {
+	public boolean isRunning() {
 		return running;
 	}
 }
