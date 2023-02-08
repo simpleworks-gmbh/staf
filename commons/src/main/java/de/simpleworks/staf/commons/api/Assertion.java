@@ -165,9 +165,10 @@ public class Assertion implements IPojo {
 				break;
 			case DB_RESULT:
 				if (allowedValue.equals(AllowedValueEnum.NON_EMPTY)) {
-					if (Convert.isEmpty(value)) {
-						Assertion.logger.error("value can't be null or empty string.");
-						result = false;
+					if (!Convert.isEmpty(value)) {
+						if(Assertion.logger.isDebugEnabled()) {
+							Assertion.logger.debug(String.format("value is set, but will not used in assertion validation for '%s'.", AllowedValueEnum.NON_EMPTY));
+						}
 					}
 				}
 				break;
