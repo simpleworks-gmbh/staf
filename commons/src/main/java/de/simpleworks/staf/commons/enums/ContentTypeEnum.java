@@ -1,12 +1,12 @@
 package de.simpleworks.staf.commons.enums;
 
-import java.util.List;
-
 import de.simpleworks.staf.commons.consts.ContentTypeValue;
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.IEnum;
 import de.simpleworks.staf.commons.utils.UtilsCollection;
 import de.simpleworks.staf.commons.utils.UtilsFormat;
+
+import java.util.List;
 
 public enum ContentTypeEnum implements IEnum {
 	NONE("NONE", ContentTypeValue.NONE), UNKNOWN("unkown", ContentTypeValue.UNKNOWN),
@@ -38,6 +38,7 @@ public enum ContentTypeEnum implements IEnum {
 	MULTIPART_FORM_DATA("multipart/form-data", ContentTypeValue.MULTIPART_FORM_DATA),
 	TEXT("text/plain", ContentTypeValue.TEXT), CSV("text/csv", ContentTypeValue.CSV),
 	HTML("text/html", ContentTypeValue.HTML),
+    XML("application/xml", ContentTypeValue.XML),
 	SPRINGBOOT_ACTUATOR_V2_JSON("application/vnd.spring-boot.actuator.v2+json", ContentTypeValue.SPRINGBOOT_ACTUATOR_V2_JSON),
 	SPRINGBOOT_ACTUATOR_V3_JSON("application/vnd.spring-boot.actuator.v3+json", ContentTypeValue.SPRINGBOOT_ACTUATOR_V3_JSON);
 
