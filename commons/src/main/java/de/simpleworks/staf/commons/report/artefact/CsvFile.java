@@ -12,7 +12,7 @@ import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.UtilsCollection;
 
 public class CsvFile extends Artefact<String> {
-	private static final Logger logger = LogManager.getLogger(HarFile.class);
+	private static final Logger logger = LogManager.getLogger(CsvFile.class);
 	private static final String CSV_DELIMETER = ";";
 
 	private final List<String> expetcedColumns;
