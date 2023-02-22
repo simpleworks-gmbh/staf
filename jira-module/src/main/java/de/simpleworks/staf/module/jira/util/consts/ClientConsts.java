@@ -8,6 +8,7 @@ public class ClientConsts {
 	public static final String FILENAME = "jira-client.properties";
 	public static final String USERNAME = "jira.username";
 	public static final String PASSWORD = "jira.password";
+	public static final String PAT = "jira.pat";
 	public static final String URL = "jira.url";
 
 	public final static String SCREENSHOT_FORMAT = "screenshot.format";

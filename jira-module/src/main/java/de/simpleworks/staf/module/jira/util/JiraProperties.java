@@ -25,7 +25,10 @@ public class JiraProperties extends PropertiesReader {
 
 	@Property(ClientConsts.PASSWORD)
 	private String password;
-
+	
+	@Property(ClientConsts.PAT)
+	private String pat;
+	
 	@Default("png")
 	@Property(ClientConsts.SCREENSHOT_FORMAT)
 	private String screenshot;
@@ -59,6 +62,10 @@ public class JiraProperties extends PropertiesReader {
 
 	public String getPassword() {
 		return password;
+	}
+	
+	public String getPat() {
+		return pat;
 	}
 
 	public String getScreenshotFormat() {
