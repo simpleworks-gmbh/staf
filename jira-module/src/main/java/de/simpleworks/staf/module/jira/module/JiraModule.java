@@ -5,16 +5,16 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import org.apache.logging.log4j.Logger; 
 import com.atlassian.jira.rest.client.api.IssueRestClient;
 import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.api.JiraRestClientFactory;
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory;
 import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
+import com.google.inject.Provides; 
 
 import de.simpleworks.staf.commons.exceptions.SystemException;
+import de.simpleworks.staf.module.jira.util.BearerTokenAuthenticationHandler;
 import de.simpleworks.staf.module.jira.util.JiraProperties;
 
 public class JiraModule extends AbstractModule {
@@ -27,14 +27,44 @@ public class JiraModule extends AbstractModule {
 		properties = JiraProperties.getInstance();
 	}
 
+	private JiraRestClient getBearerTokenJiraRestClient(URI uri) {
+		final JiraRestClientFactory factory = new AsynchronousJiraRestClientFactory();
+		final JiraRestClient result = factory.createWithAuthenticationHandler(uri,
+				new BearerTokenAuthenticationHandler(properties.getPat()));
+
+		return result;
+	}
+
+	private JiraRestClient getBasicAuthJiraRestClient(URI uri) {
+		final JiraRestClientFactory factory = new AsynchronousJiraRestClientFactory();
+		final JiraRestClient result = factory.createWithBasicHttpAuthentication(uri, properties.getUsername(),
+				properties.getPassword());
+
+		return result;
+	}
+
 	@Override
 	protected void configure() {
 		URI uri = null;
 
 		try {
 			uri = getJiraUri();
-			final JiraRestClientFactory factory = new AsynchronousJiraRestClientFactory();
-			client = factory.createWithBasicHttpAuthentication(uri, properties.getUsername(), properties.getPassword());
+
+			switch (properties.getAuthentication()) {
+
+			case BASIC_AUTHENTICATED_CLIENT:
+				client = getBasicAuthJiraRestClient(uri);
+				break;
+
+			case BEARER_TOKEN_CLIENT:
+				client = getBearerTokenJiraRestClient(uri);
+				break;
+
+			default:
+				throw new IllegalArgumentException(String.format("authentication '%s' is not implemented yet.",
+						properties.getAuthentication().getValue()));
+			}
+
 		} catch (final Throwable th) {
 			final String msg = String.format("can't create jira rest client (url: '%s', user: '%s')", uri,
 					properties.getUsername());

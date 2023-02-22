@@ -10,7 +10,9 @@ import de.simpleworks.staf.commons.annotation.Property;
 import de.simpleworks.staf.commons.annotation.Property.Default;
 import de.simpleworks.staf.commons.exceptions.InvalidConfiguration;
 import de.simpleworks.staf.commons.utils.PropertiesReader;
-import de.simpleworks.staf.module.jira.util.consts.ClientConsts; 
+import de.simpleworks.staf.module.jira.util.consts.ClientConsts;
+import de.simpleworks.staf.module.jira.util.consts.JiraAuthenticationValue;
+import de.simpleworks.staf.module.jira.util.enums.JiraAuthenticationEnum; 
 
 public class JiraProperties extends PropertiesReader {
 	private static final Logger logger = LogManager.getLogger(JiraProperties.class);
@@ -29,6 +31,11 @@ public class JiraProperties extends PropertiesReader {
 	@Property(ClientConsts.PAT)
 	private String pat;
 	
+	@Default( JiraAuthenticationValue.BASIC_AUTHENTICATED_CLIENT)
+	@Property(ClientConsts.JIRA_AUTHENTICATION)
+	private JiraAuthenticationEnum authentication;
+	
+
 	@Default("png")
 	@Property(ClientConsts.SCREENSHOT_FORMAT)
 	private String screenshot;
@@ -66,6 +73,10 @@ public class JiraProperties extends PropertiesReader {
 	
 	public String getPat() {
 		return pat;
+	}
+	
+	public JiraAuthenticationEnum getAuthentication() {
+		return authentication;
 	}
 
 	public String getScreenshotFormat() {
