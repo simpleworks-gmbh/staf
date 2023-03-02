@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -172,9 +173,13 @@ public class TestcaseFinder {
 		}
 
 		try (JarFile jarFile = new JarFile(file)) {
-			final Enumeration<JarEntry> e = jarFile.entries();
-			while (e.hasMoreElements()) {
-				final JarEntry jarEntry = e.nextElement();
+			
+			
+			List<JarEntry> list = Collections.list(jarFile.entries());
+			
+			
+			list.stream().parallel().forEach(e -> {
+				final JarEntry jarEntry = e;
 				final String name = jarEntry.getName();
 				if (name.endsWith(TestcaseFinder.SUFFIX_FILE_CLASS)
 						&& !name.endsWith(TestcaseFinder.FILE_MODULE_INFO)) {
@@ -187,10 +192,12 @@ public class TestcaseFinder {
 						final String message = String.format("can't check class: '%s' from jar: '%s'.", className,
 								file);
 						TestcaseFinder.logger.error(message, ex);
-						throw new SystemException(message);
+						//throw new SystemException(message);
 					}
 				}
-			}
+			});
+			
+			
 		} catch (final IOException ex) {
 			final String message = String.format("can't read jar: '%s'.", file);
 			TestcaseFinder.logger.error(message, ex);
