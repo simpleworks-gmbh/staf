@@ -1,6 +1,5 @@
 package de.simpleworks.staf.devicetesting.android.stafelements;
 
-import java.time.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
@@ -8,15 +7,12 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
 import de.simpleworks.staf.commons.exceptions.SystemException;
-import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.web.stafelements.STAFElement;
 import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.android.AndroidTouchAction;
 import io.appium.java_client.android.nativekey.AndroidKey;
 import io.appium.java_client.android.nativekey.KeyEvent;
-import io.appium.java_client.touch.LongPressOptions;
-import io.appium.java_client.touch.offset.ElementOption;
 
 @SuppressWarnings("deprecation")
 public class STAFInputBox extends STAFElement {
@@ -38,14 +34,20 @@ public class STAFInputBox extends STAFElement {
 		wait.until(ExpectedConditions.presenceOfElementLocated(getBy()));
 		wait.until(ExpectedConditions.elementToBeClickable(getBy()));
 		getWebDriver().findElement(getBy()).click();
-		if (markText()) {
-			if (!pressDELETEKey()) {
-				STAFInputBox.logger.error("cannot delete text.");
+
+		if (text != null) {
+
+			// Put the cursor on the desired testfield
+			getWebDriver().findElement(getBy()).sendKeys("");
+			// Press delete button as many times as the existing text length
+			for (int i = 0; i < text.length(); i++) {
+				((AndroidDriver) getWebDriver()).pressKey(new KeyEvent(AndroidKey.DEL));
 			}
 		}
-		Actions enterText = new Actions(getWebDriver());
+		final Actions enterText = new Actions(getWebDriver());
 		enterText.sendKeys(text);
 		enterText.perform();
+
 		((AndroidDriver) getWebDriver()).hideKeyboard();
 	}
 
@@ -60,36 +62,4 @@ public class STAFInputBox extends STAFElement {
 		return value;
 	}
 
-	@Override
-	public boolean markText() {
-		boolean result = true;
-		try {
-			// check if we need to mark text at all.
-			if (Convert.isEmpty(getText())) {
-				return false;
-			}
-			// (long) press on the text edit, so the whole texts gets selected.
-			AndroidTouchAction ta = new AndroidTouchAction((AndroidDriver) getWebDriver());
-			ta.longPress(LongPressOptions.longPressOptions()
-					.withElement(ElementOption.element(getWebDriver().findElement(getBy())))
-					.withDuration(Duration.ofMillis(2000))).release();
-			ta.perform();
-		} catch (Exception ex) {
-			STAFInputBox.logger.error("can't mark text.", ex);
-			result = false;
-		}
-		return result;
-	}
-
-	@Override
-	public boolean pressDELETEKey() {
-		boolean result = true;
-		try {
-			((AndroidDriver) getWebDriver()).pressKey(new KeyEvent(AndroidKey.DEL));
-		} catch (Exception ex) {
-			STAFInputBox.logger.error("can't delete text.", ex);
-			result = false;
-		}
-		return result;
-	}
 }
