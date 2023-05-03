@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,7 +36,7 @@ public class JSONPATHAssertionValidator extends AssertionUtils<HttpResponse> {
 		if (Convert.isEmpty(path)) {
 			throw new IllegalArgumentException("path can't be null or empty string.");
 		}
-		
+
 		if (JSONPATHAssertionValidator.logger.isInfoEnabled()) {
 			JSONPATHAssertionValidator.logger.info(String.format("run jsonpath '%s' on '%s'.", path, body));
 		}
@@ -243,6 +245,29 @@ public class JSONPATHAssertionValidator extends AssertionUtils<HttpResponse> {
 				throw new RuntimeException(msg);
 			}
 			break;
+		case REGEX:
+			final Pattern pattern = Pattern.compile(assertionValue);
+			final Matcher matcher = pattern.matcher(content);
+
+			final Map<String, String> result = new HashMap<>();
+			if (matcher.find()) {
+				if (logger.isDebugEnabled()) {
+					logger.debug(
+							String.format("Regex found %d capture groups.", Integer.valueOf(matcher.groupCount())));
+				}
+
+				for (int i = 1; i <= matcher.groupCount(); i++) {
+					final String assertionIdGroup = String.format("%s_G%d", assertionId, Integer.valueOf(i));
+					result.put(assertionIdGroup, matcher.group(i));
+				}
+			}
+
+			if (result.isEmpty()) {
+				throw new RuntimeException(String.format(
+						"The assertion  \"%s\" was not met. Fetched value '%s' does not match the regular expression '%s'.",
+						assertionId, content, assertionValue));
+			}
+			return result;
 		default:
 			throw new IllegalArgumentException(
 					String.format("The allowedValueEnum '%s' is not implemented yet.", allowedValueEnum.getValue()));

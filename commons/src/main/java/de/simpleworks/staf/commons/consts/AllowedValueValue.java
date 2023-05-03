@@ -11,6 +11,7 @@ public class AllowedValueValue {
 	public final static String ANY_ORDER = "ANY_ORDER";
 	public final static String STRICT_ORDER = "STRICT_ORDER";
 	public final static String EXACT_VALUE = "EXACT_VALUE";
+	public static final String REGEX = "REGEX";
 	
 	// Kafka Validations
 	public final static String AMOUNT_EQUALS_TO = "AMOUNT_EQUALS_TO";
