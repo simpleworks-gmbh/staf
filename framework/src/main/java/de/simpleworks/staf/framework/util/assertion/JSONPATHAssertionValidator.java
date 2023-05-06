@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -243,6 +245,29 @@ public class JSONPATHAssertionValidator extends AssertionUtils<HttpResponse> {
 				throw new RuntimeException(msg);
 			}
 			break;
+		case REGEX:
+			
+			
+			final Pattern r = Pattern.compile(assertionValue);
+			final Matcher m = r.matcher(content);
+
+			boolean regexMatched = false;
+			String matchedGroup = Convert.EMPTY_STRING;
+			
+			while (m.find()) {
+				matchedGroup = m.group();
+				regexMatched = true;
+			}
+			
+			if (!regexMatched) {
+				throw new RuntimeException(String.format(
+						"The assertion  \"%s\" was not met. Fetched value '%s' does not match the expected one '%s'.",
+						assertionId, content, assertionValue));
+			}
+			
+			// NOTE: only the last matching group is returned
+			content = matchedGroup;
+			break;	
 		default:
 			throw new IllegalArgumentException(
 					String.format("The allowedValueEnum '%s' is not implemented yet.", allowedValueEnum.getValue()));
