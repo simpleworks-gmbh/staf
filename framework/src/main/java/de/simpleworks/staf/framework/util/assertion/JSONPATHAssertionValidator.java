@@ -1,8 +1,10 @@
 package de.simpleworks.staf.framework.util.assertion;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -244,6 +246,18 @@ public class JSONPATHAssertionValidator extends AssertionUtils<HttpResponse> {
 				JSONPATHAssertionValidator.logger.error(msg, ex);
 				throw new RuntimeException(msg);
 			}
+			break;
+		case PART_OF:
+			final List<String> elements = Arrays.asList(assertionValue.split("#"));
+			
+			if(elements.indexOf(content) < 0) {
+				final String msg = String.format(
+						"The assertion \"%s\" was not met. Expected value '%s', is not part of ['%s'].", assertionId,
+						assertionValue, content);
+				JSONPATHAssertionValidator.logger.error(msg);
+				throw new RuntimeException(msg);
+			}
+			
 			break;
 		case REGEX:
 			final Pattern pattern = Pattern.compile(assertionValue);
