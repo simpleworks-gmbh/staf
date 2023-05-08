@@ -38,7 +38,7 @@ public class JSONPATHAssertionValidator extends AssertionUtils<HttpResponse> {
 		if (Convert.isEmpty(path)) {
 			throw new IllegalArgumentException("path can't be null or empty string.");
 		}
-		
+
 		if (JSONPATHAssertionValidator.logger.isInfoEnabled()) {
 			JSONPATHAssertionValidator.logger.info(String.format("run jsonpath '%s' on '%s'.", path, body));
 		}
@@ -238,7 +238,6 @@ public class JSONPATHAssertionValidator extends AssertionUtils<HttpResponse> {
 			break;
 		case ANY_ORDER:
 			try {
-				
 				JSONAssert.assertEquals(assertionValue, content, JSONCompareMode.LENIENT);
 			} catch (final JSONException ex) {
 				final String msg = String.format(
@@ -260,27 +259,29 @@ public class JSONPATHAssertionValidator extends AssertionUtils<HttpResponse> {
 			}
 			
 			break;
-		case REGEX:	
-			final Pattern r = Pattern.compile(assertionValue);
-			final Matcher m = r.matcher(content);
+		case REGEX:
+			final Pattern pattern = Pattern.compile(assertionValue);
+			final Matcher matcher = pattern.matcher(content);
 
-			boolean regexMatched = false;
-			String matchedGroup = Convert.EMPTY_STRING;
-			
-			while (m.find()) {
-				matchedGroup = m.group();
-				regexMatched = true;
+			final Map<String, String> result = new HashMap<>();
+			if (matcher.find()) {
+				if (logger.isDebugEnabled()) {
+					logger.debug(
+							String.format("Regex found %d capture groups.", Integer.valueOf(matcher.groupCount())));
+				}
+
+				for (int i = 1; i <= matcher.groupCount(); i++) {
+					final String assertionIdGroup = String.format("%s_G%d", assertionId, Integer.valueOf(i));
+					result.put(assertionIdGroup, matcher.group(i));
+				}
 			}
-			
-			if (!regexMatched) {
+
+			if (result.isEmpty()) {
 				throw new RuntimeException(String.format(
-						"The assertion  \"%s\" was not met. Fetched value '%s' does not match the expected one '%s'.",
+						"The assertion  \"%s\" was not met. Fetched value '%s' does not match the regular expression '%s'.",
 						assertionId, content, assertionValue));
 			}
-			
-			// NOTE: only the last matching group is returned
-			content = matchedGroup;
-			break;	
+			return result;
 		default:
 			throw new IllegalArgumentException(
 					String.format("The allowedValueEnum '%s' is not implemented yet.", allowedValueEnum.getValue()));

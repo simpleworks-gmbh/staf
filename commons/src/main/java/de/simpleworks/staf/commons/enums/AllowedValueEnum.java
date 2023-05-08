@@ -16,9 +16,9 @@ public enum AllowedValueEnum implements IEnum {
 	ANY_ORDER("ANY_ORDER", AllowedValueValue.ANY_ORDER), STRICT_ORDER("STRICT_ORDER", AllowedValueValue.STRICT_ORDER),
 	PART_OF("PART_OF", AllowedValueValue.PART_OF),
 	EXACT_VALUE("EXACT_VALUE", AllowedValueValue.EXACT_VALUE),
-	REGEX("REGEX", AllowedValueValue.REGEX),
 	AMOUNT_EQUALS_TO("AMOUNT_EQUALS_TO", AllowedValueValue.AMOUNT_EQUALS_TO),
-	AMOUNT_MORE_THAN("AMOUNT_MORE_THAN", AllowedValueValue.AMOUNT_MORE_THAN);
+	AMOUNT_MORE_THAN("AMOUNT_MORE_THAN", AllowedValueValue.AMOUNT_MORE_THAN),
+	REGEX("REGEX", AllowedValueValue.REGEX);
 
 	final private String name;
 	final private String value;
