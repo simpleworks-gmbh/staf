@@ -31,6 +31,7 @@ public class HttpRequest implements IPojo {
 	private FormParameter[] formParameters;
 	private MultipartFormDataParameter[] multipartFormDataParameters;
 	private MultipartFormFileParameter multipartFormFileParameter;
+	private RawFileParameter rawFileParameter;
 	private Header[] headers;
 	private String basicAuth;
 
@@ -47,6 +48,7 @@ public class HttpRequest implements IPojo {
 		formParameters = new FormParameter[0];
 		multipartFormDataParameters = new MultipartFormDataParameter[0];
 		multipartFormFileParameter = new MultipartFormFileParameter();
+		rawFileParameter = new RawFileParameter();
 		headers = new Header[0];
 		basicAuth = Convert.EMPTY_STRING;
 	}
@@ -115,6 +117,10 @@ public class HttpRequest implements IPojo {
 		return multipartFormFileParameter;
 	}
 
+	public RawFileParameter getRawFileParameter() {
+		return rawFileParameter;
+	}
+
 	public Header[] getHeaders() {
 		return headers;
 	}
@@ -149,6 +155,10 @@ public class HttpRequest implements IPojo {
 
 	public void setMultipartFormFileParameter(final MultipartFormFileParameter multipartFormFileParameter) {
 		this.multipartFormFileParameter = multipartFormFileParameter;
+	}
+
+	public void setRawFileParameter(RawFileParameter rawFileParameter) {
+		this.rawFileParameter = rawFileParameter;
 	}
 
 	public void setQueryParameters(final QueryParameter[] queryParameters) {
@@ -218,8 +228,8 @@ public class HttpRequest implements IPojo {
 
 	@Override
 	public boolean validate() {
-		if (HttpRequest.logger.isDebugEnabled()) {
-			HttpRequest.logger.debug("validate HttpRequest...");
+		if (HttpRequest.logger.isTraceEnabled()) {
+			HttpRequest.logger.trace("validate HttpRequest...");
 		}
 		boolean result = true;
 		if (method == null) {
@@ -284,6 +294,16 @@ public class HttpRequest implements IPojo {
 				result = false;
 			}
 		}
+
+		if (method == HttpMethodEnum.POST || method == HttpMethodEnum.PUT) {
+			/*if (!Convert.isEmpty(rawFileParameter.getFile())) {
+				if (!rawFileParameter.validate()) {
+					HttpRequest.logger.error(String.format("rawFileParameter '%s' is invalid.", rawFileParameter));
+					result = false;
+				}
+			}*/
+		}
+
 		if (!Convert.isEmpty(headers)) {
 			if (Arrays.asList(headers).stream().filter(h -> h.validate()).collect(Collectors.toList()).isEmpty()) {
 				HttpRequest.logger.error(String.format("headers are invalid '%s'.", String.join(",",
@@ -296,7 +316,7 @@ public class HttpRequest implements IPojo {
 
 	@Override
 	public String toString() {
-		return String.format("[%s: %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s]",
+		return String.format("[%s: %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s]",
 				Convert.getClassName(HttpRequest.class),
 				UtilsFormat.format("method", method == null ? null : method.getValue()),
 				UtilsFormat.format("scheme", scheme),
@@ -320,6 +340,7 @@ public class HttpRequest implements IPojo {
 								Arrays.asList(multipartFormDataParameters).stream().map(m -> m.toString())
 										.collect(Collectors.toList()))),
 				UtilsFormat.format("multipartFormFileParameter", multipartFormFileParameter),
+				UtilsFormat.format("rawFileParameter", rawFileParameter),
 				UtilsFormat.format("headers",
 						String.join(",",
 								Arrays.asList(headers).stream().map(h -> h.toString()).collect(Collectors.toList()))),

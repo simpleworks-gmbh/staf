@@ -23,6 +23,7 @@ public class FrameworkConsts {
 	public static final String WEBDRIVER_SCREENSHOT = "webdriver.screenshot";
 	public static final String WEBDRIVER_HEADLESS = "webdriver.headless";
 	public static final String WEBDRIVER_MANAGER_CLASS = "webdriver.manager.class";
+	public static final String WEBDRIVER_IS_SINGLE_INSTANCE = "webdriver.isSingleInstance";
 
 	public static final String REPORTER_MANAGER_CLASS = "reporter.manager.class";
 	public static final String REPORTER_MANAGER_REPORT_DIRECTORY = "reporter.manager.report.directory";

@@ -43,7 +43,7 @@ public class TestCaseProperties extends PropertiesReader {
 	@Property(FrameworkConsts.FUNCTION_TEMPLATE_REGULAR_EXPRESSION)
 	private String functionTemplateRegularExpression;
 	
-	@Default("de.simpleworks.staf.module.jsonreporter.JsonReporter")
+	@Default("de.simpleworks.staf.framework.reporter.json.JsonReporter")
 	@Property(FrameworkConsts.REPORTER_MANAGER_CLASS)
 	private String reporterManagerClass;
 

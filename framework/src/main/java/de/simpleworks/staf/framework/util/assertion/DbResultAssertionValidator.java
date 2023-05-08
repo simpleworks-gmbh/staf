@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import de.simpleworks.staf.commons.api.Assertion;
 import de.simpleworks.staf.commons.database.QueuedDbResult;
 import de.simpleworks.staf.commons.enums.AllowedValueEnum;
@@ -45,24 +44,29 @@ public class DbResultAssertionValidator extends AssertionUtils<QueuedDbResult> {
 			for (Map<String, String> map : response.getResult()) {
 				content = map.get(assertionAtribute);
 
+						
 				if (content == null) {
-					throw new RuntimeException(String
-							.format("Can't validate assertion '%s'. The fetched value was null.", assertion.getId()));
+					if (assertionValue == null) {
+						throw new DbViolatedAssertionException(String.format(
+								"The assertion '%s' was not met. Fetched value '%s' does match the expected one '%s'.",
+								assertion.getId(), content, assertionValue), response);
+					}
 				}
-
-				if (content.equals(assertionValue)) {
-					throw new RuntimeException(String.format(
-							"The assertion '%s' was not met. Fetched value '%s' does match the expected one '%s'.",
-							assertion.getId(), content, assertionValue));
+				else {
+					if (content.equals(assertionValue)) {
+						throw new DbViolatedAssertionException(String.format(
+								"The assertion '%s' was not met. Fetched value '%s' does match the expected one '%s'.",
+								assertion.getId(), content, assertionValue), response);
+					}
 				}
 			}
 			break;
 
 		case NON_EMPTY:
 			if (Convert.isEmpty(response.getResult())) {
-				throw new RuntimeException(String.format(
+				throw new DbViolatedAssertionException(String.format(
 						"The assertion '%s' was not met. Value can't be fetched, but a \"non empty vaue\" was expected.",
-						assertion.getId()));
+						assertion.getId()), response);
 			}
 			break;
 
@@ -72,13 +76,13 @@ public class DbResultAssertionValidator extends AssertionUtils<QueuedDbResult> {
 				content = map.get(assertionAtribute);
 
 				if (content == null) {
-					throw new RuntimeException("Can't validate assertion. The fetched value was null.");
+					throw new DbViolatedAssertionException("Can't validate assertion. The fetched value was null.", response);
 				}
 
 				if (!content.contains(assertionValue)) {
-					throw new RuntimeException(
+					throw new DbViolatedAssertionException(
 							String.format("The assertion '%s' was not met. Fetched value '%s' does not contain '%s'.",
-									assertion.getId(), content, assertionValue));
+									assertion.getId(), content, assertionValue), response);
 				}
 			}
 
@@ -90,22 +94,22 @@ public class DbResultAssertionValidator extends AssertionUtils<QueuedDbResult> {
 				content = map.get(assertionAtribute);
 
 				if (content == null && assertionValue != null) {
-					throw new RuntimeException(String.format(
+					throw new DbViolatedAssertionException(String.format(
 							"The assertion '%s' was not met. Fetched value is null, but '%s' was expected.",
-							assertion.getId(), assertionValue));
+							assertion.getId(), assertionValue), response);
 				}
 
 				if (content != null && assertionValue == null) {
-					throw new RuntimeException(String.format(
+					throw new DbViolatedAssertionException(String.format(
 							"The assertion '%s' was not met. Fetched value is '%s', but null was expected.",
-							assertion.getId(), content));
+							assertion.getId(), content), response);
 				}
 
 				if (content != null && assertionValue != null) {
 					if (!content.equals(assertionValue)) {
-						throw new RuntimeException(String.format(
+						throw new DbViolatedAssertionException(String.format(
 								"The assertion '%s' was not met. Fetched value '%s' does not match the expected one '%s'.",
-								assertion.getId(), content, assertionValue));
+								assertion.getId(), content, assertionValue), response);
 					}
 				}
 

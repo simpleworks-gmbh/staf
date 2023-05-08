@@ -16,6 +16,7 @@ import de.simpleworks.staf.commons.api.Header;
 import de.simpleworks.staf.commons.api.HttpRequest;
 import de.simpleworks.staf.commons.api.HttpResponse;
 import de.simpleworks.staf.commons.api.MultipartFormFileParameter;
+import de.simpleworks.staf.commons.api.RawFileParameter;
 import de.simpleworks.staf.commons.enums.ContentTypeEnum;
 import de.simpleworks.staf.commons.enums.HttpMethodEnum;
 import de.simpleworks.staf.commons.exceptions.SystemException;
@@ -40,17 +41,20 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 public class HttpClient implements IHttpClient {
-	private static final Logger logger = LogManager.getLogger(HttpClient.class);
-	private final OkHttpClientRecipe okhttpclientRecipe;
+	private static final Logger logger = LogManager.getLogger(HttpClient.class); 
 	private final OkHttpClient client;
 	private final BrowserMobProxyServer browsermobProxy;
 
 	public HttpClient() throws SystemException {
-		okhttpclientRecipe = OkHttpBuilder.buildOkHttpClientRecipe();
-		client = okhttpclientRecipe.getClient();
-		browsermobProxy = okhttpclientRecipe.getBrowsermobProxy();
+		this(OkHttpBuilder.buildOkHttpClientRecipe());
 	}
 
+	protected HttpClient(final OkHttpClientRecipe okhttpclientRecipe) throws SystemException {
+		this.client = okhttpclientRecipe.getClient();
+		this.browsermobProxy = okhttpclientRecipe.getBrowsermobProxy();
+	}
+	
+	
 	public BrowserMobProxyServer getBrowserMobProxyServer() {
 		return browsermobProxy;
 	}
@@ -197,12 +201,24 @@ public class HttpClient implements IHttpClient {
 			result = multipartBodyBuilder.build();
 			break;
 		default:
+			
 			if (HttpClient.logger.isDebugEnabled()) {
 				HttpClient.logger
 						.debug(String.format("Content Type '%s' is not implemented yet.", contenttype.getValue()));
-				HttpClient.logger.debug("The Content Type was not defined, will return an empty request body.");
 			}
-			result = RequestBody.create(null, Convert.EMPTY_STRING);
+			
+		
+			final RawFileParameter rawFileParameter = request.getRawFileParameter();
+
+			if(!Convert.isEmpty(rawFileParameter.getFile())) {
+				HttpClient.logger.debug(String.format("'RawFileParameter' was set, will use the file at '%s'.", rawFileParameter.getFile()));
+				result = RequestBody.create(MediaType.parse(contenttype.getValue()), new File(rawFileParameter.getFile()));
+			}
+			else {
+				HttpClient.logger.debug("The Content Type was not defined, will return an empty request body.");
+				result = RequestBody.create(null, Convert.EMPTY_STRING);
+			}
+
 		}
 		return result;
 	}
@@ -253,7 +269,7 @@ public class HttpClient implements IHttpClient {
 		final HttpResponse result = new HttpResponse();
 		final ContentTypeEnum contentTypeEnum = HttpClient.getContentType(body);
 		result.setContentType(contentTypeEnum);
-		if (contentTypeEnum == ContentTypeEnum.JSON) {
+		if (contentTypeEnum == ContentTypeEnum.JSON || contentTypeEnum == ContentTypeEnum.SPRINGBOOT_ACTUATOR_V2_JSON || contentTypeEnum == ContentTypeEnum.SPRINGBOOT_ACTUATOR_V3_JSON) {
 			final String json = UtilsIO.getAllContentFromBytesArray(bytes);
 			result.setJsonBody(json);
 			if (HttpClient.logger.isDebugEnabled()) {

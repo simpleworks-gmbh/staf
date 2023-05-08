@@ -15,7 +15,6 @@ import de.simpleworks.staf.module.kafka.api.IKafkaTeststep;
 import de.simpleworks.staf.module.kafka.api.KafkaConsumeRequest;
 
 public class KafkaTeststep implements IKafkaTeststep<KafkaConsumeRequest> {
-
 	private static final Logger logger = LogManager.getLogger(KafkaTeststep.class);
 
 	private String name;
@@ -68,16 +67,14 @@ public class KafkaTeststep implements IKafkaTeststep<KafkaConsumeRequest> {
 
 	@Override
 	public boolean validate() {
-		if (KafkaTeststep.logger.isDebugEnabled()) {
-			KafkaTeststep.logger.debug("validate KafkaTeststep...");
+		if (KafkaTeststep.logger.isTraceEnabled()) {
+			KafkaTeststep.logger.trace("validate KafkaTeststep...");
 		}
 
 		boolean result = true;
 
 		if (Convert.isEmpty(name)) {
-			if (KafkaTeststep.logger.isDebugEnabled()) {
-				KafkaTeststep.logger.debug("name can't be null or empty string.");
-			}
+			KafkaTeststep.logger.error("name can't be null or empty string.");
 			result = false;
 		}
 

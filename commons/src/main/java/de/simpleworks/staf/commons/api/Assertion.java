@@ -150,6 +150,14 @@ public class Assertion implements IPojo {
 					Assertion.logger.error("jsonpath can't be null or empty string.");
 					result = false;
 				}
+				
+				if (allowedValue.equals(AllowedValueEnum.REGEX)) {
+					if (Convert.isEmpty(value)) {
+						Assertion.logger.error(String.format("value can't be null or empty string, if allowedValue is %s.", AllowedValueEnum.REGEX.getValue()));
+						result = false;
+					}
+				}
+				
 				break;
 			case HEADER:
 				if (Convert.isEmpty(headername)) {
@@ -165,9 +173,10 @@ public class Assertion implements IPojo {
 				break;
 			case DB_RESULT:
 				if (allowedValue.equals(AllowedValueEnum.NON_EMPTY)) {
-					if (Convert.isEmpty(value)) {
-						Assertion.logger.error("value can't be null or empty string.");
-						result = false;
+					if (!Convert.isEmpty(value)) {
+						if(Assertion.logger.isDebugEnabled()) {
+							Assertion.logger.debug(String.format("value is set, but will not used in assertion validation for '%s'.", AllowedValueEnum.NON_EMPTY));
+						}
 					}
 				}
 				break;

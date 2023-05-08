@@ -16,7 +16,7 @@ import org.junit.runners.model.Statement;
 
 import de.simpleworks.staf.commons.exceptions.SystemException;
 import de.simpleworks.staf.commons.utils.Scanner;
-import de.simpleworks.staf.framework.elements.commons.TestCase;
+import de.simpleworks.staf.framework.elements.commons.ATestCaseImpl;
 import de.simpleworks.staf.framework.util.STAFUtils;
 
 /**
@@ -27,18 +27,18 @@ public class STAFBlockJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 
 	private static final Logger logger = LogManager.getLogger(STAFBlockJUnit4ClassRunner.class);
 
-	private final Class<? extends TestCase> testClass;
-	private Object test;
+	private final Class<? extends ATestCaseImpl> testClass;
+	protected Object test;
 
 	@SuppressWarnings("unchecked")
 	public STAFBlockJUnit4ClassRunner(final Class<?> clazz) throws InitializationError {
 		super(clazz);
 
-		if (!Scanner.doesClassExtendSpecificClass(clazz, TestCase.class)) {
-			throw new InitializationError(String.format("clazz needs to extends '%s'.", TestCase.class.getName()));
+		if (!Scanner.doesClassExtendSpecificClass(clazz, ATestCaseImpl.class)) {
+			throw new InitializationError(String.format("clazz needs to extends '%s'.", ATestCaseImpl.class.getName()));
 		}
 
-		this.testClass = (Class<? extends TestCase>) clazz;
+		this.testClass = (Class<? extends ATestCaseImpl>) clazz;
 	}
 
 	@Override
@@ -89,4 +89,5 @@ public class STAFBlockJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	protected Description describeChild(final FrameworkMethod method) {
 		return Description.createTestDescription(testClass.getName(), method.getName(), method.getAnnotations());
 	}
+	
 }

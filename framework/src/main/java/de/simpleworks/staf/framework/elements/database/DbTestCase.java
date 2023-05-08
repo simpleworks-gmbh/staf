@@ -6,11 +6,14 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Date;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.logging.log4j.LogManager;
@@ -38,13 +41,14 @@ import de.simpleworks.staf.framework.elements.api.RewriteUrlObject;
 import de.simpleworks.staf.framework.elements.commons.TemplateTestCase;
 import de.simpleworks.staf.framework.util.AssertionUtils;
 import de.simpleworks.staf.framework.util.assertion.DbResultAssertionValidator;
+import de.simpleworks.staf.framework.util.assertion.DbViolatedAssertionException;
 import net.lightbody.bmp.BrowserMobProxyServer;
 
 public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 
 	private static final Logger logger = LogManager.getLogger(DbTestCase.class);
 	public final static String ENVIRONMENT_VARIABLES_NAME = "DbTestCase";
-	private final DbConnectionManagerImpl databaseconnectionimpl;
+	private  DbConnectionManagerImpl databaseconnectionimpl;
 
 	private String currentstepname;
 	private Statement currentStatement;
@@ -53,10 +57,16 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 
 	protected DbTestCase(final String resource, final Module... modules) throws SystemException {
 		super(resource, DbTestCase.ENVIRONMENT_VARIABLES_NAME, new MapperDbTeststep(), modules);
+		 
+		final TeststepProvider<DbTeststep> provider = getProvider();
 
+		if (provider == null) {
+			throw new SystemException("provider can't be null.");
+		}
 		try {
-			databaseconnectionimpl = new DbConnectionManagerImpl();
-		} catch (final InstantiationException ex) {
+			databaseconnectionimpl = new DbConnectionManagerImpl(provider.getTeststeps().stream().map(step -> step.getStatement())
+					.map(statement -> statement.getConnectionId()).collect(Collectors.toList()));	
+		} catch (final Exception ex) {
 			DbTestCase.logger.error(ex);
 			throw new SystemException("can't set up database connection manager.");
 		}
@@ -203,7 +213,7 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 			default:
 				throw new IllegalArgumentException(String.format("type '%s' is not implemented yet.", type.getValue()));
 			}
-
+ 
 			DbTestCase.validateExpectedRows(currentResult, statement);
 
 			if (!Convert.isEmpty(assertions)) {
@@ -214,10 +224,18 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 
 			result.setSuccessfull(true);
 		} catch (final Throwable th) {
-			final String msg = String.format("Statement '%s' failed.", statement);
+			final String msg = String.format("Statement '%s' has failed, due to '%s'.", statement, th.getMessage());
 			DbTestCase.logger.error(msg, th);
-			result.setErrormessage(th.getMessage());
+			
+			result.setErrormessage(msg);
 			result.setSuccessfull(false);
+			
+			if(th instanceof DbViolatedAssertionException) {
+				// add latest result row to the currentResult
+				final DbViolatedAssertionException violatedException = (DbViolatedAssertionException) th;
+				currentResult = violatedException.getResult();
+			}
+			
 		}
 
 		if (DbTestCase.logger.isDebugEnabled()) {
@@ -270,7 +288,11 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 				} else if (Timestamp.class.equals(ob.getClass())) {
 					final Timestamp timestamp = rs.getObject(column, Timestamp.class);
 					value = timestamp.toString();
-				} else {
+				} else if (Date.class.equals(ob.getClass())) {
+					final Date  date = rs.getObject(column, Date.class);
+					value = date.toString();
+				} 
+				else {
 					throw new IllegalArgumentException(
 							String.format("Cannot handle type: '%s', value '%s'.", ob.getClass(), value));
 				}
@@ -300,8 +322,9 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 				final ResultSet rs = selectStatement.executeQuery();) {
 			return DbTestCase.readData(rs);
 		} catch (final Exception ex) {
-			final String msg = String.format("can't parse response from statement '%s'.", statement);
+			final String msg = String.format("can't parse response from statement '%s', due to '%s'.", statement, ex.getMessage());
 			DbTestCase.logger.error(msg, ex);
+			
 			throw new SystemException(msg);
 		}
 	}
@@ -328,7 +351,7 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 			}
 			return result;
 		} catch (final Exception ex) {
-			final String msg = String.format("can't parse response from statement '%s'.", statement);
+			final String msg = String.format("can't parse response from statement '%s' due to '%s'.", statement, ex.getMessage());
 			DbTestCase.logger.error(msg, ex);
 			throw new SystemException(msg);
 		}
@@ -392,8 +415,8 @@ public class DbTestCase extends TemplateTestCase<DbTeststep, QueuedDbResult> {
 
 		final DbResultRow rows = debresult.getResult();
 		if ((rows.size() != expectedRowsAmount)) {
-			throw new SystemException(String.format("debresult only has '%s' rows, but expected are '%s'.",
-					Integer.toString(rows.size()), Integer.toString(expectedRowsAmount)));
+			throw new SystemException(String.format("debresult only has '%s' rows, but expected are '%s', used statement [%s].",
+					Integer.toString(rows.size()), Integer.toString(expectedRowsAmount), statement));
 		}
 	}
 

@@ -6,9 +6,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -183,7 +186,40 @@ public class STAFElement {
 	}
 
 	protected WebElement getWebElement() throws SystemException {
-		final WebElement result = getWebDriver().findElement(getBy());
+
+		final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
+		
+		final WebElement result = wait.ignoring(StaleElementReferenceException.class)
+				.until(new ExpectedCondition<WebElement>() {
+					@Override
+					public WebElement apply(WebDriver driver) {
+						
+						WebElement result = null;
+						
+						try {
+							final WebDriverWait wait = new WebDriverWait(driver, getTimeout());
+							wait.until(ExpectedConditions.presenceOfElementLocated(getBy())); 
+						}
+						catch(TimeoutException ex) {
+							logger.error(String.format("element identified by '%s' is not loaded in DOM.", getBy().toString()), ex);
+							return result;
+						}
+						
+
+						try {
+							final WebDriverWait wait = new WebDriverWait(driver, getTimeout());
+							wait.until(ExpectedConditions.visibilityOfElementLocated(getBy()));
+						}
+						catch(TimeoutException ex) {			
+							logger.error(String.format("element identified by '%s' is not visible.", getBy().toString()), ex);
+							return result;
+						}
+				
+						result = getWebDriver().findElement(getBy());						
+						return result;
+					}
+				});
+		 
 
 		if (result == null) {
 			throw new SystemException(String.format("No webElement can be found at '%s'.", getBy()));
@@ -264,8 +300,8 @@ public class STAFElement {
 	public int getTimeout() {
 		final int result = guiproperties.getTimeout();
 
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("using timeout %d.", Integer.valueOf(result)));
+		if (logger.isTraceEnabled()) {
+			logger.trace(String.format("using timeout %d.", Integer.valueOf(result)));
 		}
 
 		return result;

@@ -1,6 +1,7 @@
 package de.simpleworks.staf.framework.database;
 
-import java.util.List;
+import java.util.List; 
+import java.util.ArrayList;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,14 +21,29 @@ public class DbConnectionManagerImpl implements DbConnectionManager {
 	private DbConnectionPool pool = null;
 	private boolean running = false;
 
-	private final List<DbConnection> dbconnections;
+	private final List<DbConnection> dbconnections = new ArrayList<DbConnection>();
 
-	public DbConnectionManagerImpl() throws InstantiationException {
+	public DbConnectionManagerImpl(List<String> ids) throws InstantiationException {
 
+		if(Convert.isEmpty(ids)) {
+			throw new IllegalArgumentException("ids can't be null or empty.");
+		}
+	
 		try {
-
-			this.dbconnections = properties.getDbConnections();
-
+			
+			for(DbConnection connection : properties.getDbConnections()) {
+				
+				if(ids.indexOf(connection.getId()) > -1) {
+					
+					if(DbConnectionManagerImpl.logger.isTraceEnabled()) {
+						DbConnectionManagerImpl.logger.trace(String.format("add connection '%s'.", connection));
+					}
+					
+					dbconnections.add(connection);
+				}
+			}
+			
+			
 			if (Convert.isEmpty(dbconnections)) {
 				throw new IllegalArgumentException("dbconnections can't be null or empty.");
 			}
@@ -36,7 +52,6 @@ public class DbConnectionManagerImpl implements DbConnectionManager {
 			logger.error(msg, ex);
 			throw new InstantiationException(msg);
 		}
-
 	}
 
 	@Override

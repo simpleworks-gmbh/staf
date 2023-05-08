@@ -1,12 +1,12 @@
 package de.simpleworks.staf.commons.enums;
 
-import java.util.List;
-
 import de.simpleworks.staf.commons.consts.ContentTypeValue;
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.IEnum;
 import de.simpleworks.staf.commons.utils.UtilsCollection;
 import de.simpleworks.staf.commons.utils.UtilsFormat;
+
+import java.util.List;
 
 public enum ContentTypeEnum implements IEnum {
 	NONE("NONE", ContentTypeValue.NONE), UNKNOWN("unkown", ContentTypeValue.UNKNOWN),
@@ -27,17 +27,20 @@ public enum ContentTypeEnum implements IEnum {
 	PPT("application/vnd.ms-powerpoint", ContentTypeValue.PPT),
 	PPTX("application/vnd.openxmlformats-officedocument.presentationml.presentation", ContentTypeValue.PPTX),
 	POTX("application/vnd.openxmlformats-officedocument.presentationml.template", ContentTypeValue.POTX),
-	PPSX("applicationvnd.openxmlformats-officedocument.presentationml.slideshow", ContentTypeValue.PPSX),
-	PPAM("applicationvnd.ms-powerpoint.addin.macroEnabled.12", ContentTypeValue.PPAM),
-	PPTM("applicationvnd.ms-powerpoint.presentation.macroEnabled.12", ContentTypeValue.PPTM),
-	POTM("applicationvnd.ms-powerpoint.template.macroEnabled.12", ContentTypeValue.POTM),
-	PPSM("applicationvnd.ms-powerpoint.slideshow.macroEnabled.12", ContentTypeValue.PPSM),
+	PPSX("application/vnd.openxmlformats-officedocument.presentationml.slideshow", ContentTypeValue.PPSX),
+	PPAM("application/vnd.ms-powerpoint.addin.macroEnabled.12", ContentTypeValue.PPAM),
+	PPTM("application/vnd.ms-powerpoint.presentation.macroEnabled.12", ContentTypeValue.PPTM),
+	POTM("application/vnd.ms-powerpoint.template.macroEnabled.12", ContentTypeValue.POTM),
+	PPSM("application/vnd.ms-powerpoint.slideshow.macroEnabled.12", ContentTypeValue.PPSM),
 	PNG("image/png", ContentTypeValue.PNG), JPG("image/jpg", ContentTypeValue.JPG),
 	JPEG("image/jpeg", ContentTypeValue.JPEG),
-	FORM_URLENCODED("x-www-form-urlencoded", ContentTypeValue.FORM_URLENCODED),
+	FORM_URLENCODED("application/x-www-form-urlencoded", ContentTypeValue.FORM_URLENCODED),
 	MULTIPART_FORM_DATA("multipart/form-data", ContentTypeValue.MULTIPART_FORM_DATA),
 	TEXT("text/plain", ContentTypeValue.TEXT), CSV("text/csv", ContentTypeValue.CSV),
-	HTML("text/html", ContentTypeValue.HTML);
+	HTML("text/html", ContentTypeValue.HTML),
+    XML("application/xml", ContentTypeValue.XML),
+	SPRINGBOOT_ACTUATOR_V2_JSON("application/vnd.spring-boot.actuator.v2+json", ContentTypeValue.SPRINGBOOT_ACTUATOR_V2_JSON),
+	SPRINGBOOT_ACTUATOR_V3_JSON("application/vnd.spring-boot.actuator.v3+json", ContentTypeValue.SPRINGBOOT_ACTUATOR_V3_JSON);
 
 	final private String name;
 	final private String value;

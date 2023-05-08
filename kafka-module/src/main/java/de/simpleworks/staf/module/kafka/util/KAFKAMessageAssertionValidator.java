@@ -104,6 +104,25 @@ public class KAFKAMessageAssertionValidator extends AssertionUtils<KafkaConsumeR
 							"The assertion  \"%s\" was not met. Fetched value '%s' does not match the expected one '%s'.",
 							assertionId, content, assertionValue));
 				}
+			} 
+
+			break;
+			
+		case NOT:
+
+			for (KafkaConsumeRecord record : response.getRecords()) {
+
+				final String jsonpath = assertion.getJsonpath();
+
+				// fix me, no check if type is correct
+				final String jsonBody = (String) record.getContent();
+				content = JSONPATHAssertionValidator.executeJsonPath(jsonBody, jsonpath);
+
+				if (content.equals(assertionValue)) {
+					throw new RuntimeException(String.format(
+							"The assertion \"%s\" was not met. Fetched value '%s' does match the expected one '%s'.",
+							assertionId, content, assertionValue));
+				}
 			}
 
 			break;

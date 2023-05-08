@@ -32,6 +32,10 @@ public class WebDriverProperties extends PropertiesReader {
 	@Property(FrameworkConsts.WEBDRIVER_MANAGER_CLASS)
 	private WebDriverManagerImpl webdrivermanager;
 
+
+	@Property(FrameworkConsts.WEBDRIVER_IS_SINGLE_INSTANCE)
+	private boolean isSingleInstance;
+
 	public WebDriverManagerImpl getWebDriverManager() {
 		return webdrivermanager;
 	}
@@ -42,6 +46,15 @@ public class WebDriverProperties extends PropertiesReader {
 	}
 
 	public static final synchronized WebDriverProperties getInstance() {
+
+		if (Boolean.getBoolean(System.getProperty(FrameworkConsts.WEBDRIVER_IS_SINGLE_INSTANCE, "false"))) {
+			if (WebDriverProperties.logger.isDebugEnabled()) {
+				WebDriverProperties.logger.debug("create new WebDriverProperties instance.");
+			}
+
+			return new WebDriverProperties();
+		}
+
 		if (WebDriverProperties.instance == null) {
 			if (WebDriverProperties.logger.isDebugEnabled()) {
 				WebDriverProperties.logger.debug("create instance.");
