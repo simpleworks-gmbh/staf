@@ -202,6 +202,19 @@ The **Variable Name** equals the one in the id field of the assertion.
 
 The following validateMethods are supported: 
 
+* JSONPATH 
+    * EVERYTHING: No assertion. Stores complete JSON content targeted by the JSON path.
+    * RANDOM: Assertion that the JSON path points to a non-empty JSON array. Stores a random element of the array.
+    * MAX: Assertion that the JSON path points to a non-empty JSON array with maximum number of elements given in value. Stores the max number of elements in the array.
+    * NOT: Assertion that the JSON path points to a value, that is not the same given in the value attribute. The content is stored.
+    * NON_EMPTY: Assertion that the JSON path points to a non-empty value. The content is stored.
+    * CONTAINS_VALUE: Assertion that the JSON path points to a value, that contains the substring given by the value attribute.
+    * EXACT_VALUE: Assertion that the JSON path pointss to a value, that is exactly the same as given by the value attribute. The content is stored.
+    * STRICT_ORDER: Assertion that the JSON path points to a non-empty JSON array that has the same permutation of elements given by the value attribute. **NOTE: careful in use, as it is hard to expect the ordering in a JSON array**
+    * ANY_ORDER: Assertion that the JSON path points to a non-empty JSON array that has any permutation of elements given by the value attribute.
+    * PART_OF: Assertion that the JSON path points to a value that matches any of the possible values given by the value attribute in a '#' separated fashion (e.g. "outcome 1#outcome 2"). The content is stored.
+    * REGEX: Assertion that the JSON path points to a value, that matches the regular expression given by the value attribute. For each group that matched, it stores the matching group in a variable suffixed by _G{N}, where N denotes the gruop number (counting from left to right and outside to inside groups).
+
 ## `APITestCase`
 ```bash
 @Testcase(id = "TESTCLASS_ID")
