@@ -31,14 +31,13 @@ RUN apt install unzip -y
 RUN apt install jq -y
 
 # install wget
-RUN apt install wget -y 
+RUN apt install wget curl -y 
 
 # fetch and install latest maven
-RUN export MAVEN_LATEST_VERSION=$(curl -s "https://search.maven.org/solrsearch/select?q=g:org.apache.maven+AND+a:apache-maven&core=gav&rows=5&wt=json" | jq -r ".response.docs[] | select(.v | startswith(\"3.\")) | .v" | head -n
- 1) && \
- wget https://dlcdn.apache.org/maven/maven-3/${MAVEN_LATEST_VERSION}/binaries/apache-maven-${MAVEN_LATEST_VERSION}-bin.zip && \
- unzip apache-maven-${MAVEN_LATEST_VERSION}-bin.zip && \
- mv apache-maven-${MAVEN_LATEST_VERSION} /opt/maven
+RUN export MAVEN_LATEST_VERSION=$(curl -s "https://search.maven.org/solrsearch/select?q=g:org.apache.maven+AND+a:apache-maven&core=gav&rows=5&wt=json" | jq -r ".response.docs[] | select(.v | startswith(\"3.\")) | .v" | head -n 1) && \
+ wget "https://dlcdn.apache.org/maven/maven-3/${MAVEN_LATEST_VERSION}/binaries/apache-maven-${MAVEN_LATEST_VERSION}-bin.zip" && \
+ unzip "apache-maven-${MAVEN_LATEST_VERSION}-bin.zip" && \
+ mv "apache-maven-${MAVEN_LATEST_VERSION}" /opt/maven
 
 
 # Set mvn environment variables
