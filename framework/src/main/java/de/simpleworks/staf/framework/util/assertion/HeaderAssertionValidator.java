@@ -37,7 +37,7 @@ public class HeaderAssertionValidator extends AssertionUtils<HttpResponse> {
 		if (Convert.isEmpty(name)) {
 			throw new IllegalArgumentException("name can't be null or empty string.");
 		}
-		List<Header> matchingHeaders = headerList.stream().filter(header -> name.equals(header.getName()))
+		List<Header> matchingHeaders = headerList.stream().filter(header -> name.toLowerCase().equals(header.getName().toLowerCase()))
 				.collect(Collectors.toList());
 		if (matchingHeaders.size() == 0) {
 			throw new RuntimeException((String.format("The header \"%s\" can't be found.", name)));
