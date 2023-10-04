@@ -26,11 +26,6 @@ RUN export MAVEN_LATEST_VERSION=$(curl -s "https://search.maven.org/solrsearch/s
  unzip apache-maven-${MAVEN_LATEST_VERSION}-bin.zip && \
  mv apache-maven-${MAVEN_LATEST_VERSION} /opt/maven
 
-# unzip maven-3.8.6
-#RUN unzip apache-maven-3.8.6-bin.zip
-
-#RUN mv apache-maven-3.8.6 /opt/maven
-
 # Set mvn environment variables
 ENV M2_HOME=/opt/maven
 ENV MAVEN_HOME=/opt/maven
