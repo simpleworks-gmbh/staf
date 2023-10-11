@@ -10,6 +10,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import de.simpleworks.staf.commons.exceptions.SystemException;
+import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.web.stafelements.STAFElement;
 import io.appium.java_client.ios.IOSDriver;
 
@@ -34,14 +35,10 @@ public class STAFInputBox extends STAFElement {
 		getWebDriver().findElement(getBy()).click();
 		if (text != null) {
 
-			// Put the cursor on the desired testfield
-			getWebDriver().findElement(getBy()).sendKeys("");
-			// Press delete button as many times as the existing text length
-			for (int i = 0; i < text.length(); i++) {
-				((IOSDriver) getWebDriver()).findElement(getBy()).sendKeys(Keys.BACK_SPACE);
-			}
+			((IOSDriver) getWebDriver()).findElement(getBy()).clear();
+
 		}
-		final Actions enterText = new Actions(getWebDriver());
+		Actions enterText = new Actions(getWebDriver());
 		enterText.sendKeys(text);
 		enterText.perform();
 	}
@@ -56,4 +53,23 @@ public class STAFInputBox extends STAFElement {
 		}
 		return value;
 	}
+
+	@Override
+	public boolean markText() {
+		boolean result = true;
+		try {
+			// check if we need to mark text at all.
+			if (Convert.isEmpty(getText())) {
+				return false;
+			}
+
+			getWebDriver().findElement(getBy()).sendKeys(Keys.BACK_SPACE);
+
+		} catch (Exception ex) {
+			STAFInputBox.logger.error("can't mark text.", ex);
+			result = false;
+		}
+		return result;
+	}
+
 }
