@@ -18,8 +18,8 @@ ENV RELEASE=staf-release
 # refresh package list
 RUN apt update -y
 
-# install java openjdk 8
-RUN apt install openjdk-8-jdk -y
+# install java openjdk 11
+RUN apt install openjdk-11-jdk -y
 
 # install git
 RUN apt install git -y

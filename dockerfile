@@ -8,7 +8,7 @@ FROM ubuntu:18.04
 RUN apt update -y
 
 # install java openjdk 8
-RUN apt install openjdk-8-jdk -y
+RUN apt install openjdk-11-jdk -y
 
 # install unzip
 RUN apt install unzip -y

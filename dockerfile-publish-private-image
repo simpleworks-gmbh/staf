@@ -7,8 +7,8 @@ FROM registry.gitlab.com/simpleworks-gmbh/staf-environment:latest
 # refresh package list
 RUN apt update -y
 
-# install java openjdk 8
-RUN apt install openjdk-8-jdk -y
+# install java openjdk 11
+RUN apt install openjdk-11-jdk -y
 
 # install unzip
 RUN apt install unzip -y
