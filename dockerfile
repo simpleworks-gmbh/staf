@@ -46,4 +46,4 @@ RUN mkdir artefactory
 # remove maven repository
 RUN rm -rf ~/.m2
 
-RUN mvn -b clean install dependency:resolve dependency:resolve-plugins -DskipTests=true
+RUN mvn -B clean install dependency:resolve dependency:resolve-plugins -DskipTests=true
