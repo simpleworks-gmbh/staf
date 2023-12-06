@@ -1,6 +1,7 @@
 package de.simpleworks.staf.commons.web.stafelements;
 
 import java.io.File;
+import java.time.Duration;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,7 +24,7 @@ public class STAFInputBox extends STAFElement {
 			STAFInputBox.logger.debug(String.format("enter '%s' into the Input at '%s'.", text, getBy()));
 		}
 
-		final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
+		final WebDriverWait wait = new WebDriverWait(getWebDriver(), Duration.ofSeconds(getTimeout()));
 		wait.until(ExpectedConditions.presenceOfElementLocated(getBy()));
 		wait.until(ExpectedConditions.elementToBeClickable(getBy()));
 
@@ -49,7 +50,7 @@ public class STAFInputBox extends STAFElement {
 			throw new IllegalArgumentException(String.format("File at '%s' does not exist.", file.getAbsolutePath()));
 		}
 
-		final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
+		final WebDriverWait wait = new WebDriverWait(getWebDriver(), Duration.ofSeconds(getTimeout()));
 		wait.until(ExpectedConditions.presenceOfElementLocated(getBy()));
 
 		getWebDriver().findElement(getBy()).sendKeys(file.getAbsolutePath());
@@ -58,7 +59,7 @@ public class STAFInputBox extends STAFElement {
 	@Override
 	public String getText() throws SystemException {
 
-		final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
+		final WebDriverWait wait = new WebDriverWait(getWebDriver(), Duration.ofSeconds(getTimeout()));
 		wait.until(ExpectedConditions.presenceOfElementLocated(getBy()));
 
 		final String value = getAttribute("value");

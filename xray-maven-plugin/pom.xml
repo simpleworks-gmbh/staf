@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>de.simpleworks.staf</groupId>
 		<artifactId>staf-parent</artifactId>
-		<version>0.130</version>
+		<version>0.140-27</version>
 	</parent>
 
 	<artifactId>xray-maven-plugin</artifactId>
@@ -17,16 +17,16 @@
 	<packaging>maven-plugin</packaging>
 	
 	<properties>
-		<project.version>0.130</project.version>
+		<project.version>0.140-27</project.version>
 		<version.maven-plugin-api>3.6.3</version.maven-plugin-api>
 		<version.maven-plugin-annotations>3.6.0</version.maven-plugin-annotations>
 		<version.maven-project>2.2.1</version.maven-project>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<version.maven-compiler-plugin>3.8.0</version.maven-compiler-plugin>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+		<version.maven-compiler-plugin>3.11.0</version.maven-compiler-plugin>
 		<version.maven-jar-plugin>3.1.1</version.maven-jar-plugin>
-		<version.maven-plugin-plugin>3.5</version.maven-plugin-plugin>
+		<version.maven-plugin-plugin>3.10.2</version.maven-plugin-plugin>
 		<version.com.jayway.jsonpath>2.4.0</version.com.jayway.jsonpath> 
 	</properties>
 	<build>

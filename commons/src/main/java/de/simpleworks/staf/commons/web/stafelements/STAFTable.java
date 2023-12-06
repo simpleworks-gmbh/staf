@@ -1,5 +1,6 @@
 package de.simpleworks.staf.commons.web.stafelements;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,7 +31,7 @@ public class STAFTable extends STAFElement {
 
 	public List<WebElement> getHeader() {
 		if (Convert.isEmpty(headers)) {
-			final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
+			final WebDriverWait wait = new WebDriverWait(getWebDriver(), Duration.ofSeconds(getTimeout()));
 			wait.until(ExpectedConditions.visibilityOfElementLocated(getBy()));
 
 			try {
@@ -51,7 +52,7 @@ public class STAFTable extends STAFElement {
 
 	public List<WebElement> getRows() {
 		if (Convert.isEmpty(rows)) {
-			final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
+			final WebDriverWait wait = new WebDriverWait(getWebDriver(), Duration.ofSeconds(getTimeout()));
 			wait.until(ExpectedConditions.visibilityOfElementLocated(getBy()));
 
 			try {
@@ -158,7 +159,7 @@ public class STAFTable extends STAFElement {
 						.debug(String.format("Searching for Key '%s' in the row at '%s'.", cellValue, row.toString()));
 			}
 
-			final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
+			final WebDriverWait wait = new WebDriverWait(getWebDriver(), Duration.ofSeconds(getTimeout()));
 			wait.until(ExpectedConditions.visibilityOfElementLocated(getBy()));
 
 			return row.findElements(By.xpath(String.format(".//*[contains(text(), \"%s\")]", cellValue))).size() > 0;

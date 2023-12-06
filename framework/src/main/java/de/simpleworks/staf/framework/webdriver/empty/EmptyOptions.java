@@ -4,10 +4,11 @@ import java.util.Set;
 
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriver.ImeHandler;
+//import org.openqa.selenium.WebDriver.ImeHandler;
 import org.openqa.selenium.WebDriver.Timeouts;
 import org.openqa.selenium.WebDriver.Window;
 import org.openqa.selenium.logging.Logs;
+import de.simpleworks.staf.framework.webdriver.empty.EmptyTimeouts;
 
 public class EmptyOptions implements WebDriver.Options {
 
@@ -46,10 +47,12 @@ public class EmptyOptions implements WebDriver.Options {
 		return new EmptyTimeouts();
 	}
 
+	/*
 	@Override
 	public ImeHandler ime() {
 		return null;
 	}
+	*/
 
 	@Override
 	public Window window() {

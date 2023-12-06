@@ -1,5 +1,7 @@
 package de.simpleworks.staf.commons.web.stafelements;
 
+import java.time.Duration;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
@@ -23,7 +25,7 @@ public class STAFSelectBox extends STAFElement {
 			throw new IllegalArgumentException("text can't be null or empty string.");
 		}
 
-		final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
+		final WebDriverWait wait = new WebDriverWait(getWebDriver(), Duration.ofSeconds(getTimeout()));
 		wait.until(ExpectedConditions.presenceOfElementLocated(getBy()));
 		if (STAFSelectBox.logger.isDebugEnabled()) {
 			STAFSelectBox.logger.debug(String.format("select '%s' into the Input at '%s'.", text, getBy()));
@@ -38,7 +40,7 @@ public class STAFSelectBox extends STAFElement {
 			throw new IllegalArgumentException("text can't be null or empty string.");
 		}
 
-		final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
+		final WebDriverWait wait = new WebDriverWait(getWebDriver(), Duration.ofSeconds(getTimeout()));
 		wait.until(ExpectedConditions.presenceOfElementLocated(getBy()));
 		if (STAFSelectBox.logger.isDebugEnabled()) {
 			STAFSelectBox.logger.debug(String.format("select '%s' into the Input at '%s'.", text, getBy()));
@@ -50,7 +52,7 @@ public class STAFSelectBox extends STAFElement {
 
 	@Override
 	public String getText() throws SystemException {
-		final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
+		final WebDriverWait wait = new WebDriverWait(getWebDriver(), Duration.ofSeconds(getTimeout()));
 		wait.until(ExpectedConditions.presenceOfElementLocated(getBy()));
 
 		final Select select = new Select(getWebDriver().findElement(getBy()));

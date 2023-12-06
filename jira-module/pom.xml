@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>de.simpleworks.staf</groupId>
 		<artifactId>staf-parent</artifactId>
-		<version>0.130</version>
+		<version>0.140-27</version>
 	</parent>
   
 	<artifactId>jira-module</artifactId>
@@ -28,7 +28,7 @@
 	</repositories>
 	
 	<properties>
-		<project.version>0.130</project.version>
+		<project.version>0.140-27</project.version>
 		<version.jersey-json>1.5</version.jersey-json>
 		<version.jersey-client>1.5</version.jersey-client>
 		<version.guava>25.0-jre</version.guava>
@@ -39,9 +39,9 @@
 		<version.commons-io>2.7</version.commons-io>
 		<version.junit>5.1.0</version.junit>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<version.maven-compiler-plugin>3.8.0</version.maven-compiler-plugin>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+		<version.maven-compiler-plugin>3.11.0</version.maven-compiler-plugin>
 		<version.maven-jar-plugin>3.1.1</version.maven-jar-plugin>
 	</properties>
  

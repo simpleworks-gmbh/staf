@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0    http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<description>Simpleworks Test Automation Framework</description>
 	<groupId>de.simpleworks.staf</groupId>
 	<artifactId>staf-parent</artifactId>
-	<version>0.130</version>
+	<version>0.140-27</version>
 	<packaging>pom</packaging>
 	<name>staf-parent</name>
 	<url>https://github.com/simpleworks-gmbh/staf</url>
@@ -40,13 +40,13 @@
 	</scm>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<version.maven-compiler-plugin>3.8.0</version.maven-compiler-plugin>
-		<version.selenium>3.141.59</version.selenium>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+		<version.maven-compiler-plugin>3.11.0</version.maven-compiler-plugin>
+		<version.selenium>4.9.1</version.selenium>
 		<version.maven-jar-plugin>3.1.1</version.maven-jar-plugin>
 		<version.maven-gpg-plugin>1.6</version.maven-gpg-plugin>
-		<version.guice>4.0</version.guice>
+		<version.guice>7.0.0</version.guice>
 		<version.gson>2.8.9</version.gson>
 		<version.junit4>4.13.1</version.junit4>
 		<version.com.jayway.jsonpath.json-path>2.6.0</version.com.jayway.jsonpath.json-path>
@@ -149,6 +149,13 @@
 						<compilerArgs>
 							<arg>-Xlint:all,-options,-path</arg>
 						</compilerArgs>
+						<annotationProcessorPaths>
+							<path>
+								<groupId>com.google.auto.service</groupId>
+								<artifactId>auto-service</artifactId>
+								<version>1.0</version>
+							</path>
+						</annotationProcessorPaths>
 					</configuration>
 				</plugin>
 				<plugin>

@@ -1,5 +1,7 @@
 package de.simpleworks.staf.commons.web.stafelements;
 
+import java.time.Duration;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
@@ -19,7 +21,7 @@ public class STAFButton extends STAFElement {
 			STAFButton.logger.debug(String.format("click on element at '%s'.", getBy()));
 		}
 
-		final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
+		final WebDriverWait wait = new WebDriverWait(getWebDriver(), Duration.ofSeconds(getTimeout()));
 		wait.until(ExpectedConditions.presenceOfElementLocated(getBy()));
 		wait.until(ExpectedConditions.elementToBeClickable(getBy()));
 

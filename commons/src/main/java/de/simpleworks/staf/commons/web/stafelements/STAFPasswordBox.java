@@ -1,5 +1,7 @@
 package de.simpleworks.staf.commons.web.stafelements;
 
+import java.time.Duration;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
@@ -22,7 +24,7 @@ public class STAFPasswordBox extends STAFInputBox {
 			STAFPasswordBox.logger.debug(String.format("enter confidential input at '%s'.", getBy()));
 		}
 
-		final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
+		final WebDriverWait wait = new WebDriverWait(getWebDriver(), Duration.ofSeconds(getTimeout()));
 		wait.until(ExpectedConditions.presenceOfElementLocated(getBy()));
 		wait.until(ExpectedConditions.elementToBeClickable(getBy()));
 
@@ -42,7 +44,7 @@ public class STAFPasswordBox extends STAFInputBox {
 	@Override
 	public String getText() throws SystemException {
 
-		final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
+		final WebDriverWait wait = new WebDriverWait(getWebDriver(), Duration.ofSeconds(getTimeout()));
 		wait.until(ExpectedConditions.presenceOfElementLocated(getBy()));
 
 		final String value = getAttribute("value");

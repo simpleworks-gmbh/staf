@@ -9,6 +9,7 @@ import com.google.inject.Module;
 
 import de.simpleworks.staf.commons.utils.Convert;
 import de.simpleworks.staf.commons.utils.UtilsCollection;
+import de.simpleworks.staf.framework.enums.TestcaseKindEnum;
 import de.simpleworks.staf.module.jira.module.JiraModule;
 import de.simpleworks.staf.plugin.maven.msteams.module.MsTeamsModule;
 
@@ -22,6 +23,8 @@ public abstract class MsTeamsMojo extends AbstractMojo {
 			if (MsTeamsMojo.logger.isDebugEnabled()) {
 				MsTeamsMojo.logger.debug(String.format("No Custom-Modules will be injected."));
 			}
+			
+			TestcaseKindEnum test = TestcaseKindEnum.API_TESTCASE;
 		}
 		try {
 			// load guice models

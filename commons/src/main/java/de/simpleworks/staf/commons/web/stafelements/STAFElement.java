@@ -1,5 +1,6 @@
 package de.simpleworks.staf.commons.web.stafelements;
 
+import java.time.Duration;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -128,13 +129,13 @@ public class STAFElement {
 	}
 
 	public boolean isVisible() {
-		final WebDriverWait wait = new WebDriverWait(getWebDriver(), 30);
+		final WebDriverWait wait = new WebDriverWait(getWebDriver(), Duration.ofSeconds(getTimeout()));
 		wait.until(ExpectedConditions.visibilityOfElementLocated(getBy()));
 		return exists();
 	}
 
 	public boolean isPresent() {
-		final WebDriverWait wait = new WebDriverWait(getWebDriver(), 30);
+		final WebDriverWait wait = new WebDriverWait(getWebDriver(), Duration.ofSeconds(getTimeout()));
 		wait.until(ExpectedConditions.presenceOfElementLocated(getBy()));
 		return exists();
 	}

@@ -1,5 +1,6 @@
 package de.simpleworks.staf.commons.web.stafelements;
 
+import java.time.Duration;
 import java.util.List;
 
 import de.simpleworks.staf.commons.exceptions.SystemException;
@@ -24,7 +25,7 @@ public class STAFList extends STAFElement {
 			throw new SystemException(String.format("No webElement can be found at '%s'.", getBy()));
 		}
 
-		final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
+		final WebDriverWait wait = new WebDriverWait(getWebDriver(), Duration.ofSeconds(getTimeout()));
 		wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(getBy()));
 
 		final List<WebElement> result = getWebDriver().findElements(getBy());
@@ -83,7 +84,7 @@ public class STAFList extends STAFElement {
 			throw new SystemException(String.format("No element can't be found at '%s'", Integer.toString(index)));
 		}
 
-		final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
+		final WebDriverWait wait = new WebDriverWait(getWebDriver(), Duration.ofSeconds(getTimeout()));
 		wait.until(ExpectedConditions.elementToBeClickable(element));
 
 		element.click();
@@ -165,7 +166,7 @@ public class STAFList extends STAFElement {
 			throw new SystemException(String.format("No element can't be found at '%s'", Integer.toString(index)));
 		}
 
-		final WebDriverWait wait = new WebDriverWait(getWebDriver(), getTimeout());
+		final WebDriverWait wait = new WebDriverWait(getWebDriver(), Duration.ofSeconds(getTimeout()));
 		wait.until(ExpectedConditions.elementToBeClickable(element));
 
 		element.click();
