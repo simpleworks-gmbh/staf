@@ -67,7 +67,7 @@ COPY . /mnt
 WORKDIR /mnt
 
 # compile and install to local .m2 cache maven
-RUN mvn clean install
+RUN mvn clean install -DskipTests=true
 
 # deploy artifacts
 RUN mvn -DaltDeploymentRepository=internal::default::file://\${project.build.directory}/mvn-repo javadoc:jar source:jar deploy
