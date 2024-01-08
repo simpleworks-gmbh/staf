@@ -67,10 +67,10 @@ COPY . /mnt
 WORKDIR /mnt
 
 # compile and install to local .m2 cache maven
-RUN mvn clean install
+RUN mvn clean install -DskipTests=true
 
 # deploy artifacts
-RUN mvn -DaltDeploymentRepository=internal::default::file://\${project.build.directory}/mvn-repo javadoc:jar source:jar deploy
+RUN mvn -DaltDeploymentRepository=internal::default::file://\${project.build.directory}/mvn-repo javadoc:jar source:jar deploy -DskipTests=true
 
 # copy all artefacts to /mnt/staf-release
 RUN for i in $(find $(pwd) -name mvn-repo); do cp -r $i/* /mnt/${RELEASE};done

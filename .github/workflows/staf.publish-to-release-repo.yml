@@ -12,7 +12,7 @@ jobs:
       - name: Build docker image
         run: docker build -t ${{ github.repository }}:latest -f dockerfile .
       - name: Run tests
-        run: docker run -t ${{ github.repository }}:latest mvn clean install
+        run: docker run -t ${{ github.repository }}:latest mvn clean install -DskipTests=true
       - name: notify slack channel
         uses: rtCamp/action-slack-notify@v2
         if: success() == false

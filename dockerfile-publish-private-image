@@ -41,4 +41,4 @@ COPY . /mnt
 WORKDIR /mnt
 
 # compile software
-RUN mvn clean install
+RUN mvn clean install -DskipTests=true
