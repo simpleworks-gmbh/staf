@@ -40,4 +40,5 @@ public class ContentTypeValue {
 	public static final String CSV = "text/csv";
 	public static final String SPRINGBOOT_ACTUATOR_V2_JSON = "application/vnd.spring-boot.actuator.v2+json";
 	public static final String SPRINGBOOT_ACTUATOR_V3_JSON = "application/vnd.spring-boot.actuator.v3+json";
+	public static final String PROBLEM_JSON = "application/problem+json";
 }

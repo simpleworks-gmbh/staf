@@ -39,7 +39,8 @@ public enum ContentTypeEnum implements IEnum {
 	TEXT("text/plain", ContentTypeValue.TEXT), CSV("text/csv", ContentTypeValue.CSV),
 	HTML("text/html", ContentTypeValue.HTML),
 	SPRINGBOOT_ACTUATOR_V2_JSON("application/vnd.spring-boot.actuator.v2+json", ContentTypeValue.SPRINGBOOT_ACTUATOR_V2_JSON),
-	SPRINGBOOT_ACTUATOR_V3_JSON("application/vnd.spring-boot.actuator.v3+json", ContentTypeValue.SPRINGBOOT_ACTUATOR_V3_JSON);
+	SPRINGBOOT_ACTUATOR_V3_JSON("application/vnd.spring-boot.actuator.v3+json", ContentTypeValue.SPRINGBOOT_ACTUATOR_V3_JSON),
+	PROBLEM_JSON("application/problem+json", ContentTypeValue.PROBLEM_JSON);
 
 	final private String name;
 	final private String value;
