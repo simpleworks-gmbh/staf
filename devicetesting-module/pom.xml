@@ -12,7 +12,7 @@
 
 	<properties>
 		<project.version>0.140-28</project.version>
-		<version.java-client>8.1.0</version.java-client>
+		<version.java-client>8.3.0</version.java-client>
 	</properties>
 
 	<dependencies>
