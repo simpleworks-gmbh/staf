@@ -34,13 +34,14 @@ public class STAFInputBox extends STAFElement {
 		getWebDriver().findElement(getBy()).click();
 		if (text != null) {
 
-			// Put the cursor on the desired testfield
-			getWebDriver().findElement(getBy()).sendKeys("");
-			// Press delete button as many times as the existing text length
-			for (int i = 0; i < text.length(); i++) {
-				((IOSDriver) getWebDriver()).findElement(getBy()).sendKeys(Keys.BACK_SPACE);
-			}
+//			// Put the cursor on the desired testfield
+//			getWebDriver().findElement(getBy()).sendKeys("");
+//			// Press delete button as many times as the existing text length
+//			for (int i = 0; i < text.length(); i++) {
+			getWebDriver().findElement(getBy()).clear();
+
 		}
+
 		final Actions enterText = new Actions(getWebDriver());
 		enterText.sendKeys(text);
 		enterText.perform();
